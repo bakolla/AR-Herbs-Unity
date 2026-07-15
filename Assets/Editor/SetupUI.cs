@@ -2,404 +2,375 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 using UnityEditor.SceneManagement;
+using System.IO;
+using System.Collections.Generic;
 using ARHerb.UI;
 using ARHerb.Network;
 
 public class SetupUI
 {
-    [MenuItem("Tools/Build UI")]
-    public static void BuildUI()
+    [MenuItem("AR Herb/Build MVP Scene")]
+    public static void BuildMVPScene()
     {
-        // 1. Open the SampleScene or make sure it's active
-        var scene = EditorSceneManager.OpenScene("Assets/Scenes/SampleScene.unity");
-        
-        // Destroy existing Canvas or AppManager if they exist to avoid duplication
-        var oldCanvas = GameObject.Find("Canvas");
-        if (oldCanvas != null)
+        // 1. Ensure Scenes directory exists
+        if (!Directory.Exists("Assets/Scenes"))
         {
-            Undo.DestroyObjectImmediate(oldCanvas);
-        }
-        var oldAppManager = GameObject.Find("AppManager");
-        if (oldAppManager != null)
-        {
-            Undo.DestroyObjectImmediate(oldAppManager);
-        }
-        var oldEventSystem = GameObject.Find("EventSystem");
-        if (oldEventSystem != null)
-        {
-            Undo.DestroyObjectImmediate(oldEventSystem);
+            Directory.CreateDirectory("Assets/Scenes");
         }
 
-        // Create standard DefaultControls resources
-        DefaultControls.Resources uiResources = new DefaultControls.Resources();
-        
-        // Populate standard resources from Unity Editor extra assets
-        uiResources.standard = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
-        uiResources.background = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Background.psd");
-        uiResources.inputField = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/InputFieldBackground.psd");
-        uiResources.knob = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
-        uiResources.checkmark = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Checkmark.psd");
-        uiResources.dropdown = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/DropdownArrow.psd");
-        uiResources.mask = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UIMask.psd");
+        string scenePath = "Assets/Scenes/MainARScene.unity";
+        UnityEngine.SceneManagement.Scene scene;
 
-        // 2. Create Canvas
+        // Open or create the scene
+        if (File.Exists(scenePath))
+        {
+            scene = EditorSceneManager.OpenScene(scenePath);
+        }
+        else
+        {
+            scene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
+        }
+
+        // Remove default Main Camera
+        GameObject defaultCam = GameObject.Find("Main Camera");
+        if (defaultCam != null)
+        {
+            Undo.DestroyObjectImmediate(defaultCam);
+        }
+
+        // Clean up existing duplicates
+        string[] oldNames = { "Canvas", "AppManager", "EventSystem", "AR Session", "XR Origin", "AR Session Origin" };
+        foreach (var name in oldNames)
+        {
+            GameObject oldGo = GameObject.Find(name);
+            if (oldGo != null) Undo.DestroyObjectImmediate(oldGo);
+        }
+
+        // 2. Create AR Foundation Hierarchy safely using reflection
+        CreateARFoundationObjects();
+
+        // 3. Create Canvas and UI elements
         GameObject canvasGo = new GameObject("Canvas");
         Canvas canvas = canvasGo.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        
-        CanvasScaler scaler = canvasGo.AddComponent<CanvasScaler>();
-        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1080, 1920); // Mobile vertical reference
-        scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
-        scaler.matchWidthOrHeight = 0.5f;
-
+        canvasGo.AddComponent<CanvasScaler>().uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         canvasGo.AddComponent<GraphicRaycaster>();
         Undo.RegisterCreatedObjectUndo(canvasGo, "Create Canvas");
-        
-        // Add EventSystem if not present
-        GameObject eventSystemGo = GameObject.Find("EventSystem");
-        if (eventSystemGo == null)
-        {
-            eventSystemGo = new GameObject("EventSystem", typeof(UnityEngine.EventSystems.EventSystem), typeof(UnityEngine.EventSystems.StandaloneInputModule));
-            Undo.RegisterCreatedObjectUndo(eventSystemGo, "Create EventSystem");
-        }
 
-        // 3. Add RawImage - Fullscreen CameraPreview
-        GameObject cameraPreviewGo = DefaultControls.CreateRawImage(uiResources);
-        cameraPreviewGo.name = "CameraPreview";
-        cameraPreviewGo.transform.SetParent(canvasGo.transform, false);
-        var previewRect = cameraPreviewGo.GetComponent<RectTransform>();
+        // EventSystem
+        GameObject eventSystemGo = new GameObject("EventSystem");
+        eventSystemGo.AddComponent<UnityEngine.EventSystems.EventSystem>();
+        eventSystemGo.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
+        Undo.RegisterCreatedObjectUndo(eventSystemGo, "Create EventSystem");
+
+        // UI Camera Preview
+        GameObject previewGo = new GameObject("CameraPreviewUI", typeof(RawImage));
+        previewGo.transform.SetParent(canvasGo.transform, false);
+        RawImage preview = previewGo.GetComponent<RawImage>();
+        RectTransform previewRect = preview.rectTransform;
         previewRect.anchorMin = Vector2.zero;
         previewRect.anchorMax = Vector2.one;
-        previewRect.offsetMin = Vector2.zero;
-        previewRect.offsetMax = Vector2.zero; // Fullscreen stretch
-        RawImage cameraPreviewRawImage = cameraPreviewGo.GetComponent<RawImage>();
-        cameraPreviewRawImage.color = Color.white;
+        previewRect.sizeDelta = Vector2.zero;
+        preview.color = Color.black;
 
-        // 4. Create Top Header Panel (Modern Glassmorphic Header)
-        GameObject headerPanelGo = DefaultControls.CreatePanel(uiResources);
-        headerPanelGo.name = "Header Panel";
-        headerPanelGo.transform.SetParent(canvasGo.transform, false);
-        var headerRect = headerPanelGo.GetComponent<RectTransform>();
-        headerRect.anchorMin = new Vector2(0f, 1f);
-        headerRect.anchorMax = new Vector2(1f, 1f);
-        headerRect.anchoredPosition = new Vector2(0, -40); // Pivot centered at top
-        headerRect.sizeDelta = new Vector2(0, 80);
-        var headerImage = headerPanelGo.GetComponent<Image>();
-        if (headerImage != null)
-        {
-            headerImage.sprite = uiResources.standard;
-            headerImage.color = new Color(0.05f, 0.06f, 0.08f, 0.85f); // Premium dark translucent
-        }
+        // Top Header
+        GameObject topBarGo = CreatePanel(canvasGo.transform, "TopBar", new Vector2(0f, 0.92f), new Vector2(1f, 1f), new Vector2(0f, 0f), new Color(0.04f, 0.05f, 0.06f, 0.85f));
+        
+        GameObject titleGo = CreateText(topBarGo.transform, "TitleText", "🌿 HERB & FAUNA SCANNER", 22, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+        RectTransform titleRect = titleGo.GetComponent<RectTransform>();
+        titleRect.anchorMin = new Vector2(0f, 0.5f);
+        titleRect.anchorMax = new Vector2(1f, 1f);
+        titleRect.sizeDelta = Vector2.zero;
 
-        // Header Title Text
-        GameObject headerTextGo = DefaultControls.CreateText(uiResources);
-        headerTextGo.name = "Header Title";
-        headerTextGo.transform.SetParent(headerPanelGo.transform, false);
-        var headerTextRect = headerTextGo.GetComponent<RectTransform>();
-        headerTextRect.anchorMin = new Vector2(0f, 0f);
-        headerTextRect.anchorMax = new Vector2(1f, 1f);
-        headerTextRect.offsetMin = new Vector2(20, 0);
-        headerTextRect.offsetMax = new Vector2(-20, 0);
-        Text headerText = headerTextGo.GetComponent<Text>();
-        headerText.text = "🌿 HERB & FAUNA SCANNER";
-        headerText.alignment = TextAnchor.MiddleCenter;
-        headerText.fontStyle = FontStyle.Bold;
-        headerText.fontSize = 28;
-        headerText.color = new Color(0.18f, 0.8f, 0.44f); // Emerald Green
+        // URL Input (like a pill search bar below title)
+        GameObject urlGo = new GameObject("BackendUrlInput", typeof(Image), typeof(InputField));
+        urlGo.transform.SetParent(topBarGo.transform, false);
+        RectTransform urlRect = urlGo.GetComponent<RectTransform>();
+        urlRect.anchorMin = new Vector2(0.1f, 0.15f);
+        urlRect.anchorMax = new Vector2(0.9f, 0.45f);
+        urlRect.sizeDelta = Vector2.zero;
+        urlGo.GetComponent<Image>().color = new Color(0.15f, 0.17f, 0.22f, 0.9f);
 
-        // 5. Add InputField — Backend URL (styled as a search/config bar below the header)
-        GameObject backendUrlGo = DefaultControls.CreateInputField(uiResources);
-        backendUrlGo.name = "Backend URL Input";
-        backendUrlGo.transform.SetParent(canvasGo.transform, false);
-        var urlRect = backendUrlGo.GetComponent<RectTransform>();
-        urlRect.anchorMin = new Vector2(0.5f, 1f);
-        urlRect.anchorMax = new Vector2(0.5f, 1f);
-        urlRect.anchoredPosition = new Vector2(0, -110);
-        urlRect.sizeDelta = new Vector2(420, 45);
-        InputField backendUrlInput = backendUrlGo.GetComponent<InputField>();
-        var inputImage = backendUrlGo.GetComponent<Image>();
-        if (inputImage != null)
-        {
-            inputImage.sprite = uiResources.standard;
-            inputImage.color = new Color(0.1f, 0.11f, 0.14f, 0.9f); // Dark fill
-        }
-        var inputTexts = backendUrlGo.GetComponentsInChildren<Text>(true);
-        foreach (var t in inputTexts)
-        {
-            t.color = Color.white;
-            t.fontSize = 16;
-            if (t.name == "Placeholder") t.color = new Color(0.6f, 0.6f, 0.6f, 0.8f);
-        }
+        GameObject urlTextGo = CreateText(urlGo.transform, "Text", "http://localhost:3001", 14, TextAnchor.MiddleLeft, Color.white);
+        RectTransform urlTextRect = urlTextGo.GetComponent<RectTransform>();
+        urlTextRect.anchorMin = Vector2.zero;
+        urlTextRect.anchorMax = Vector2.one;
+        urlTextRect.offsetMin = new Vector2(15f, 5f);
+        urlTextRect.offsetMax = new Vector2(-15f, -5f);
 
-        // 6. Mode Selection Dropdown (placed above scan button)
-        GameObject dropdownGo = DefaultControls.CreateDropdown(uiResources);
-        dropdownGo.name = "Category Dropdown";
+        InputField urlInputField = urlGo.GetComponent<InputField>();
+        urlInputField.textComponent = urlTextGo.GetComponent<Text>();
+        urlInputField.text = "http://localhost:3001";
+
+        // Dropdown (styled dark above scan button)
+        GameObject dropdownGo = new GameObject("ModeDropdown", typeof(Image), typeof(Dropdown));
         dropdownGo.transform.SetParent(canvasGo.transform, false);
-        var dropdownRect = dropdownGo.GetComponent<RectTransform>();
-        dropdownRect.anchorMin = new Vector2(0.5f, 0f);
-        dropdownRect.anchorMax = new Vector2(0.5f, 0f);
-        dropdownRect.anchoredPosition = new Vector2(0, 190);
-        dropdownRect.sizeDelta = new Vector2(280, 50);
-        Dropdown modeDropdown = dropdownGo.GetComponent<Dropdown>();
-        modeDropdown.options.Clear();
-        modeDropdown.options.Add(new Dropdown.OptionData("Plants (Rośliny)"));
-        modeDropdown.options.Add(new Dropdown.OptionData("Mushrooms (Grzyby)"));
-        modeDropdown.options.Add(new Dropdown.OptionData("Insects (Owady)"));
-        modeDropdown.options.Add(new Dropdown.OptionData("Stones (Kamienie)"));
-        var dropdownImage = dropdownGo.GetComponent<Image>();
-        if (dropdownImage != null)
-        {
-            dropdownImage.sprite = uiResources.standard;
-            dropdownImage.color = new Color(0.12f, 0.13f, 0.16f, 0.95f);
-        }
-        var dropdownLabel = dropdownGo.GetComponentInChildren<Text>();
-        if (dropdownLabel != null)
-        {
-            dropdownLabel.color = Color.white;
-            dropdownLabel.fontSize = 18;
-            dropdownLabel.alignment = TextAnchor.MiddleCenter;
-        }
+        RectTransform ddRect = dropdownGo.GetComponent<RectTransform>();
+        ddRect.anchorMin = new Vector2(0.2f, 0.18f);
+        ddRect.anchorMax = new Vector2(0.8f, 0.23f);
+        ddRect.sizeDelta = Vector2.zero;
+        dropdownGo.GetComponent<Image>().color = new Color(0.12f, 0.13f, 0.16f, 0.95f);
 
-        // 7. Large Circular Scan Button (Modern Figma-style capture trigger)
-        GameObject scanButtonGo = DefaultControls.CreateButton(uiResources);
-        scanButtonGo.name = "Scan Button";
-        scanButtonGo.transform.SetParent(canvasGo.transform, false);
-        var scanRect = scanButtonGo.GetComponent<RectTransform>();
-        scanRect.anchorMin = new Vector2(0.5f, 0f);
-        scanRect.anchorMax = new Vector2(0.5f, 0f);
-        scanRect.anchoredPosition = new Vector2(0, 90);
-        scanRect.sizeDelta = new Vector2(110, 110); // Large circle size
-        
-        Button scanButton = scanButtonGo.GetComponent<Button>();
-        var buttonImage = scanButtonGo.GetComponent<Image>();
-        if (buttonImage != null)
+        GameObject ddLabelGo = CreateText(dropdownGo.transform, "Label", "Plants", 18, TextAnchor.MiddleCenter, Color.white);
+        RectTransform ddLabelRect = ddLabelGo.GetComponent<RectTransform>();
+        ddLabelRect.anchorMin = Vector2.zero;
+        ddLabelRect.anchorMax = Vector2.one;
+        ddLabelRect.sizeDelta = Vector2.zero;
+
+        Dropdown dropdown = dropdownGo.GetComponent<Dropdown>();
+        dropdown.captionText = ddLabelGo.GetComponent<Text>();
+        dropdown.options = new List<Dropdown.OptionData>
         {
-            buttonImage.sprite = uiResources.knob; // Use standard circular knob
-            buttonImage.color = new Color(0.18f, 0.8f, 0.44f, 0.95f); // Vibrant emerald green
-        }
-        
-        // Subtle outer border ring for the button
-        GameObject ringGo = new GameObject("Outer Ring", typeof(Image));
-        ringGo.transform.SetParent(scanButtonGo.transform, false);
-        var ringRect = ringGo.GetComponent<RectTransform>();
+            new Dropdown.OptionData("Plants"),
+            new Dropdown.OptionData("Mushrooms"),
+            new Dropdown.OptionData("Insects"),
+            new Dropdown.OptionData("Stones")
+        };
+
+        // Scan Button (Circular bottom shutter)
+        GameObject btnGo = new GameObject("ScanButton", typeof(Image), typeof(Button));
+        btnGo.transform.SetParent(canvasGo.transform, false);
+        RectTransform btnRect = btnGo.GetComponent<RectTransform>();
+        btnRect.anchorMin = new Vector2(0.5f, 0.08f);
+        btnRect.anchorMax = new Vector2(0.5f, 0.08f);
+        btnRect.sizeDelta = new Vector2(100f, 100f);
+        btnRect.anchoredPosition = Vector2.zero;
+
+        // Use knob sprite for circle, fallback to color
+        Image btnImg = btnGo.GetComponent<Image>();
+        btnImg.sprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
+        btnImg.color = new Color(0.18f, 0.8f, 0.44f, 1f); // Vibrant emerald green
+
+        // Soft outer glow highlight circle
+        GameObject ringGo = new GameObject("OuterRing", typeof(Image));
+        ringGo.transform.SetParent(btnGo.transform, false);
+        RectTransform ringRect = ringGo.GetComponent<RectTransform>();
         ringRect.anchorMin = Vector2.zero;
         ringRect.anchorMax = Vector2.one;
-        ringRect.sizeDelta = new Vector2(16, 16); // Slightly larger than parent button
-        var ringImage = ringGo.GetComponent<Image>();
-        ringImage.sprite = uiResources.knob;
-        ringImage.color = new Color(1f, 1f, 1f, 0.25f); // White halo
+        ringRect.sizeDelta = new Vector2(16f, 16f);
+        Image ringImg = ringGo.GetComponent<Image>();
+        ringImg.sprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
+        ringImg.color = new Color(1f, 1f, 1f, 0.25f);
+
+        GameObject btnTextGo = CreateText(btnGo.transform, "BtnText", "SCAN", 16, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+        RectTransform btnTextRect = btnTextGo.GetComponent<RectTransform>();
+        btnTextRect.anchorMin = Vector2.zero;
+        btnTextRect.anchorMax = Vector2.one;
+        btnTextRect.sizeDelta = Vector2.zero;
+        Button scanButton = btnGo.GetComponent<Button>();
+
+        // Status Message Text (centered above dropdown)
+        GameObject statusGo = CreateText(canvasGo.transform, "StatusText", "Gotowy do skanowania", 16, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+        RectTransform statusRect = statusGo.GetComponent<RectTransform>();
+        statusRect.anchorMin = new Vector2(0.1f, 0.25f);
+        statusRect.anchorMax = new Vector2(0.9f, 0.29f);
+        statusRect.sizeDelta = Vector2.zero;
+        Text statusText = statusGo.GetComponent<Text>();
+        // Subtle background for status
+        statusGo.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0.4f);
+
+        // 4. Result Panel (Bottom Sheet style card)
+        GameObject resPanelGo = CreatePanel(canvasGo.transform, "ResultPanel", new Vector2(0.05f, 0.32f), new Vector2(0.95f, 0.85f), new Vector2(0f, 0f), new Color(0.08f, 0.09f, 0.12f, 0.95f));
         
-        var buttonText = scanButtonGo.GetComponentInChildren<Text>();
-        if (buttonText != null) 
-        {
-            buttonText.text = "SCAN";
-            buttonText.color = Color.white;
-            buttonText.fontSize = 18;
-            buttonText.fontStyle = FontStyle.Bold;
-        }
+        // Handle Bar
+        GameObject handleGo = CreatePanel(resPanelGo.transform, "HandleBar", new Vector2(0.42f, 0.96f), new Vector2(0.58f, 0.98f), new Vector2(0f, 0f), new Color(0.3f, 0.3f, 0.3f, 0.8f));
+        handleGo.AddComponent<Image>().sprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
 
-        // 8. Text — Status Text (Loading/Status Display)
-        GameObject statusTextGo = DefaultControls.CreateText(uiResources);
-        statusTextGo.name = "Status Text";
-        statusTextGo.transform.SetParent(canvasGo.transform, false);
-        var statusRect = statusTextGo.GetComponent<RectTransform>();
-        statusRect.anchorMin = new Vector2(0.5f, 0f);
-        statusRect.anchorMax = new Vector2(0.5f, 0f);
-        statusRect.anchoredPosition = new Vector2(0, 270);
-        statusRect.sizeDelta = new Vector2(600, 40);
-        Text statusText = statusTextGo.GetComponent<Text>();
-        statusText.text = "Ready to scan";
-        statusText.alignment = TextAnchor.MiddleCenter;
-        statusText.color = new Color(1f, 1f, 1f, 0.9f);
-        statusText.fontSize = 18;
+        // Common Name
+        GameObject commGo = CreateText(resPanelGo.transform, "CommonNameText", "Nazwa rośliny", 22, TextAnchor.MiddleLeft, new Color(0.18f, 0.8f, 0.44f), FontStyle.Bold);
+        RectTransform commRect = commGo.GetComponent<RectTransform>();
+        commRect.anchorMin = new Vector2(0.05f, 0.85f);
+        commRect.anchorMax = new Vector2(0.6f, 0.94f);
+        commRect.sizeDelta = Vector2.zero;
 
-        // 9. Panel — Result Panel (Figma-style Bottom Sheet Card)
-        GameObject resultPanelGo = DefaultControls.CreatePanel(uiResources);
-        resultPanelGo.name = "Result Panel";
-        resultPanelGo.transform.SetParent(canvasGo.transform, false);
-        var panelRect = resultPanelGo.GetComponent<RectTransform>();
-        panelRect.anchorMin = new Vector2(0.5f, 0f);
-        panelRect.anchorMax = new Vector2(0.5f, 0f);
-        panelRect.anchoredPosition = new Vector2(0, 520); // Anchored above controls
-        panelRect.sizeDelta = new Vector2(480, 440);      // Tall bottom card
-        var panelImage = resultPanelGo.GetComponent<Image>();
-        if (panelImage != null)
-        {
-            panelImage.sprite = uiResources.standard;
-            panelImage.color = new Color(0.08f, 0.09f, 0.12f, 0.95f); // Sleek card background
-        }
+        // Score
+        GameObject scoreGo = CreateText(resPanelGo.transform, "ScoreText", "Prawdopodobieństwo: 100%", 15, TextAnchor.MiddleRight, new Color(0.95f, 0.77f, 0.06f), FontStyle.Bold);
+        RectTransform scoreRect = scoreGo.GetComponent<RectTransform>();
+        scoreRect.anchorMin = new Vector2(0.6f, 0.85f);
+        scoreRect.anchorMax = new Vector2(0.95f, 0.94f);
+        scoreRect.sizeDelta = Vector2.zero;
 
-        // Bottom Sheet Handle (Mock pill handle for visual design)
-        GameObject handleGo = new GameObject("Handle Bar", typeof(Image));
-        handleGo.transform.SetParent(resultPanelGo.transform, false);
-        var handleRect = handleGo.GetComponent<RectTransform>();
-        handleRect.anchorMin = new Vector2(0.5f, 1f);
-        handleRect.anchorMax = new Vector2(0.5f, 1f);
-        handleRect.anchoredPosition = new Vector2(0, -10);
-        handleRect.sizeDelta = new Vector2(60, 6);
-        var handleImg = handleGo.GetComponent<Image>();
-        handleImg.sprite = uiResources.standard;
-        handleImg.color = new Color(1f, 1f, 1f, 0.25f);
+        // Scientific Name
+        GameObject sciGo = CreateText(resPanelGo.transform, "ScientificNameText", "Scientific Name", 16, TextAnchor.MiddleLeft, new Color(0.7f, 0.7f, 0.7f), FontStyle.Italic);
+        RectTransform sciRect = sciGo.GetComponent<RectTransform>();
+        sciRect.anchorMin = new Vector2(0.05f, 0.77f);
+        sciRect.anchorMax = new Vector2(0.95f, 0.84f);
+        sciRect.sizeDelta = Vector2.zero;
 
-        // commonNameText (Primary result header)
-        GameObject commonNameGo = DefaultControls.CreateText(uiResources);
-        commonNameGo.name = "CommonNameText";
-        commonNameGo.transform.SetParent(resultPanelGo.transform, false);
-        var commonNameRect = commonNameGo.GetComponent<RectTransform>();
-        commonNameRect.anchorMin = new Vector2(0, 1);
-        commonNameRect.anchorMax = new Vector2(1, 1);
-        commonNameRect.anchoredPosition = new Vector2(15, -45);
-        commonNameRect.sizeDelta = new Vector2(-150, 40); // Leave space for score badge
-        Text commonNameText = commonNameGo.GetComponent<Text>();
-        commonNameText.text = "Common Name";
-        commonNameText.alignment = TextAnchor.MiddleLeft;
-        commonNameText.fontStyle = FontStyle.Bold;
-        commonNameText.fontSize = 24;
-        commonNameText.color = new Color(0.18f, 0.8f, 0.44f); // Emerald Green
+        // Separator line
+        CreatePanel(resPanelGo.transform, "Line", new Vector2(0.05f, 0.75f), new Vector2(0.95f, 0.755f), new Vector2(0f, 0f), new Color(0.2f, 0.2f, 0.2f, 1f));
 
-        // scoreText (Right-aligned tag badge)
-        GameObject scoreGo = DefaultControls.CreateText(uiResources);
-        scoreGo.name = "ScoreText";
-        scoreGo.transform.SetParent(resultPanelGo.transform, false);
-        var scoreRect = scoreGo.GetComponent<RectTransform>();
-        scoreRect.anchorMin = new Vector2(1, 1);
-        scoreRect.anchorMax = new Vector2(1, 1);
-        scoreRect.anchoredPosition = new Vector2(-15, -45);
-        scoreRect.sizeDelta = new Vector2(120, 40);
-        Text scoreText = scoreGo.GetComponent<Text>();
-        scoreText.text = "Score";
-        scoreText.alignment = TextAnchor.MiddleRight;
-        scoreText.fontStyle = FontStyle.Bold;
-        scoreText.fontSize = 16;
-        scoreText.color = new Color(0.95f, 0.77f, 0.06f); // Gold
+        // Description
+        GameObject descGo = CreateText(resPanelGo.transform, "DescriptionText", "Opis rośliny...", 15, TextAnchor.UpperLeft, Color.white);
+        RectTransform descRect = descGo.GetComponent<RectTransform>();
+        descRect.anchorMin = new Vector2(0.05f, 0.38f);
+        descRect.anchorMax = new Vector2(0.95f, 0.72f);
+        descRect.sizeDelta = Vector2.zero;
 
-        // scientificNameText (Secondary italic label)
-        GameObject scientificNameGo = DefaultControls.CreateText(uiResources);
-        scientificNameGo.name = "ScientificNameText";
-        scientificNameGo.transform.SetParent(resultPanelGo.transform, false);
-        var sciNameRect = scientificNameGo.GetComponent<RectTransform>();
-        sciNameRect.anchorMin = new Vector2(0, 1);
-        sciNameRect.anchorMax = new Vector2(1, 1);
-        sciNameRect.anchoredPosition = new Vector2(15, -85);
-        sciNameRect.sizeDelta = new Vector2(-30, 30);
-        Text scientificNameText = scientificNameGo.GetComponent<Text>();
-        scientificNameText.text = "Scientific Name";
-        scientificNameText.alignment = TextAnchor.MiddleLeft;
-        scientificNameText.fontStyle = FontStyle.Italic;
-        scientificNameText.fontSize = 16;
-        scientificNameText.color = new Color(0.74f, 0.76f, 0.78f);
+        // Fun Fact
+        GameObject factGo = CreateText(resPanelGo.transform, "FunFactText", "Ciekawostka...", 14, TextAnchor.UpperLeft, new Vector2(0.5f, 0.8f, 1f));
+        RectTransform factRect = factGo.GetComponent<RectTransform>();
+        factRect.anchorMin = new Vector2(0.05f, 0.16f);
+        factRect.anchorMax = new Vector2(0.95f, 0.35f);
+        factRect.sizeDelta = Vector2.zero;
 
-        // Thin Separator line in UI card
-        GameObject separatorGo = new GameObject("UI Separator", typeof(Image));
-        separatorGo.transform.SetParent(resultPanelGo.transform, false);
-        var sepRect = separatorGo.GetComponent<RectTransform>();
-        sepRect.anchorMin = new Vector2(0f, 1f);
-        sepRect.anchorMax = new Vector2(1f, 1f);
-        sepRect.anchoredPosition = new Vector2(0, -120);
-        sepRect.sizeDelta = new Vector2(-30, 2);
-        var sepImg = separatorGo.GetComponent<Image>();
-        sepImg.color = new Color(1f, 1f, 1f, 0.1f);
+        // Edibility status pill
+        GameObject ediblePanelGo = CreatePanel(resPanelGo.transform, "EdibilityPanel", new Vector2(0.05f, 0.03f), new Vector2(0.95f, 0.13f), new Vector2(0f, 0f), new Color(0.15f, 0.2f, 0.15f, 0.9f));
+        GameObject edibGo = CreateText(ediblePanelGo.transform, "EdibilityText", "Status spożywczy: Brak danych", 14, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+        RectTransform edibRect = edibGo.GetComponent<RectTransform>();
+        edibRect.anchorMin = Vector2.zero;
+        edibRect.anchorMax = Vector2.one;
+        edibRect.sizeDelta = Vector2.zero;
 
-        // descriptionText (Clean body block)
-        GameObject descGo = DefaultControls.CreateText(uiResources);
-        descGo.name = "DescriptionText";
-        descGo.transform.SetParent(resultPanelGo.transform, false);
-        var descRect = descGo.GetComponent<RectTransform>();
-        descRect.anchorMin = new Vector2(0, 1);
-        descRect.anchorMax = new Vector2(1, 1);
-        descRect.anchoredPosition = new Vector2(15, -200);
-        descRect.sizeDelta = new Vector2(-30, 120);
-        Text descriptionText = descGo.GetComponent<Text>();
-        descriptionText.text = "Description";
-        descriptionText.alignment = TextAnchor.UpperLeft;
-        descriptionText.color = new Color(0.95f, 0.95f, 0.95f);
-        descriptionText.fontSize = 15;
-
-        // funFactText (Blue box or stylized block)
-        GameObject funFactGo = DefaultControls.CreateText(uiResources);
-        funFactGo.name = "FunFactText";
-        funFactGo.transform.SetParent(resultPanelGo.transform, false);
-        var funFactRect = funFactGo.GetComponent<RectTransform>();
-        funFactRect.anchorMin = new Vector2(0, 1);
-        funFactRect.anchorMax = new Vector2(1, 1);
-        funFactRect.anchoredPosition = new Vector2(15, -305);
-        funFactRect.sizeDelta = new Vector2(-30, 70);
-        Text funFactText = funFactGo.GetComponent<Text>();
-        funFactText.text = "Fun Fact";
-        funFactText.alignment = TextAnchor.UpperLeft;
-        funFactText.color = new Color(0.2f, 0.6f, 1f); // Soft premium blue
-        funFactText.fontSize = 14;
-
-        // edibilityText (Highlighted indicator pill)
-        GameObject edibilityGo = DefaultControls.CreateText(uiResources);
-        edibilityGo.name = "EdibilityText";
-        edibilityGo.transform.SetParent(resultPanelGo.transform, false);
-        var edibilityRect = edibilityGo.GetComponent<RectTransform>();
-        edibilityRect.anchorMin = new Vector2(0, 1);
-        edibilityRect.anchorMax = new Vector2(1, 1);
-        edibilityRect.anchoredPosition = new Vector2(15, -395);
-        edibilityRect.sizeDelta = new Vector2(-30, 45);
-        Text edibilityText = edibilityGo.GetComponent<Text>();
-        edibilityText.text = "Edibility";
-        edibilityText.alignment = TextAnchor.MiddleCenter;
-        edibilityText.color = new Color(0.9f, 0.5f, 0.5f);
-        edibilityText.fontStyle = FontStyle.Bold;
-        edibilityText.fontSize = 15;
-
-        // Assign proper legacy fonts to all Text elements
-        AssignDefaultFonts(canvasGo);
-
-        // 10. Create AppManager Empty GameObject
+        // 5. Create AppManager
         GameObject appManagerGo = new GameObject("AppManager");
+        BackendClient client = appManagerGo.AddComponent<BackendClient>();
+        UIManager uiManager = appManagerGo.AddComponent<UIManager>();
         Undo.RegisterCreatedObjectUndo(appManagerGo, "Create AppManager");
 
-        // 11. Add BackendClient and UIManager components
-        BackendClient backendClient = appManagerGo.AddComponent<BackendClient>();
-        UIManager uiManager = appManagerGo.AddComponent<UIManager>();
+        // 6. Setup UIManager fields via reflection
+        SetRef(uiManager, "backendClient", client);
+        SetRef(uiManager, "backendUrlInput", urlInputField);
+        SetRef(uiManager, "modeDropdown", dropdown);
+        SetRef(uiManager, "cameraPreviewUI", preview);
+        SetRef(uiManager, "resultPanel", resPanelGo);
+        SetRef(uiManager, "commonNameText", commGo.GetComponent<Text>());
+        SetRef(uiManager, "scientificNameText", sciGo.GetComponent<Text>());
+        SetRef(uiManager, "scoreText", scoreGo.GetComponent<Text>());
+        SetRef(uiManager, "descriptionText", descGo.GetComponent<Text>());
+        SetRef(uiManager, "funFactText", factGo.GetComponent<Text>());
+        SetRef(uiManager, "edibilityText", edibGo.GetComponent<Text>());
+        SetRef(uiManager, "statusMessageText", statusText);
+        SetRef(uiManager, "scanButton", scanButton);
 
-        // 12. Connect fields in UIManager using SerializedObject
-        SerializedObject so = new SerializedObject(uiManager);
-        so.FindProperty("backendClient").objectReferenceValue = backendClient;
-        so.FindProperty("backendUrlInput").objectReferenceValue = backendUrlInput;
-        so.FindProperty("modeDropdown").objectReferenceValue = modeDropdown;
-        so.FindProperty("cameraPreviewUI").objectReferenceValue = cameraPreviewRawImage;
-        so.FindProperty("resultPanel").objectReferenceValue = resultPanelGo;
-        so.FindProperty("commonNameText").objectReferenceValue = commonNameText;
-        so.FindProperty("scientificNameText").objectReferenceValue = scientificNameText;
-        so.FindProperty("scoreText").objectReferenceValue = scoreText;
-        so.FindProperty("descriptionText").objectReferenceValue = descriptionText;
-        so.FindProperty("funFactText").objectReferenceValue = funFactText;
-        so.FindProperty("edibilityText").objectReferenceValue = edibilityText;
-        so.FindProperty("statusMessageText").objectReferenceValue = statusText;
-        so.FindProperty("scanButton").objectReferenceValue = scanButton;
-        
-        // Apply properties
-        so.ApplyModifiedProperties();
-
-        // Save scene
+        // Mark scene dirty and save it
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
-        
-        Debug.Log("Figma/Lovable-style UI built successfully in SampleScene!");
+
+        Debug.Log($"[SetupUI] Successfully generated MainARScene at '{scenePath}'. AppManager is completely configured.");
+        EditorUtility.DisplayDialog("AR Herb Setup", "Pomyślnie wygenerowano scenę MainARScene!\nWszystkie powiązania interfejsu zostały automatycznie podpięte pod AppManager.", "OK");
     }
 
-    private static void AssignDefaultFonts(GameObject root)
+    private static GameObject CreatePanel(Transform parent, string name, Vector2 anchorMin, Vector2 anchorMax, Vector2 sizeDelta, Color color)
     {
-        Font defaultFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        if (defaultFont == null)
+        GameObject go = new GameObject(name, typeof(Image));
+        go.transform.SetParent(parent, false);
+        RectTransform r = go.GetComponent<RectTransform>();
+        r.anchorMin = anchorMin;
+        r.anchorMax = anchorMax;
+        r.sizeDelta = sizeDelta;
+        go.GetComponent<Image>().color = color;
+        return go;
+    }
+
+    private static GameObject CreateText(Transform parent, string name, string defaultText, int fontSize, TextAnchor alignment, Color color, FontStyle style = FontStyle.Normal)
+    {
+        GameObject go = new GameObject(name, typeof(Text));
+        go.transform.SetParent(parent, false);
+        Text t = go.GetComponent<Text>();
+        t.text = defaultText;
+        t.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        t.fontSize = fontSize;
+        t.alignment = alignment;
+        t.color = color;
+        t.fontStyle = style;
+        t.supportRichText = true;
+        t.horizontalOverflow = HorizontalWrapMode.Wrap;
+        t.verticalOverflow = VerticalWrapMode.Truncate;
+        return go;
+    }
+
+    private static void SetRef(object target, string fieldName, object value)
+    {
+        var field = target.GetType().GetField(fieldName, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
+        if (field != null)
         {
-            defaultFont = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            field.SetValue(target, value);
+        }
+        else
+        {
+            Debug.LogWarning($"[SetupUI] Field '{fieldName}' not found in '{target.GetType().Name}'.");
+        }
+    }
+
+    private static void CreateARFoundationObjects()
+    {
+        // 1. Create AR Session if package is available
+        System.Type arSessionType = System.Type.GetType("UnityEngine.XR.ARFoundation.ARSession, Unity.XR.ARFoundation");
+        System.Type arInputManagerType = System.Type.GetType("UnityEngine.XR.ARFoundation.ARInputManager, Unity.XR.ARFoundation");
+        
+        if (arSessionType != null)
+        {
+            GameObject arSessionGo = new GameObject("AR Session");
+            arSessionGo.AddComponent(arSessionType);
+            if (arInputManagerType != null)
+            {
+                arSessionGo.AddComponent(arInputManagerType);
+            }
+            Undo.RegisterCreatedObjectUndo(arSessionGo, "Create AR Session");
+            Debug.Log("[SetupUI] Created AR Session.");
         }
 
-        if (defaultFont != null)
+        // 2. Create XR Origin if package is available
+        System.Type xrOriginType = System.Type.GetType("Unity.XR.CoreUtils.XROrigin, Unity.XR.CoreUtils");
+        System.Type arCameraManagerType = System.Type.GetType("UnityEngine.XR.ARFoundation.ARCameraManager, Unity.XR.ARFoundation");
+        System.Type arCameraBackgroundType = System.Type.GetType("UnityEngine.XR.ARFoundation.ARCameraBackground, Unity.XR.ARFoundation");
+
+        if (xrOriginType != null)
         {
-            foreach (var txt in root.GetComponentsInChildren<Text>(true))
+            GameObject xrOriginGo = new GameObject("XR Origin");
+            xrOriginGo.AddComponent(xrOriginType);
+            Undo.RegisterCreatedObjectUndo(xrOriginGo, "Create XR Origin");
+
+            GameObject cameraOffsetGo = new GameObject("Camera Offset");
+            cameraOffsetGo.transform.SetParent(xrOriginGo.transform, false);
+
+            GameObject arCameraGo = new GameObject("Main Camera", typeof(Camera));
+            arCameraGo.transform.SetParent(cameraOffsetGo.transform, false);
+            arCameraGo.tag = "MainCamera";
+
+            if (arCameraManagerType != null) arCameraGo.AddComponent(arCameraManagerType);
+            if (arCameraBackgroundType != null) arCameraGo.AddComponent(arCameraBackgroundType);
+
+            var xrOrigin = xrOriginGo.GetComponent(xrOriginType);
+            var offsetProp = xrOriginType.GetProperty("CameraFloorOffsetObject");
+            var cameraProp = xrOriginType.GetProperty("Camera");
+
+            if (offsetProp != null) offsetProp.SetValue(xrOrigin, cameraOffsetGo);
+            if (cameraProp != null) cameraProp.SetValue(xrOrigin, arCameraGo.GetComponent<Camera>());
+
+            Debug.Log("[SetupUI] Created XR Origin (Mobile AR) structure.");
+        }
+        else
+        {
+            // Try fallback ARSessionOrigin
+            System.Type arSessionOriginType = System.Type.GetType("UnityEngine.XR.ARFoundation.ARSessionOrigin, Unity.XR.ARFoundation");
+            if (arSessionOriginType != null)
             {
-                if (txt.font == null)
-                {
-                    txt.font = defaultFont;
-                }
+                GameObject arOriginGo = new GameObject("AR Session Origin");
+                arOriginGo.AddComponent(arSessionOriginType);
+                Undo.RegisterCreatedObjectUndo(arOriginGo, "Create AR Session Origin");
+
+                GameObject arCameraGo = new GameObject("AR Camera", typeof(Camera));
+                arCameraGo.transform.SetParent(arOriginGo.transform, false);
+                arCameraGo.tag = "MainCamera";
+
+                if (arCameraManagerType != null) arCameraGo.AddComponent(arCameraManagerType);
+                if (arCameraBackgroundType != null) arCameraGo.AddComponent(arCameraBackgroundType);
+
+                var arOrigin = arOriginGo.GetComponent(arSessionOriginType);
+                var cameraProp = arSessionOriginType.GetProperty("camera");
+                if (cameraProp != null) cameraProp.SetValue(arOrigin, arCameraGo.GetComponent<Camera>());
+
+                Debug.Log("[SetupUI] Created AR Session Origin (Mobile AR) fallback.");
+            }
+            else
+            {
+                // Create a standard PC Camera as fallback
+                GameObject pcCamGo = new GameObject("Main Camera", typeof(Camera));
+                pcCamGo.tag = "MainCamera";
+                Undo.RegisterCreatedObjectUndo(pcCamGo, "Create PC Main Camera");
+                Debug.Log("[SetupUI] AR Foundation package not detected. Created default Main Camera for PC testing.");
             }
         }
     }
