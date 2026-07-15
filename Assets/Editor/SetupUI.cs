@@ -208,7 +208,7 @@ public class SetupUI
         descRect.sizeDelta = Vector2.zero;
 
         // Fun Fact
-        GameObject factGo = CreateText(resPanelGo.transform, "FunFactText", "Ciekawostka...", 14, TextAnchor.UpperLeft, new Vector2(0.5f, 0.8f, 1f));
+        GameObject factGo = CreateText(resPanelGo.transform, "FunFactText", "Ciekawostka...", 14, TextAnchor.UpperLeft, new Color(0.5f, 0.8f, 1f));
         RectTransform factRect = factGo.GetComponent<RectTransform>();
         factRect.anchorMin = new Vector2(0.05f, 0.16f);
         factRect.anchorMax = new Vector2(0.95f, 0.35f);
