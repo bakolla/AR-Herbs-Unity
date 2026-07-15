@@ -49,7 +49,7 @@ public class SetupUI
         
         CanvasScaler scaler = canvasGo.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1080, 1920); // Mobile vertical reference
+        scaler.referenceResolution = new Vector2(1080, 1920); // Standard mobile reference resolution
         scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
         scaler.matchWidthOrHeight = 0.5f;
 
@@ -64,7 +64,7 @@ public class SetupUI
             Undo.RegisterCreatedObjectUndo(eventSystemGo, "Create EventSystem");
         }
 
-        // 3. Add RawImage - Fullscreen CameraPreview
+        // 3. Add RawImage - Fullscreen CameraPreview (Stretched)
         GameObject cameraPreviewGo = DefaultControls.CreateRawImage(uiResources);
         cameraPreviewGo.name = "CameraPreview";
         cameraPreviewGo.transform.SetParent(canvasGo.transform, false);
@@ -83,64 +83,66 @@ public class SetupUI
         var headerRect = headerPanelGo.GetComponent<RectTransform>();
         headerRect.anchorMin = new Vector2(0f, 1f);
         headerRect.anchorMax = new Vector2(1f, 1f);
-        headerRect.anchoredPosition = new Vector2(0, -40); // Pivot centered at top
+        headerRect.anchoredPosition = new Vector2(0, -40); // Anchored at top center
         headerRect.sizeDelta = new Vector2(0, 80);
         var headerImage = headerPanelGo.GetComponent<Image>();
         if (headerImage != null)
         {
             headerImage.sprite = uiResources.standard;
-            headerImage.color = new Color(0.05f, 0.06f, 0.08f, 0.85f); // Premium dark translucent
+            headerImage.color = new Color(0.06f, 0.08f, 0.1f, 0.85f); // Translucent deep slate
         }
 
-        // Header Title Text
+        // Header Title Text (Left-aligned)
         GameObject headerTextGo = DefaultControls.CreateText(uiResources);
         headerTextGo.name = "Header Title";
         headerTextGo.transform.SetParent(headerPanelGo.transform, false);
         var headerTextRect = headerTextGo.GetComponent<RectTransform>();
         headerTextRect.anchorMin = new Vector2(0f, 0f);
-        headerTextRect.anchorMax = new Vector2(1f, 1f);
-        headerTextRect.offsetMin = new Vector2(20, 0);
-        headerTextRect.offsetMax = new Vector2(-20, 0);
+        headerTextRect.anchorMax = new Vector2(0.5f, 1f);
+        headerTextRect.anchoredPosition = new Vector2(30, 0);
+        headerTextRect.sizeDelta = new Vector2(-60, 0);
         Text headerText = headerTextGo.GetComponent<Text>();
         headerText.text = "🌿 HERB & FAUNA SCANNER";
-        headerText.alignment = TextAnchor.MiddleCenter;
+        headerText.alignment = TextAnchor.MiddleLeft;
         headerText.fontStyle = FontStyle.Bold;
-        headerText.fontSize = 28;
-        headerText.color = new Color(0.18f, 0.8f, 0.44f); // Emerald Green
+        headerText.fontSize = 24;
+        headerText.color = new Color(0.18f, 0.8f, 0.44f); // Emerald Green accent
 
-        // 5. Add InputField — Backend URL (styled as a search/config bar below the header)
+        // 5. Add InputField — Backend URL (Small settings input positioned on the right inside header)
         GameObject backendUrlGo = DefaultControls.CreateInputField(uiResources);
         backendUrlGo.name = "Backend URL Input";
-        backendUrlGo.transform.SetParent(canvasGo.transform, false);
+        backendUrlGo.transform.SetParent(headerPanelGo.transform, false);
         var urlRect = backendUrlGo.GetComponent<RectTransform>();
-        urlRect.anchorMin = new Vector2(0.5f, 1f);
-        urlRect.anchorMax = new Vector2(0.5f, 1f);
-        urlRect.anchoredPosition = new Vector2(0, -110);
-        urlRect.sizeDelta = new Vector2(420, 45);
+        urlRect.anchorMin = new Vector2(1f, 0.5f);
+        urlRect.anchorMax = new Vector2(1f, 0.5f);
+        urlRect.anchoredPosition = new Vector2(-30, 0);
+        urlRect.sizeDelta = new Vector2(320, 40);
+        urlRect.pivot = new Vector2(1f, 0.5f); // Right align pivot
+        
         InputField backendUrlInput = backendUrlGo.GetComponent<InputField>();
         var inputImage = backendUrlGo.GetComponent<Image>();
         if (inputImage != null)
         {
             inputImage.sprite = uiResources.standard;
-            inputImage.color = new Color(0.1f, 0.11f, 0.14f, 0.9f); // Dark fill
+            inputImage.color = new Color(0.12f, 0.14f, 0.18f, 0.9f); // Dark field fill
         }
         var inputTexts = backendUrlGo.GetComponentsInChildren<Text>(true);
         foreach (var t in inputTexts)
         {
             t.color = Color.white;
-            t.fontSize = 16;
+            t.fontSize = 14;
             if (t.name == "Placeholder") t.color = new Color(0.6f, 0.6f, 0.6f, 0.8f);
         }
 
-        // 6. Mode Selection Dropdown (placed above scan button)
+        // 6. Mode Selection Dropdown (placed neatly above scan button)
         GameObject dropdownGo = DefaultControls.CreateDropdown(uiResources);
         dropdownGo.name = "Category Dropdown";
         dropdownGo.transform.SetParent(canvasGo.transform, false);
         var dropdownRect = dropdownGo.GetComponent<RectTransform>();
         dropdownRect.anchorMin = new Vector2(0.5f, 0f);
         dropdownRect.anchorMax = new Vector2(0.5f, 0f);
-        dropdownRect.anchoredPosition = new Vector2(0, 190);
-        dropdownRect.sizeDelta = new Vector2(280, 50);
+        dropdownRect.anchoredPosition = new Vector2(0, 210);
+        dropdownRect.sizeDelta = new Vector2(280, 48);
         Dropdown modeDropdown = dropdownGo.GetComponent<Dropdown>();
         modeDropdown.options.Clear();
         modeDropdown.options.Add(new Dropdown.OptionData("Plants (Rośliny)"));
@@ -151,62 +153,62 @@ public class SetupUI
         if (dropdownImage != null)
         {
             dropdownImage.sprite = uiResources.standard;
-            dropdownImage.color = new Color(0.12f, 0.13f, 0.16f, 0.95f);
+            dropdownImage.color = new Color(0.12f, 0.14f, 0.18f, 0.95f);
         }
         var dropdownLabel = dropdownGo.GetComponentInChildren<Text>();
         if (dropdownLabel != null)
         {
             dropdownLabel.color = Color.white;
-            dropdownLabel.fontSize = 18;
+            dropdownLabel.fontSize = 17;
             dropdownLabel.alignment = TextAnchor.MiddleCenter;
         }
 
-        // 7. Large Circular Scan Button (Modern Figma-style capture trigger)
+        // 7. Large Circular Scan Button (Modern camera shutter trigger)
         GameObject scanButtonGo = DefaultControls.CreateButton(uiResources);
         scanButtonGo.name = "Scan Button";
         scanButtonGo.transform.SetParent(canvasGo.transform, false);
         var scanRect = scanButtonGo.GetComponent<RectTransform>();
         scanRect.anchorMin = new Vector2(0.5f, 0f);
         scanRect.anchorMax = new Vector2(0.5f, 0f);
-        scanRect.anchoredPosition = new Vector2(0, 90);
-        scanRect.sizeDelta = new Vector2(110, 110); // Large circle size
+        scanRect.anchoredPosition = new Vector2(0, 100);
+        scanRect.sizeDelta = new Vector2(105, 105); // Dominant mobile circular size
         
         Button scanButton = scanButtonGo.GetComponent<Button>();
         var buttonImage = scanButtonGo.GetComponent<Image>();
         if (buttonImage != null)
         {
-            buttonImage.sprite = uiResources.knob; // Use standard circular knob
-            buttonImage.color = new Color(0.18f, 0.8f, 0.44f, 0.95f); // Vibrant emerald green
+            buttonImage.sprite = uiResources.knob; // Circle knob
+            buttonImage.color = new Color(0.18f, 0.8f, 0.44f, 0.95f); // Accent green
         }
         
-        // Subtle outer border ring for the button
+        // Outer decorative ring for the button
         GameObject ringGo = new GameObject("Outer Ring", typeof(Image));
         ringGo.transform.SetParent(scanButtonGo.transform, false);
         var ringRect = ringGo.GetComponent<RectTransform>();
         ringRect.anchorMin = Vector2.zero;
         ringRect.anchorMax = Vector2.one;
-        ringRect.sizeDelta = new Vector2(16, 16); // Slightly larger than parent button
+        ringRect.sizeDelta = new Vector2(16, 16);
         var ringImage = ringGo.GetComponent<Image>();
         ringImage.sprite = uiResources.knob;
-        ringImage.color = new Color(1f, 1f, 1f, 0.25f); // White halo
+        ringImage.color = new Color(1f, 1f, 1f, 0.2f);
         
         var buttonText = scanButtonGo.GetComponentInChildren<Text>();
         if (buttonText != null) 
         {
             buttonText.text = "SCAN";
             buttonText.color = Color.white;
-            buttonText.fontSize = 18;
+            buttonText.fontSize = 17;
             buttonText.fontStyle = FontStyle.Bold;
         }
 
-        // 8. Text — Status Text (Loading/Status Display)
+        // 8. Text — Status Text (Placed above the dropdown/scanner)
         GameObject statusTextGo = DefaultControls.CreateText(uiResources);
         statusTextGo.name = "Status Text";
         statusTextGo.transform.SetParent(canvasGo.transform, false);
         var statusRect = statusTextGo.GetComponent<RectTransform>();
         statusRect.anchorMin = new Vector2(0.5f, 0f);
         statusRect.anchorMax = new Vector2(0.5f, 0f);
-        statusRect.anchoredPosition = new Vector2(0, 270);
+        statusRect.anchoredPosition = new Vector2(0, 800); // Placed above result panel
         statusRect.sizeDelta = new Vector2(600, 40);
         Text statusText = statusTextGo.GetComponent<Text>();
         statusText.text = "Ready to scan";
@@ -214,138 +216,142 @@ public class SetupUI
         statusText.color = new Color(1f, 1f, 1f, 0.9f);
         statusText.fontSize = 18;
 
-        // 9. Panel — Result Panel (Figma-style Bottom Sheet Card)
+        // 9. Panel — Result Panel (Floating Bottom Sheet Card)
         GameObject resultPanelGo = DefaultControls.CreatePanel(uiResources);
         resultPanelGo.name = "Result Panel";
         resultPanelGo.transform.SetParent(canvasGo.transform, false);
         var panelRect = resultPanelGo.GetComponent<RectTransform>();
-        panelRect.anchorMin = new Vector2(0.5f, 0f);
-        panelRect.anchorMax = new Vector2(0.5f, 0f);
-        panelRect.anchoredPosition = new Vector2(0, 520); // Anchored above controls
-        panelRect.sizeDelta = new Vector2(480, 440);      // Tall bottom card
+        panelRect.anchorMin = new Vector2(0f, 0f);
+        panelRect.anchorMax = new Vector2(1f, 0f);
+        panelRect.anchoredPosition = new Vector2(0, 280); // Floats above the dropdown & scan button
+        panelRect.pivot = new Vector2(0.5f, 0f);
+        panelRect.offsetMin = new Vector2(40, panelRect.offsetMin.y);  // Horizontal margins (1000px wide card)
+        panelRect.offsetMax = new Vector2(-40, panelRect.offsetMax.y);
+        panelRect.sizeDelta = new Vector2(panelRect.sizeDelta.x, 500); // Fixed card height
+        
         var panelImage = resultPanelGo.GetComponent<Image>();
         if (panelImage != null)
         {
             panelImage.sprite = uiResources.standard;
-            panelImage.color = new Color(0.08f, 0.09f, 0.12f, 0.95f); // Sleek card background
+            panelImage.color = new Color(0.08f, 0.1f, 0.13f, 0.95f); // Rich glassmorphic dark slate
         }
 
-        // Bottom Sheet Handle (Mock pill handle for visual design)
+        // Pill handle on top of result card
         GameObject handleGo = new GameObject("Handle Bar", typeof(Image));
         handleGo.transform.SetParent(resultPanelGo.transform, false);
         var handleRect = handleGo.GetComponent<RectTransform>();
         handleRect.anchorMin = new Vector2(0.5f, 1f);
         handleRect.anchorMax = new Vector2(0.5f, 1f);
-        handleRect.anchoredPosition = new Vector2(0, -10);
-        handleRect.sizeDelta = new Vector2(60, 6);
+        handleRect.anchoredPosition = new Vector2(0, -12);
+        handleRect.sizeDelta = new Vector2(70, 6);
         var handleImg = handleGo.GetComponent<Image>();
         handleImg.sprite = uiResources.standard;
         handleImg.color = new Color(1f, 1f, 1f, 0.25f);
 
-        // commonNameText (Primary result header)
+        // commonNameText (Left-aligned primary result title)
         GameObject commonNameGo = DefaultControls.CreateText(uiResources);
         commonNameGo.name = "CommonNameText";
         commonNameGo.transform.SetParent(resultPanelGo.transform, false);
         var commonNameRect = commonNameGo.GetComponent<RectTransform>();
         commonNameRect.anchorMin = new Vector2(0, 1);
         commonNameRect.anchorMax = new Vector2(1, 1);
-        commonNameRect.anchoredPosition = new Vector2(15, -45);
-        commonNameRect.sizeDelta = new Vector2(-150, 40); // Leave space for score badge
+        commonNameRect.anchoredPosition = new Vector2(30, -50);
+        commonNameRect.sizeDelta = new Vector2(-220, 40); // Margin on right for score badge
         Text commonNameText = commonNameGo.GetComponent<Text>();
         commonNameText.text = "Common Name";
         commonNameText.alignment = TextAnchor.MiddleLeft;
         commonNameText.fontStyle = FontStyle.Bold;
-        commonNameText.fontSize = 24;
-        commonNameText.color = new Color(0.18f, 0.8f, 0.44f); // Emerald Green
+        commonNameText.fontSize = 26;
+        commonNameText.color = new Color(0.18f, 0.8f, 0.44f);
 
-        // scoreText (Right-aligned tag badge)
+        // scoreText (Right-aligned badge inside result panel)
         GameObject scoreGo = DefaultControls.CreateText(uiResources);
         scoreGo.name = "ScoreText";
         scoreGo.transform.SetParent(resultPanelGo.transform, false);
         var scoreRect = scoreGo.GetComponent<RectTransform>();
         scoreRect.anchorMin = new Vector2(1, 1);
         scoreRect.anchorMax = new Vector2(1, 1);
-        scoreRect.anchoredPosition = new Vector2(-15, -45);
-        scoreRect.sizeDelta = new Vector2(120, 40);
+        scoreRect.anchoredPosition = new Vector2(-30, -50);
+        scoreRect.sizeDelta = new Vector2(150, 40);
         Text scoreText = scoreGo.GetComponent<Text>();
         scoreText.text = "Score";
         scoreText.alignment = TextAnchor.MiddleRight;
         scoreText.fontStyle = FontStyle.Bold;
-        scoreText.fontSize = 16;
+        scoreText.fontSize = 18;
         scoreText.color = new Color(0.95f, 0.77f, 0.06f); // Gold
 
-        // scientificNameText (Secondary italic label)
+        // scientificNameText (Left-aligned secondary italic label)
         GameObject scientificNameGo = DefaultControls.CreateText(uiResources);
         scientificNameGo.name = "ScientificNameText";
         scientificNameGo.transform.SetParent(resultPanelGo.transform, false);
         var sciNameRect = scientificNameGo.GetComponent<RectTransform>();
         sciNameRect.anchorMin = new Vector2(0, 1);
         sciNameRect.anchorMax = new Vector2(1, 1);
-        sciNameRect.anchoredPosition = new Vector2(15, -85);
-        sciNameRect.sizeDelta = new Vector2(-30, 30);
+        sciNameRect.anchoredPosition = new Vector2(30, -95);
+        sciNameRect.sizeDelta = new Vector2(-60, 30);
         Text scientificNameText = scientificNameGo.GetComponent<Text>();
         scientificNameText.text = "Scientific Name";
         scientificNameText.alignment = TextAnchor.MiddleLeft;
         scientificNameText.fontStyle = FontStyle.Italic;
-        scientificNameText.fontSize = 16;
+        scientificNameText.fontSize = 17;
         scientificNameText.color = new Color(0.74f, 0.76f, 0.78f);
 
-        // Thin Separator line in UI card
+        // Horizontal separator line
         GameObject separatorGo = new GameObject("UI Separator", typeof(Image));
         separatorGo.transform.SetParent(resultPanelGo.transform, false);
         var sepRect = separatorGo.GetComponent<RectTransform>();
         sepRect.anchorMin = new Vector2(0f, 1f);
         sepRect.anchorMax = new Vector2(1f, 1f);
-        sepRect.anchoredPosition = new Vector2(0, -120);
-        sepRect.sizeDelta = new Vector2(-30, 2);
+        sepRect.anchoredPosition = new Vector2(0, -135);
+        sepRect.sizeDelta = new Vector2(-60, 2);
         var sepImg = separatorGo.GetComponent<Image>();
         sepImg.color = new Color(1f, 1f, 1f, 0.1f);
 
-        // descriptionText (Clean body block)
+        // descriptionText
         GameObject descGo = DefaultControls.CreateText(uiResources);
         descGo.name = "DescriptionText";
         descGo.transform.SetParent(resultPanelGo.transform, false);
         var descRect = descGo.GetComponent<RectTransform>();
         descRect.anchorMin = new Vector2(0, 1);
         descRect.anchorMax = new Vector2(1, 1);
-        descRect.anchoredPosition = new Vector2(15, -200);
-        descRect.sizeDelta = new Vector2(-30, 120);
+        descRect.anchoredPosition = new Vector2(30, -230);
+        descRect.sizeDelta = new Vector2(-60, 140);
         Text descriptionText = descGo.GetComponent<Text>();
         descriptionText.text = "Description";
         descriptionText.alignment = TextAnchor.UpperLeft;
         descriptionText.color = new Color(0.95f, 0.95f, 0.95f);
         descriptionText.fontSize = 15;
 
-        // funFactText (Blue box or stylized block)
+        // funFactText
         GameObject funFactGo = DefaultControls.CreateText(uiResources);
         funFactGo.name = "FunFactText";
         funFactGo.transform.SetParent(resultPanelGo.transform, false);
         var funFactRect = funFactGo.GetComponent<RectTransform>();
         funFactRect.anchorMin = new Vector2(0, 1);
         funFactRect.anchorMax = new Vector2(1, 1);
-        funFactRect.anchoredPosition = new Vector2(15, -305);
-        funFactRect.sizeDelta = new Vector2(-30, 70);
+        funFactRect.anchoredPosition = new Vector2(30, -340);
+        funFactRect.sizeDelta = new Vector2(-60, 80);
         Text funFactText = funFactGo.GetComponent<Text>();
         funFactText.text = "Fun Fact";
         funFactText.alignment = TextAnchor.UpperLeft;
-        funFactText.color = new Color(0.2f, 0.6f, 1f); // Soft premium blue
+        funFactText.color = new Color(0.2f, 0.6f, 1f);
         funFactText.fontSize = 14;
 
-        // edibilityText (Highlighted indicator pill)
+        // edibilityText
         GameObject edibilityGo = DefaultControls.CreateText(uiResources);
         edibilityGo.name = "EdibilityText";
         edibilityGo.transform.SetParent(resultPanelGo.transform, false);
         var edibilityRect = edibilityGo.GetComponent<RectTransform>();
         edibilityRect.anchorMin = new Vector2(0, 1);
         edibilityRect.anchorMax = new Vector2(1, 1);
-        edibilityRect.anchoredPosition = new Vector2(15, -395);
-        edibilityRect.sizeDelta = new Vector2(-30, 45);
+        edibilityRect.anchoredPosition = new Vector2(30, -425);
+        edibilityRect.sizeDelta = new Vector2(-60, 45);
         Text edibilityText = edibilityGo.GetComponent<Text>();
         edibilityText.text = "Edibility";
         edibilityText.alignment = TextAnchor.MiddleCenter;
         edibilityText.color = new Color(0.9f, 0.5f, 0.5f);
         edibilityText.fontStyle = FontStyle.Bold;
-        edibilityText.fontSize = 15;
+        edibilityText.fontSize = 16;
 
         // Assign proper legacy fonts to all Text elements
         AssignDefaultFonts(canvasGo);
@@ -381,7 +387,7 @@ public class SetupUI
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
         
-        Debug.Log("Figma/Lovable-style UI built successfully in SampleScene!");
+        Debug.Log("Modern mobile AR scanner UI redesigned successfully in SampleScene!");
     }
 
     private static void AssignDefaultFonts(GameObject root)
