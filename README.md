@@ -1,3 +1,11 @@
+Unity version: Unity 6: 6000.0.43f1
+
+packages to install: 
+AR Foundation
+Google ARCore XR Plugin
+Apple ARKit XR Plugin
+Newtonsoft.Json
+
 # AR Herb Unity Client & Backend
 
 This repository contains the Unity AR Foundation client and the Node.js/Express proxy backend.
