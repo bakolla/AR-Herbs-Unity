@@ -40,6 +40,10 @@ namespace ARHerb.UI
         [Header("Buttons")]
         [SerializeField] private Button scanButton;
 
+        [Header("AR / Editor Environment Roots")]
+        [SerializeField] private GameObject arMobileRoot;
+        [SerializeField] private GameObject pcCamera;
+
         private ICameraCaptureProvider activeCaptureProvider;
 
         private void Start()
@@ -74,6 +78,10 @@ namespace ARHerb.UI
         private void InitializeCameraProvider()
         {
 #if UNITY_EDITOR || UNITY_STANDALONE
+            Debug.Log("[UIManager] Editor mode: using webcam fallback");
+            if (arMobileRoot != null) arMobileRoot.SetActive(false);
+            if (pcCamera != null) pcCamera.SetActive(true);
+
             if (useMockTestImageInEditor)
             {
                 // Fallback A: TestImageCaptureProvider (pre-selected Texture2D asset)
@@ -87,6 +95,10 @@ namespace ARHerb.UI
                 Debug.Log("[UIManager] Initialized EditorWebcamCaptureProvider for Editor/PC.");
             }
 #else
+            Debug.Log("[UIManager] Mobile mode: using AR Foundation");
+            if (arMobileRoot != null) arMobileRoot.SetActive(true);
+            if (pcCamera != null) pcCamera.SetActive(false);
+
             // Production C: AR Foundation camera stream
             activeCaptureProvider = gameObject.AddComponent<ARFoundationCaptureProvider>();
             Debug.Log("[UIManager] Initialized ARFoundationCaptureProvider for Mobile Device.");

@@ -39,7 +39,7 @@ public class SetupUI
         }
 
         // Clean up existing duplicates
-        string[] oldNames = { "Canvas", "AppManager", "EventSystem", "AR Session", "XR Origin", "AR Session Origin" };
+        string[] oldNames = { "Canvas", "AppManager", "EventSystem", "AR Session", "XR Origin", "AR Session Origin", "ARMobileRoot", "Main Camera" };
         foreach (var name in oldNames)
         {
             GameObject oldGo = GameObject.Find(name);
@@ -47,7 +47,7 @@ public class SetupUI
         }
 
         // 2. Create AR Foundation Hierarchy safely using reflection
-        CreateARFoundationObjects();
+        GameObject arMobileRoot = CreateARFoundationObjects();
 
         // 3. Create Canvas and UI elements
         GameObject canvasGo = new GameObject("Canvas");
@@ -242,6 +242,8 @@ public class SetupUI
         SetRef(uiManager, "edibilityText", edibGo.GetComponent<Text>());
         SetRef(uiManager, "statusMessageText", statusText);
         SetRef(uiManager, "scanButton", scanButton);
+        SetRef(uiManager, "arMobileRoot", arMobileRoot);
+        SetRef(uiManager, "pcCamera", GameObject.Find("Main Camera"));
 
         // Mark scene dirty and save it
         EditorSceneManager.MarkSceneDirty(scene);
@@ -293,41 +295,60 @@ public class SetupUI
         }
     }
 
-    private static void CreateARFoundationObjects()
+    private static GameObject CreateARFoundationObjects()
     {
-        // 1. Create AR Session if package is available
+        // Always create a standard PC Camera as fallback/main camera for Editor/PC testing
+        GameObject pcCamGo = new GameObject("Main Camera", typeof(Camera));
+        pcCamGo.tag = "MainCamera";
+        pcCamGo.transform.position = new Vector3(0, 0, -10);
+        Undo.RegisterCreatedObjectUndo(pcCamGo, "Create PC Main Camera");
+
+        // Try to locate AR Foundation types
         System.Type arSessionType = System.Type.GetType("UnityEngine.XR.ARFoundation.ARSession, Unity.XR.ARFoundation");
         System.Type arInputManagerType = System.Type.GetType("UnityEngine.XR.ARFoundation.ARInputManager, Unity.XR.ARFoundation");
-        
+        System.Type xrOriginType = System.Type.GetType("Unity.XR.CoreUtils.XROrigin, Unity.XR.CoreUtils");
+        System.Type arSessionOriginType = System.Type.GetType("UnityEngine.XR.ARFoundation.ARSessionOrigin, Unity.XR.ARFoundation");
+        System.Type arCameraManagerType = System.Type.GetType("UnityEngine.XR.ARFoundation.ARCameraManager, Unity.XR.ARFoundation");
+        System.Type arCameraBackgroundType = System.Type.GetType("UnityEngine.XR.ARFoundation.ARCameraBackground, Unity.XR.ARFoundation");
+
+        bool hasAR = arSessionType != null || xrOriginType != null || arSessionOriginType != null;
+
+        if (!hasAR)
+        {
+            Debug.Log("[SetupUI] AR Foundation package not detected. Created default Main Camera for PC testing.");
+            return null;
+        }
+
+        // Create ARMobileRoot
+        GameObject arMobileRoot = new GameObject("ARMobileRoot");
+        Undo.RegisterCreatedObjectUndo(arMobileRoot, "Create ARMobileRoot");
+
+        // Create AR Session inside root
         if (arSessionType != null)
         {
             GameObject arSessionGo = new GameObject("AR Session");
+            arSessionGo.transform.SetParent(arMobileRoot.transform, false);
             arSessionGo.AddComponent(arSessionType);
             if (arInputManagerType != null)
             {
                 arSessionGo.AddComponent(arInputManagerType);
             }
-            Undo.RegisterCreatedObjectUndo(arSessionGo, "Create AR Session");
-            Debug.Log("[SetupUI] Created AR Session.");
+            Debug.Log("[SetupUI] Created AR Session under ARMobileRoot.");
         }
 
-        // 2. Create XR Origin if package is available
-        System.Type xrOriginType = System.Type.GetType("Unity.XR.CoreUtils.XROrigin, Unity.XR.CoreUtils");
-        System.Type arCameraManagerType = System.Type.GetType("UnityEngine.XR.ARFoundation.ARCameraManager, Unity.XR.ARFoundation");
-        System.Type arCameraBackgroundType = System.Type.GetType("UnityEngine.XR.ARFoundation.ARCameraBackground, Unity.XR.ARFoundation");
-
+        // Create Origin inside root
         if (xrOriginType != null)
         {
             GameObject xrOriginGo = new GameObject("XR Origin");
+            xrOriginGo.transform.SetParent(arMobileRoot.transform, false);
             xrOriginGo.AddComponent(xrOriginType);
-            Undo.RegisterCreatedObjectUndo(xrOriginGo, "Create XR Origin");
 
             GameObject cameraOffsetGo = new GameObject("Camera Offset");
             cameraOffsetGo.transform.SetParent(xrOriginGo.transform, false);
 
-            GameObject arCameraGo = new GameObject("Main Camera", typeof(Camera));
+            // Create AR Camera (do NOT tag MainCamera to avoid conflict in Editor)
+            GameObject arCameraGo = new GameObject("AR Camera", typeof(Camera));
             arCameraGo.transform.SetParent(cameraOffsetGo.transform, false);
-            arCameraGo.tag = "MainCamera";
 
             if (arCameraManagerType != null) arCameraGo.AddComponent(arCameraManagerType);
             if (arCameraBackgroundType != null) arCameraGo.AddComponent(arCameraBackgroundType);
@@ -339,39 +360,31 @@ public class SetupUI
             if (offsetProp != null) offsetProp.SetValue(xrOrigin, cameraOffsetGo);
             if (cameraProp != null) cameraProp.SetValue(xrOrigin, arCameraGo.GetComponent<Camera>());
 
-            Debug.Log("[SetupUI] Created XR Origin (Mobile AR) structure.");
+            Debug.Log("[SetupUI] Created XR Origin under ARMobileRoot.");
         }
-        else
+        else if (arSessionOriginType != null)
         {
-            // Try fallback ARSessionOrigin
-            System.Type arSessionOriginType = System.Type.GetType("UnityEngine.XR.ARFoundation.ARSessionOrigin, Unity.XR.ARFoundation");
-            if (arSessionOriginType != null)
-            {
-                GameObject arOriginGo = new GameObject("AR Session Origin");
-                arOriginGo.AddComponent(arSessionOriginType);
-                Undo.RegisterCreatedObjectUndo(arOriginGo, "Create AR Session Origin");
+            GameObject arOriginGo = new GameObject("AR Session Origin");
+            arOriginGo.transform.SetParent(arMobileRoot.transform, false);
+            arOriginGo.AddComponent(arSessionOriginType);
 
-                GameObject arCameraGo = new GameObject("AR Camera", typeof(Camera));
-                arCameraGo.transform.SetParent(arOriginGo.transform, false);
-                arCameraGo.tag = "MainCamera";
+            GameObject arCameraGo = new GameObject("AR Camera", typeof(Camera));
+            arCameraGo.transform.SetParent(arOriginGo.transform, false);
 
-                if (arCameraManagerType != null) arCameraGo.AddComponent(arCameraManagerType);
-                if (arCameraBackgroundType != null) arCameraGo.AddComponent(arCameraBackgroundType);
+            if (arCameraManagerType != null) arCameraGo.AddComponent(arCameraManagerType);
+            if (arCameraBackgroundType != null) arCameraGo.AddComponent(arCameraBackgroundType);
 
-                var arOrigin = arOriginGo.GetComponent(arSessionOriginType);
-                var cameraProp = arSessionOriginType.GetProperty("camera");
-                if (cameraProp != null) cameraProp.SetValue(arOrigin, arCameraGo.GetComponent<Camera>());
+            var arOrigin = arOriginGo.GetComponent(arSessionOriginType);
+            var cameraProp = arSessionOriginType.GetProperty("camera");
+            if (cameraProp != null) cameraProp.SetValue(arOrigin, arCameraGo.GetComponent<Camera>());
 
-                Debug.Log("[SetupUI] Created AR Session Origin (Mobile AR) fallback.");
-            }
-            else
-            {
-                // Create a standard PC Camera as fallback
-                GameObject pcCamGo = new GameObject("Main Camera", typeof(Camera));
-                pcCamGo.tag = "MainCamera";
-                Undo.RegisterCreatedObjectUndo(pcCamGo, "Create PC Main Camera");
-                Debug.Log("[SetupUI] AR Foundation package not detected. Created default Main Camera for PC testing.");
-            }
+            Debug.Log("[SetupUI] Created AR Session Origin under ARMobileRoot.");
         }
+
+        // Deactivate ARMobileRoot by default in Editor
+        arMobileRoot.SetActive(false);
+        Debug.Log("[SetupUI] AR Foundation components structured under ARMobileRoot and deactivated by default.");
+
+        return arMobileRoot;
     }
 }
