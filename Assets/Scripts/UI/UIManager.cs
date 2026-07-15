@@ -63,7 +63,7 @@ namespace ARHerb.UI
                 resultPanel.SetActive(false);
             }
 
-            SetStatusText("Gotowy do skanowania");
+            SetStatusText("Gotowy do skanowania", StatusType.Ready);
 
             InitializeCameraProvider();
         }
