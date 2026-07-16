@@ -281,8 +281,22 @@ public class SetupUI
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
 
+        // 7. Configure Project Settings & Build Settings automatically
+        PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, "com.bakolla.arherb");
+
+        List<EditorBuildSettingsScene> buildScenes = new List<EditorBuildSettingsScene>();
+        buildScenes.Add(new EditorBuildSettingsScene(scenePath, true));
+        foreach (var s in EditorBuildSettings.scenes)
+        {
+            if (s.path != scenePath)
+            {
+                buildScenes.Add(s);
+            }
+        }
+        EditorBuildSettings.scenes = buildScenes.ToArray();
+
         Debug.Log($"[SetupUI] Successfully generated MainARScene at '{scenePath}'. AppManager is completely configured.");
-        EditorUtility.DisplayDialog("AR Herb Setup", "Pomyślnie wygenerowano scenę MainARScene!\nWszystkie powiązania interfejsu zostały automatycznie podpięte pod AppManager.", "OK");
+        EditorUtility.DisplayDialog("AR Herb Setup", "Pomyślnie wygenerowano scenę MainARScene!\nUstawiono identyfikator pakietu Android na com.bakolla.arherb oraz dodano scenę do okna Build Settings.", "OK");
     }
 
     private static GameObject CreatePanel(Transform parent, string name, Vector2 anchorMin, Vector2 anchorMax, Vector2 sizeDelta, Color color)

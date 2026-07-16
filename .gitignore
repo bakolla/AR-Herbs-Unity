@@ -29,3 +29,9 @@ backend/.env
 backend/.env.local
 backend/.env.*.local
 backend/.env.example
+
+# Unity Build Artifacts & Android Temp Files
+.utmp/
+[Aa]ndroid/
+*.apk
+*_BurstDebugInformation_DoNotShip/

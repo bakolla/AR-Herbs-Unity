@@ -24,8 +24,10 @@ namespace ARHerb.UI
 
         [Header("Camera & Preview Elements")]
         [SerializeField] private RawImage cameraPreviewUI;
+#if UNITY_EDITOR || UNITY_STANDALONE
         [Tooltip("If checked, utilizes the TestImageCaptureProvider fallback in Editor instead of WebCamTexture.")]
         [SerializeField] private bool useMockTestImageInEditor = false;
+#endif
 
         [Header("Result Panel UI Elements")]
         [SerializeField] private GameObject resultPanel;
