@@ -27,6 +27,8 @@ namespace ARHerb.UI
 #if UNITY_EDITOR || UNITY_STANDALONE
         [Tooltip("If checked, utilizes the TestImageCaptureProvider fallback in Editor instead of WebCamTexture.")]
         [SerializeField] private bool useMockTestImageInEditor = false;
+        [Tooltip("Drag a Texture2D asset here to serve as the mock camera feed when testing in the Editor without a webcam.")]
+        [SerializeField] private Texture2D mockTestImage;
 #endif
 
         [Header("Result Panel UI Elements")]
@@ -166,7 +168,9 @@ namespace ARHerb.UI
             if (useMockTestImageInEditor)
             {
                 // Fallback A: TestImageCaptureProvider (pre-selected Texture2D asset)
-                activeCaptureProvider = gameObject.AddComponent<TestImageCaptureProvider>();
+                var testProvider = gameObject.AddComponent<TestImageCaptureProvider>();
+                testProvider.SetTestImage(mockTestImage);
+                activeCaptureProvider = testProvider;
                 Debug.Log("[UIManager] Initialized TestImageCaptureProvider for Editor/PC.");
             }
             else

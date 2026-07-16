@@ -16,6 +16,11 @@ namespace ARHerb.Camera
         
         private RawImage previewUI;
 
+        public void SetTestImage(Texture2D image)
+        {
+            testImage = image;
+        }
+
         public void Initialize(RawImage previewTarget)
         {
             previewUI = previewTarget;
