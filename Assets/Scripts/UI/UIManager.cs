@@ -40,6 +40,7 @@ namespace ARHerb.UI
         [SerializeField] private Text funFactText;
         [SerializeField] private Text edibilityText;
         [SerializeField] private Text statusMessageText; // Used for Loading / Error messages
+        [SerializeField] private Text debugText; // Displays AR diagnostics on screen
 
         [Header("Buttons")]
         [SerializeField] private Button scanButton;
@@ -52,6 +53,7 @@ namespace ARHerb.UI
 
         private void Start()
         {
+            StartCoroutine(UpdateDiagnosticsRoutine());
             // Load backend URL from PlayerPrefs or client settings
             string savedUrl = PlayerPrefs.GetString("SavedBackendUrl", "");
             if (string.IsNullOrEmpty(savedUrl))
@@ -179,20 +181,25 @@ namespace ARHerb.UI
                 activeCaptureProvider = gameObject.AddComponent<EditorWebcamCaptureProvider>();
                 Debug.Log("[UIManager] Initialized EditorWebcamCaptureProvider for Editor/PC.");
             }
-#elif UNITY_ANDROID
-            Debug.Log("Android mode: using AR Foundation");
-            if (arMobileRoot != null) arMobileRoot.SetActive(true);
-            if (pcCamera != null) pcCamera.SetActive(false);
-
-            // Production C: AR Foundation camera stream
-            activeCaptureProvider = gameObject.AddComponent<ARFoundationCaptureProvider>();
-            Debug.Log("[UIManager] Initialized ARFoundationCaptureProvider for Mobile Device.");
 #else
-            Debug.Log("Android mode: using AR Foundation");
-            if (arMobileRoot != null) arMobileRoot.SetActive(true);
-            if (pcCamera != null) pcCamera.SetActive(false);
+            if (arMobileRoot != null)
+            {
+                arMobileRoot.SetActive(false);
+            }
+            if (pcCamera != null)
+            {
+                pcCamera.SetActive(true);
+            }
 
-            activeCaptureProvider = gameObject.AddComponent<ARFoundationCaptureProvider>();
+            if (WebCamTexture.devices == null || WebCamTexture.devices.Length == 0)
+            {
+                SetStatusText("No camera found on Android device.", StatusType.Error);
+                Debug.LogError("[UIManager] No camera found on Android device.");
+                return;
+            }
+
+            activeCaptureProvider = gameObject.AddComponent<MobileWebcamCaptureProvider>();
+            Debug.Log("[UIManager] Initialized MobileWebcamCaptureProvider for Android MVP.");
 #endif
 
             if (activeCaptureProvider != null)
@@ -403,6 +410,129 @@ namespace ARHerb.UI
                 if (txt != null)
                 {
                     txt.text = buttonText;
+                }
+            }
+        }
+
+        private System.Collections.IEnumerator UpdateDiagnosticsRoutine()
+        {
+            while (true)
+            {
+                RunARDiagnostics();
+                yield return new WaitForSeconds(1.0f);
+            }
+        }
+
+        private void RunARDiagnostics()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            sb.AppendLine("=== AR DIAGNOSTICS ===");
+            
+            try
+            {
+                try
+                {
+                    bool hasCameraPerm = UnityEngine.Android.Permission.HasUserAuthorizedPermission(UnityEngine.Android.Permission.Camera);
+                    sb.AppendLine($"Camera Perm: {(hasCameraPerm ? "GRANTED" : "DENIED")}");
+                }
+                catch (Exception ex) { sb.AppendLine($"Perm Err: {ex.Message}"); }
+                
+                var pipeline = UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline;
+                sb.AppendLine($"URP Pipeline: {(pipeline != null ? pipeline.name : "Built-in")}");
+                
+                if (arMobileRoot == null)
+                {
+                    sb.AppendLine("arMobileRoot: NULL");
+                }
+                else
+                {
+                    sb.AppendLine($"arMobileRoot: Active={arMobileRoot.activeSelf}, InHierarchy={arMobileRoot.activeInHierarchy}");
+                }
+                
+                var allSession = Resources.FindObjectsOfTypeAll<UnityEngine.XR.ARFoundation.ARSession>();
+                sb.AppendLine($"ARSessions found: {allSession.Length}");
+                foreach (var s in allSession)
+                {
+                    sb.AppendLine($" - {s.gameObject.name}: Active={s.gameObject.activeSelf}, En={s.enabled}, State={UnityEngine.XR.ARFoundation.ARSession.state}");
+                }
+                
+                var allCameraMgr = Resources.FindObjectsOfTypeAll<UnityEngine.XR.ARFoundation.ARCameraManager>();
+                sb.AppendLine($"ARCameraMgrs found: {allCameraMgr.Length}");
+                foreach (var c in allCameraMgr)
+                {
+                    sb.AppendLine($" - {c.gameObject.name}: Active={c.gameObject.activeSelf}, En={c.enabled}");
+                }
+                
+                var allCamBg = Resources.FindObjectsOfTypeAll<UnityEngine.XR.ARFoundation.ARCameraBackground>();
+                sb.AppendLine($"ARCamBgs found: {allCamBg.Length}");
+                foreach (var bg in allCamBg)
+                {
+                    sb.AppendLine($" - {bg.gameObject.name}: Active={bg.gameObject.activeSelf}, En={bg.enabled}");
+                }
+
+                if (pipeline != null)
+                {
+                    try
+                    {
+                        var pipelineAsset = pipeline as UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset;
+                        if (pipelineAsset != null)
+                        {
+                            var property = typeof(UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset).GetProperty("scriptableRendererDataList", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
+                            UnityEngine.Rendering.Universal.ScriptableRendererData[] rendererDataArray = null;
+                            if (property == null)
+                            {
+                                var field = typeof(UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset).GetField("m_RendererDataList", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
+                                if (field != null)
+                                {
+                                    rendererDataArray = field.GetValue(pipelineAsset) as UnityEngine.Rendering.Universal.ScriptableRendererData[];
+                                }
+                            }
+                            else
+                            {
+                                rendererDataArray = property.GetValue(pipelineAsset) as UnityEngine.Rendering.Universal.ScriptableRendererData[];
+                            }
+
+                            if (rendererDataArray != null)
+                            {
+                                sb.AppendLine($"URP Renderers: {rendererDataArray.Length}");
+                                for (int i = 0; i < rendererDataArray.Length; i++)
+                                {
+                                    var rData = rendererDataArray[i];
+                                    if (rData == null) continue;
+                                    sb.AppendLine($" R[{i}]: {rData.name}");
+                                    if (rData.rendererFeatures != null)
+                                    {
+                                        foreach (var feat in rData.rendererFeatures)
+                                        {
+                                            if (feat == null) continue;
+                                            sb.AppendLine($"  - Feat: {feat.name}");
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        sb.AppendLine($"URP check err: {ex.Message}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                sb.AppendLine($"Fatal Diag Err: {ex.Message}");
+                sb.AppendLine(ex.StackTrace);
+            }
+
+            string diagString = sb.ToString();
+            Debug.Log(diagString);
+            if (debugText != null)
+            {
+                debugText.text = diagString;
+                debugText.gameObject.SetActive(false);
+                if (debugText.transform.parent != null)
+                {
+                    debugText.transform.parent.gameObject.SetActive(false);
                 }
             }
         }

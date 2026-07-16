@@ -71,7 +71,7 @@ public class SetupUI
         previewRect.anchorMin = Vector2.zero;
         previewRect.anchorMax = Vector2.one;
         previewRect.sizeDelta = Vector2.zero;
-        preview.color = Color.black;
+        preview.color = Color.white;
 
         // Top Header
         GameObject topBarGo = CreatePanel(canvasGo.transform, "TopBar", new Vector2(0f, 0.92f), new Vector2(1f, 1f), new Vector2(0f, 0f), new Color(0.04f, 0.05f, 0.06f, 0.85f));
@@ -191,22 +191,22 @@ public class SetupUI
         btnTextRect.sizeDelta = Vector2.zero;
         Button scanButton = btnGo.GetComponent<Button>();
 
-        // Status Message Text (centered above dropdown)
-        GameObject statusGo = CreateText(canvasGo.transform, "StatusText", "Gotowy do skanowania", 16, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+        // Status Panel (centered above dropdown) with subtle background
+        GameObject statusPanelGo = CreatePanel(canvasGo.transform, "StatusPanel", new Vector2(0.1f, 0.25f), new Vector2(0.9f, 0.29f), Vector2.zero, new Color(0f, 0f, 0f, 0.4f));
+
+        GameObject statusGo = CreateText(statusPanelGo.transform, "StatusText", "Gotowy do skanowania", 16, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
         RectTransform statusRect = statusGo.GetComponent<RectTransform>();
-        statusRect.anchorMin = new Vector2(0.1f, 0.25f);
-        statusRect.anchorMax = new Vector2(0.9f, 0.29f);
+        statusRect.anchorMin = Vector2.zero;
+        statusRect.anchorMax = Vector2.one;
         statusRect.sizeDelta = Vector2.zero;
         Text statusText = statusGo.GetComponent<Text>();
-        // Subtle background for status
-        statusGo.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0.4f);
 
         // 4. Result Panel (Bottom Sheet style card)
         GameObject resPanelGo = CreatePanel(canvasGo.transform, "ResultPanel", new Vector2(0.05f, 0.32f), new Vector2(0.95f, 0.85f), new Vector2(0f, 0f), new Color(0.08f, 0.09f, 0.12f, 0.95f));
         
         // Handle Bar
         GameObject handleGo = CreatePanel(resPanelGo.transform, "HandleBar", new Vector2(0.42f, 0.96f), new Vector2(0.58f, 0.98f), new Vector2(0f, 0f), new Color(0.3f, 0.3f, 0.3f, 0.8f));
-        handleGo.AddComponent<Image>().sprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
+        handleGo.GetComponent<Image>().sprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
 
         // Common Name
         GameObject commGo = CreateText(resPanelGo.transform, "CommonNameText", "Nazwa rośliny", 22, TextAnchor.MiddleLeft, new Color(0.18f, 0.8f, 0.44f), FontStyle.Bold);
@@ -254,6 +254,16 @@ public class SetupUI
         edibRect.anchorMax = Vector2.one;
         edibRect.sizeDelta = Vector2.zero;
 
+        // 4.5 Debug Text Panel for Screen Diagnostics (semi-transparent black panel)
+        GameObject debugPanelGo = CreatePanel(canvasGo.transform, "DebugDiagnosticsPanel", new Vector2(0.1f, 0.45f), new Vector2(0.9f, 0.88f), Vector2.zero, new Color(0f, 0f, 0f, 0.7f));
+        GameObject debugTextGo = CreateText(debugPanelGo.transform, "DebugText", "Inicjalizowanie diagnostyki...", 11, TextAnchor.UpperLeft, Color.green, FontStyle.Normal);
+        RectTransform debugTextRect = debugTextGo.GetComponent<RectTransform>();
+        debugTextRect.anchorMin = Vector2.zero;
+        debugTextRect.anchorMax = Vector2.one;
+        debugTextRect.offsetMin = new Vector2(10f, 10f);
+        debugTextRect.offsetMax = new Vector2(-10f, -10f);
+        Text dText = debugTextGo.GetComponent<Text>();
+
         // 5. Create AppManager
         GameObject appManagerGo = new GameObject("AppManager");
         BackendClient client = appManagerGo.AddComponent<BackendClient>();
@@ -273,6 +283,7 @@ public class SetupUI
         SetRef(uiManager, "funFactText", factGo.GetComponent<Text>());
         SetRef(uiManager, "edibilityText", edibGo.GetComponent<Text>());
         SetRef(uiManager, "statusMessageText", statusText);
+        SetRef(uiManager, "debugText", dText);
         SetRef(uiManager, "scanButton", scanButton);
         SetRef(uiManager, "arMobileRoot", arMobileRoot);
         SetRef(uiManager, "pcCamera", GameObject.Find("Main Camera"));
@@ -283,6 +294,9 @@ public class SetupUI
 
         // 7. Configure Project Settings & Build Settings automatically
         PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, "com.bakolla.arherb");
+        PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel24;
+        PlayerSettings.SetUseDefaultGraphicsAPIs(BuildTarget.Android, false);
+        PlayerSettings.SetGraphicsAPIs(BuildTarget.Android, new[] { UnityEngine.Rendering.GraphicsDeviceType.OpenGLES3 });
 
         List<EditorBuildSettingsScene> buildScenes = new List<EditorBuildSettingsScene>();
         buildScenes.Add(new EditorBuildSettingsScene(scenePath, true));
@@ -295,8 +309,68 @@ public class SetupUI
         }
         EditorBuildSettings.scenes = buildScenes.ToArray();
 
+        // 8. Ensure URP Renderer features include AR Background Renderer Feature (fixes mobile blue/gray screen)
+        AddARBackgroundRendererFeatureToAllRenderers();
+
         Debug.Log($"[SetupUI] Successfully generated MainARScene at '{scenePath}'. AppManager is completely configured.");
         EditorUtility.DisplayDialog("AR Herb Setup", "Pomyślnie wygenerowano scenę MainARScene!\nUstawiono identyfikator pakietu Android na com.bakolla.arherb oraz dodano scenę do okna Build Settings.", "OK");
+    }
+
+    private static void AddARBackgroundRendererFeatureToAllRenderers()
+    {
+        string[] guids = AssetDatabase.FindAssets("t:UniversalRendererData");
+        if (guids == null || guids.Length == 0)
+        {
+            Debug.LogWarning("[SetupUI] No UniversalRendererData assets found. Make sure URP is installed.");
+            return;
+        }
+
+        foreach (string guid in guids)
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            var rendererData = AssetDatabase.LoadAssetAtPath<UnityEngine.Rendering.Universal.UniversalRendererData>(path);
+            if (rendererData != null)
+            {
+                bool hasFeature = false;
+                if (rendererData.rendererFeatures != null)
+                {
+                    foreach (var feature in rendererData.rendererFeatures)
+                    {
+                        if (feature != null && feature.GetType().Name == "ARBackgroundRendererFeature")
+                        {
+                            hasFeature = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!hasFeature)
+                {
+                    System.Type type = System.Type.GetType("UnityEngine.XR.ARFoundation.ARBackgroundRendererFeature, Unity.XR.ARFoundation");
+                    if (type != null)
+                    {
+                        var featureInstance = ScriptableObject.CreateInstance(type) as UnityEngine.Rendering.Universal.ScriptableRendererFeature;
+                        if (featureInstance != null)
+                        {
+                            featureInstance.name = "ARBackgroundRendererFeature";
+                            AssetDatabase.AddObjectToAsset(featureInstance, rendererData);
+                            rendererData.rendererFeatures.Add(featureInstance);
+                            EditorUtility.SetDirty(rendererData);
+                            Debug.Log($"[SetupUI] Successfully added ARBackgroundRendererFeature to URP Renderer: {path}");
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogWarning("[SetupUI] Could not find ARBackgroundRendererFeature type. Make sure AR Foundation package is installed.");
+                    }
+                }
+                else
+                {
+                    Debug.Log($"[SetupUI] URP Renderer at '{path}' already has ARBackgroundRendererFeature.");
+                }
+            }
+        }
+        AssetDatabase.SaveAssets();
     }
 
     private static GameObject CreatePanel(Transform parent, string name, Vector2 anchorMin, Vector2 anchorMax, Vector2 sizeDelta, Color color)
@@ -324,7 +398,7 @@ public class SetupUI
         t.fontStyle = style;
         t.supportRichText = true;
         t.horizontalOverflow = HorizontalWrapMode.Wrap;
-        t.verticalOverflow = VerticalWrapMode.Truncate;
+        t.verticalOverflow = VerticalWrapMode.Overflow;
         return go;
     }
 
