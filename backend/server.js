@@ -175,8 +175,9 @@ app.use('/api', apiLimiter);
 const jsonSmall = express.json({ limit: '512kb' });
 const jsonLarge = express.json({ limit: '15mb' });
 
-const frontendPath = path.join(__dirname, '..', 'frontend');
-app.use(express.static(frontendPath));
+// Unity backend does not serve a web frontend.
+// const frontendPath = path.join(__dirname, '..', 'frontend');
+// app.use(express.static(frontendPath));
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -196,7 +197,10 @@ app.get('/health', (_req, res) => {
 });
 
 app.get('/', (_req, res) => {
-  res.sendFile(path.join(frontendPath, 'index.html'));
+  res.json({
+    ok: true,
+    message: 'AR Herb Unity Backend is running.'
+  });
 });
 
 // ── Helpers ───────────────────────────────────────────────────

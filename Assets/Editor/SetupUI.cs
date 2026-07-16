@@ -103,22 +103,54 @@ public class SetupUI
         urlInputField.text = "http://localhost:3001";
 
         // Dropdown (styled dark above scan button)
-        GameObject dropdownGo = new GameObject("ModeDropdown", typeof(Image), typeof(Dropdown));
+        DefaultControls.Resources uiResources = new DefaultControls.Resources();
+        uiResources.standard = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Background.psd");
+        uiResources.background = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/InputFieldBackground.psd");
+        uiResources.inputField = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/InputFieldBackground.psd");
+        uiResources.knob = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
+        uiResources.checkmark = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Checkmark.psd");
+        uiResources.dropdown = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/DropdownArrow.psd");
+        uiResources.mask = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UIMask.psd");
+
+        GameObject dropdownGo = DefaultControls.CreateDropdown(uiResources);
+        dropdownGo.name = "ModeDropdown";
         dropdownGo.transform.SetParent(canvasGo.transform, false);
+        Undo.RegisterCreatedObjectUndo(dropdownGo, "Create ModeDropdown");
+
         RectTransform ddRect = dropdownGo.GetComponent<RectTransform>();
         ddRect.anchorMin = new Vector2(0.2f, 0.18f);
         ddRect.anchorMax = new Vector2(0.8f, 0.23f);
         ddRect.sizeDelta = Vector2.zero;
-        dropdownGo.GetComponent<Image>().color = new Color(0.12f, 0.13f, 0.16f, 0.95f);
 
-        GameObject ddLabelGo = CreateText(dropdownGo.transform, "Label", "Plants", 18, TextAnchor.MiddleCenter, Color.white);
-        RectTransform ddLabelRect = ddLabelGo.GetComponent<RectTransform>();
-        ddLabelRect.anchorMin = Vector2.zero;
-        ddLabelRect.anchorMax = Vector2.one;
-        ddLabelRect.sizeDelta = Vector2.zero;
+        Image ddImage = dropdownGo.GetComponent<Image>();
+        if (ddImage != null) ddImage.color = new Color(0.12f, 0.13f, 0.16f, 0.95f);
 
         Dropdown dropdown = dropdownGo.GetComponent<Dropdown>();
-        dropdown.captionText = ddLabelGo.GetComponent<Text>();
+        if (dropdown.captionText != null)
+        {
+            dropdown.captionText.color = Color.white;
+            dropdown.captionText.fontSize = 18;
+            dropdown.captionText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            dropdown.captionText.alignment = TextAnchor.MiddleCenter;
+        }
+
+        Image arrowImg = dropdownGo.transform.Find("Arrow")?.GetComponent<Image>();
+        if (arrowImg != null) arrowImg.color = Color.white;
+
+        if (dropdown.template != null)
+        {
+            Image templateImg = dropdown.template.GetComponent<Image>();
+            if (templateImg != null) templateImg.color = new Color(0.12f, 0.13f, 0.16f, 0.98f);
+
+            Text itemText = dropdown.template.GetComponentInChildren<Text>(true);
+            if (itemText != null)
+            {
+                itemText.color = Color.white;
+                itemText.fontSize = 16;
+                itemText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            }
+        }
+
         dropdown.options = new List<Dropdown.OptionData>
         {
             new Dropdown.OptionData("Plants"),

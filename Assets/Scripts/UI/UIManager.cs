@@ -48,11 +48,31 @@ namespace ARHerb.UI
 
         private void Start()
         {
-            // Set up backend URL input field with default client setting
-            if (backendUrlInput != null && backendClient != null)
+            // Load backend URL from PlayerPrefs or client settings
+            string savedUrl = PlayerPrefs.GetString("SavedBackendUrl", "");
+            if (string.IsNullOrEmpty(savedUrl))
             {
-                backendUrlInput.text = backendClient.GetBackendUrl();
-                backendUrlInput.onEndEdit.AddListener(backendClient.SetBackendUrl);
+                savedUrl = backendClient != null ? backendClient.GetBackendUrl() : "http://localhost:3001";
+            }
+
+            // In Editor mode, default url should be http://localhost:3001 if no saved url exists
+#if UNITY_EDITOR
+            if (string.IsNullOrEmpty(PlayerPrefs.GetString("SavedBackendUrl", "")))
+            {
+                savedUrl = "http://localhost:3001";
+            }
+#endif
+
+            if (backendClient != null)
+            {
+                backendClient.SetBackendUrl(savedUrl);
+            }
+
+            if (backendUrlInput != null)
+            {
+                backendUrlInput.text = savedUrl;
+                backendUrlInput.onEndEdit.RemoveAllListeners();
+                backendUrlInput.onEndEdit.AddListener(OnBackendUrlChanged);
             }
 
             // Setup Scan button click listener
@@ -69,7 +89,66 @@ namespace ARHerb.UI
 
             SetStatusText("Gotowy do skanowania", StatusType.Ready);
 
+#if UNITY_ANDROID && !UNITY_EDITOR
+            // Request Android Camera permission on startup asynchronously
+            if (!UnityEngine.Android.Permission.HasUserAuthorizedPermission(UnityEngine.Android.Permission.Camera))
+            {
+                SetStatusText("Waiting for camera permission...", StatusType.Loading);
+                UnityEngine.Android.Permission.RequestUserPermission(UnityEngine.Android.Permission.Camera);
+                StartCoroutine(WaitForCameraPermission());
+            }
+            else
+            {
+                InitializeCameraProvider();
+            }
+#else
             InitializeCameraProvider();
+#endif
+            CheckBackendUrlWarning(savedUrl);
+        }
+
+#if UNITY_ANDROID && !UNITY_EDITOR
+        private System.Collections.IEnumerator WaitForCameraPermission()
+        {
+            float timeout = 15f; // Wait up to 15 seconds
+            float elapsed = 0f;
+            while (!UnityEngine.Android.Permission.HasUserAuthorizedPermission(UnityEngine.Android.Permission.Camera) && elapsed < timeout)
+            {
+                yield return new WaitForSeconds(0.5f);
+                elapsed += 0.5f;
+            }
+
+            if (UnityEngine.Android.Permission.HasUserAuthorizedPermission(UnityEngine.Android.Permission.Camera))
+            {
+                SetStatusText("Gotowy do skanowania", StatusType.Ready);
+                InitializeCameraProvider();
+            }
+            else
+            {
+                SetStatusText("Błąd: Wymagane uprawnienie do aparatu.", StatusType.Error);
+            }
+        }
+#endif
+
+        private void OnBackendUrlChanged(string newUrl)
+        {
+            PlayerPrefs.SetString("SavedBackendUrl", newUrl);
+            PlayerPrefs.Save();
+            if (backendClient != null)
+            {
+                backendClient.SetBackendUrl(newUrl);
+            }
+            CheckBackendUrlWarning(newUrl);
+        }
+
+        private void CheckBackendUrlWarning(string url)
+        {
+#if UNITY_ANDROID && !UNITY_EDITOR
+            if (url.Contains("localhost") || url.Contains("127.0.0.1") || url.StartsWith("http://"))
+            {
+                SetStatusText("Warning: Use a public HTTPS backend URL such as Pinggy/ngrok, not localhost.", StatusType.Error);
+            }
+#endif
         }
 
         /// <summary>
@@ -78,7 +157,7 @@ namespace ARHerb.UI
         private void InitializeCameraProvider()
         {
 #if UNITY_EDITOR || UNITY_STANDALONE
-            Debug.Log("[UIManager] Editor mode: using webcam fallback");
+            Debug.Log("Editor mode: using webcam fallback");
             if (arMobileRoot != null) arMobileRoot.SetActive(false);
             if (pcCamera != null) pcCamera.SetActive(true);
 
@@ -94,14 +173,20 @@ namespace ARHerb.UI
                 activeCaptureProvider = gameObject.AddComponent<EditorWebcamCaptureProvider>();
                 Debug.Log("[UIManager] Initialized EditorWebcamCaptureProvider for Editor/PC.");
             }
-#else
-            Debug.Log("[UIManager] Mobile mode: using AR Foundation");
+#elif UNITY_ANDROID
+            Debug.Log("Android mode: using AR Foundation");
             if (arMobileRoot != null) arMobileRoot.SetActive(true);
             if (pcCamera != null) pcCamera.SetActive(false);
 
             // Production C: AR Foundation camera stream
             activeCaptureProvider = gameObject.AddComponent<ARFoundationCaptureProvider>();
             Debug.Log("[UIManager] Initialized ARFoundationCaptureProvider for Mobile Device.");
+#else
+            Debug.Log("Android mode: using AR Foundation");
+            if (arMobileRoot != null) arMobileRoot.SetActive(true);
+            if (pcCamera != null) pcCamera.SetActive(false);
+
+            activeCaptureProvider = gameObject.AddComponent<ARFoundationCaptureProvider>();
 #endif
 
             if (activeCaptureProvider != null)
