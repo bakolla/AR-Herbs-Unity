@@ -47,6 +47,119 @@ namespace ARHerb.Camera
             }
         }
 
+        private void Update()
+        {
+            if (webcamTexture != null && webcamTexture.isPlaying && webcamTexture.didUpdateThisFrame)
+            {
+                AdjustPreviewOrientation();
+            }
+            else if (mockTexture != null && previewUI != null && previewUI.gameObject.activeSelf)
+            {
+                AdjustPreviewOrientationMock();
+            }
+        }
+
+        private void AdjustPreviewOrientation()
+        {
+            if (webcamTexture == null || previewUI == null) return;
+
+            RectTransform rect = previewUI.rectTransform;
+            
+            float screenW = Screen.width;
+            float screenH = Screen.height;
+            
+            if (screenW <= 0 || screenH <= 0) return;
+
+            float texW = webcamTexture.width;
+            float texH = webcamTexture.height;
+            
+            if (texW <= 16 || texH <= 16) return;
+
+            int rotationAngle = webcamTexture.videoRotationAngle;
+            bool isRotated = (rotationAngle == 90 || rotationAngle == 270);
+
+            previewUI.uvRect = new Rect(0, 0, 1, 1);
+
+            float targetWidth;
+            float targetHeight;
+
+            if (isRotated)
+            {
+                float videoAspect = texW / texH;
+                float h = screenW;
+                float w = h * videoAspect;
+                
+                if (w < screenH)
+                {
+                    w = screenH;
+                    h = w / videoAspect;
+                }
+                
+                targetWidth = w;
+                targetHeight = h;
+            }
+            else
+            {
+                float videoAspect = texW / texH;
+                float w = screenW;
+                float h = w / videoAspect;
+                
+                if (h < screenH)
+                {
+                    h = screenH;
+                    w = h * videoAspect;
+                }
+                
+                targetWidth = w;
+                targetHeight = h;
+            }
+
+            float mirrorY = webcamTexture.videoVerticallyMirrored ? -1f : 1f;
+
+            rect.anchorMin = new Vector2(0.5f, 0.5f);
+            rect.anchorMax = new Vector2(0.5f, 0.5f);
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.sizeDelta = new Vector2(targetWidth, targetHeight);
+            rect.anchoredPosition = Vector2.zero;
+            rect.localRotation = Quaternion.Euler(0, 0, -rotationAngle);
+            rect.localScale = new Vector3(1f, mirrorY, 1f);
+        }
+
+        private void AdjustPreviewOrientationMock()
+        {
+            if (mockTexture == null || previewUI == null) return;
+
+            RectTransform rect = previewUI.rectTransform;
+            
+            float screenW = Screen.width;
+            float screenH = Screen.height;
+            
+            if (screenW <= 0 || screenH <= 0) return;
+
+            float texW = mockTexture.width;
+            float texH = mockTexture.height;
+
+            previewUI.uvRect = new Rect(0, 0, 1, 1);
+
+            float videoAspect = texW / texH;
+            float w = screenW;
+            float h = w / videoAspect;
+            
+            if (h < screenH)
+            {
+                h = screenH;
+                w = h * videoAspect;
+            }
+
+            rect.anchorMin = new Vector2(0.5f, 0.5f);
+            rect.anchorMax = new Vector2(0.5f, 0.5f);
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.sizeDelta = new Vector2(w, h);
+            rect.anchoredPosition = Vector2.zero;
+            rect.localRotation = Quaternion.identity;
+            rect.localScale = Vector3.one;
+        }
+
         private Texture2D CreateMockTexture()
         {
             int width = 640;

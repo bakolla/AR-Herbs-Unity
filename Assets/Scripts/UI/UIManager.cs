@@ -24,6 +24,7 @@ namespace ARHerb.UI
 
         [Header("Camera & Preview Elements")]
         [SerializeField] private RawImage cameraPreviewUI;
+        [SerializeField] private RawImage thumbnailPreviewUI;
 #if UNITY_EDITOR || UNITY_STANDALONE
         [Tooltip("If checked, utilizes the TestImageCaptureProvider fallback in Editor instead of WebCamTexture.")]
         [SerializeField] private bool useMockTestImageInEditor = false;
@@ -81,16 +82,33 @@ namespace ARHerb.UI
                 backendUrlInput.onEndEdit.AddListener(OnBackendUrlChanged);
             }
 
+            // Load and save selected language
+            defaultLanguage = PlayerPrefs.GetString("SavedLanguage", "pl");
+            PlayerPrefs.SetString("SavedLanguage", defaultLanguage);
+
+            // Load selected mode index and setup listener
+            if (modeDropdown != null)
+            {
+                int savedMode = PlayerPrefs.GetInt("SavedMode", 0);
+                modeDropdown.value = savedMode;
+                modeDropdown.onValueChanged.RemoveAllListeners();
+                modeDropdown.onValueChanged.AddListener(OnModeChanged);
+            }
+
             // Setup Scan button click listener
             if (scanButton != null)
             {
                 scanButton.onClick.AddListener(OnScanButtonClicked);
             }
 
-            // Hide result panel on start
+            // Hide result panel and thumbnail on start
             if (resultPanel != null)
             {
                 resultPanel.SetActive(false);
+            }
+            if (thumbnailPreviewUI != null)
+            {
+                thumbnailPreviewUI.gameObject.SetActive(false);
             }
 
             SetStatusText("Gotowy do skanowania", StatusType.Ready);
@@ -157,12 +175,21 @@ namespace ARHerb.UI
 #endif
         }
 
+        private void OnModeChanged(int newIndex)
+        {
+            PlayerPrefs.SetInt("SavedMode", newIndex);
+            PlayerPrefs.Save();
+            Debug.Log($"[UIManager] Saved selected mode index: {newIndex}");
+        }
+
         /// <summary>
         /// Selects and instantiates the correct camera provider based on current environment.
         /// </summary>
         private void InitializeCameraProvider()
         {
 #if UNITY_EDITOR || UNITY_STANDALONE
+            Debug.Log("Editor Mobile Preview Mode");
+            Debug.Log($"[EditorPreview] Current Game View aspect: {(float)Screen.width / Screen.height:F3} (Target: 1080x2340 = 0.462)");
             Debug.Log("Editor mode: using webcam fallback");
             if (arMobileRoot != null) arMobileRoot.SetActive(false);
             if (pcCamera != null) pcCamera.SetActive(true);
@@ -210,11 +237,17 @@ namespace ARHerb.UI
 
         public enum StatusType { Ready, Loading, Success, Error }
 
+        private bool isScanning = false;
+
         private void OnScanButtonClicked()
         {
+            if (isScanning) return;
+            isScanning = true;
+
             if (activeCaptureProvider == null)
             {
-                SetStatusText("Błąd: Brak dostawcy aparatu.", StatusType.Error);
+                SetStatusText("Nie udało się pobrać obrazu z kamery.", StatusType.Error);
+                isScanning = false;
                 return;
             }
 
@@ -223,22 +256,42 @@ namespace ARHerb.UI
             {
                 resultPanel.SetActive(false);
             }
+            if (thumbnailPreviewUI != null)
+            {
+                thumbnailPreviewUI.gameObject.SetActive(false);
+            }
 
-            SetStatusText("Aparat: Przechwytywanie kadru...", StatusType.Loading);
+            SetStatusText("Capturing image...", StatusType.Loading);
             SetScanButtonState(false, "CZEKAJ...");
 
-            // Capture the image from the active provider (Editor webcam or AR Foundation camera)
+            // Capture the image from the active provider (Editor webcam or mobile webcam)
             activeCaptureProvider.CaptureFrame(jpegBytes =>
             {
                 if (jpegBytes == null || jpegBytes.Length == 0)
                 {
-                    SetStatusText("Błąd: Nie udało się zapisać zdjęcia z aparatu.", StatusType.Error);
+                    SetStatusText("Nie udało się pobrać obrazu z kamery.", StatusType.Error);
                     SetScanButtonState(true, "SCAN");
+                    isScanning = false;
                     return;
                 }
 
+                // Show dynamic thumbnail preview
+                if (thumbnailPreviewUI != null)
+                {
+                    Texture2D thumbTex = new Texture2D(2, 2);
+                    if (thumbTex.LoadImage(jpegBytes))
+                    {
+                        if (thumbnailPreviewUI.texture != null && thumbnailPreviewUI.texture is Texture2D dynamicTex)
+                        {
+                            Destroy(dynamicTex);
+                        }
+                        thumbnailPreviewUI.texture = thumbTex;
+                        thumbnailPreviewUI.gameObject.SetActive(true);
+                    }
+                }
+
                 string selectedMode = GetSelectedMode();
-                SetStatusText("AI: Analiza i rozpoznawanie...", StatusType.Loading);
+                SetStatusText("Sending to backend...", StatusType.Loading);
 
                 // Call /api/identify endpoint
                 backendClient.IdentifySpecimen(
@@ -247,12 +300,22 @@ namespace ARHerb.UI
                     defaultLanguage,
                     onSuccess: scanResult =>
                     {
+                        SetStatusText("Analyzing...", StatusType.Loading);
                         ProcessIdentifyResult(scanResult, selectedMode);
                     },
                     onFailure: error =>
                     {
-                        SetStatusText("Błąd: Serwer nie odpowiedział. Sprawdź połączenie.", StatusType.Error);
+                        Debug.LogError($"[UIManager] Backend Error: {error}");
+                        if (Application.internetReachability == NetworkReachability.NotReachable)
+                        {
+                            SetStatusText("Brak połączenia z internetem.", StatusType.Error);
+                        }
+                        else
+                        {
+                            SetStatusText("Nie można połączyć się z backendem.", StatusType.Error);
+                        }
                         SetScanButtonState(true, "SCAN");
+                        isScanning = false;
                     }
                 );
             });
@@ -266,8 +329,9 @@ namespace ARHerb.UI
         {
             if (result == null || result.results == null || result.results.Count == 0)
             {
-                SetStatusText("Nie znaleziono dopasowania. Spróbuj zbliżyć aparat.", StatusType.Error);
+                SetStatusText("Nie znaleziono pasującego obiektu. Spróbuj bliżej i w lepszym świetle.", StatusType.Error);
                 SetScanButtonState(true, "SCAN");
+                isScanning = false;
                 return;
             }
 
@@ -281,12 +345,18 @@ namespace ARHerb.UI
 
             float confidenceScore = bestCandidate.score;
 
-            // If the mode is "plants", the identify endpoint returns enrichment as null.
-            // We must call /api/enrich dynamically to get Gemini enrichment.
+            // Immediately display the identification result on the UI
+            DisplayResultUI(commonName, scientificName, confidenceScore, null);
+
             if (mode.ToLower() == "plants")
             {
-                SetStatusText("Gemini AI: Pobieranie ciekawostek i opisu...", StatusType.Loading);
+                SetStatusText("Loading details...", StatusType.Loading);
                 
+                // Show temporary "Loading details..." string in enrichment fields
+                if (descriptionText != null) descriptionText.text = "Loading details...";
+                if (funFactText != null) funFactText.text = "Loading details...";
+                if (edibilityText != null) edibilityText.text = "Status spożywczy: Loading details...";
+
                 List<string> commonNames = bestCandidate.species?.commonNames ?? new List<string>();
 
                 backendClient.EnrichPlant(
@@ -296,15 +366,19 @@ namespace ARHerb.UI
                     onSuccess: enrichRes =>
                     {
                         DisplayResultUI(commonName, scientificName, confidenceScore, enrichRes?.enrichment);
-                        SetStatusText("Rozpoznano pomyślnie!", StatusType.Success);
+                        SetStatusText("Done", StatusType.Success);
                         SetScanButtonState(true, "SCAN");
+                        isScanning = false;
                     },
                     onFailure: error =>
                     {
-                        // Even if enrichment fails, we show the identification name and score.
+                        Debug.LogError($"[UIManager] Enrichment Failure: {error}");
+                        // Keep basic result but display a friendly error/description
                         DisplayResultUI(commonName, scientificName, confidenceScore, null);
-                        SetStatusText($"Zidentyfikowano (brak opisu AI): {error}", StatusType.Success);
+                        if (descriptionText != null) descriptionText.text = "Nie udało się pobrać szczegółów AI.";
+                        SetStatusText("Done", StatusType.Success);
                         SetScanButtonState(true, "SCAN");
+                        isScanning = false;
                     }
                 );
             }
@@ -312,8 +386,9 @@ namespace ARHerb.UI
             {
                 // In other modes (mushrooms, insects, stones), the backend directly packages the enrichment.
                 DisplayResultUI(commonName, scientificName, confidenceScore, result.enrichment);
-                SetStatusText("Rozpoznano pomyślnie!", StatusType.Success);
+                SetStatusText("Done", StatusType.Success);
                 SetScanButtonState(true, "SCAN");
+                isScanning = false;
             }
         }
 
@@ -342,9 +417,9 @@ namespace ARHerb.UI
             }
             else
             {
-                if (descriptionText != null) descriptionText.text = "Brak opisu.";
+                if (descriptionText != null) descriptionText.text = "Brak szczegółowych informacji.";
                 if (funFactText != null) funFactText.text = "Brak ciekawostki.";
-                if (edibilityText != null) edibilityText.text = "Status spożywczy: brak danych.";
+                if (edibilityText != null) edibilityText.text = "Status spożywczy: Brak danych.";
             }
         }
 

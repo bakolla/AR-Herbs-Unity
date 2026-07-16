@@ -53,7 +53,11 @@ public class SetupUI
         GameObject canvasGo = new GameObject("Canvas");
         Canvas canvas = canvasGo.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvasGo.AddComponent<CanvasScaler>().uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        CanvasScaler scaler = canvasGo.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1080, 2340);
+        scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+        scaler.matchWidthOrHeight = 0.5f;
         canvasGo.AddComponent<GraphicRaycaster>();
         Undo.RegisterCreatedObjectUndo(canvasGo, "Create Canvas");
 
@@ -63,7 +67,7 @@ public class SetupUI
         eventSystemGo.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
         Undo.RegisterCreatedObjectUndo(eventSystemGo, "Create EventSystem");
 
-        // UI Camera Preview
+        // UI Camera Preview (parented to Canvas directly to stay fullscreen background)
         GameObject previewGo = new GameObject("CameraPreviewUI", typeof(RawImage));
         previewGo.transform.SetParent(canvasGo.transform, false);
         RawImage preview = previewGo.GetComponent<RawImage>();
@@ -73,8 +77,17 @@ public class SetupUI
         previewRect.sizeDelta = Vector2.zero;
         preview.color = Color.white;
 
+        // SafeArea Container (parented to Canvas, holds all other UI elements)
+        GameObject safeAreaGo = new GameObject("SafeArea", typeof(RectTransform), typeof(ARHerb.UI.SafeAreaHandler));
+        safeAreaGo.transform.SetParent(canvasGo.transform, false);
+        RectTransform safeAreaRect = safeAreaGo.GetComponent<RectTransform>();
+        safeAreaRect.anchorMin = Vector2.zero;
+        safeAreaRect.anchorMax = Vector2.one;
+        safeAreaRect.sizeDelta = Vector2.zero;
+        Undo.RegisterCreatedObjectUndo(safeAreaGo, "Create SafeArea");
+
         // Top Header
-        GameObject topBarGo = CreatePanel(canvasGo.transform, "TopBar", new Vector2(0f, 0.92f), new Vector2(1f, 1f), new Vector2(0f, 0f), new Color(0.04f, 0.05f, 0.06f, 0.85f));
+        GameObject topBarGo = CreatePanel(safeAreaGo.transform, "TopBar", new Vector2(0f, 0.92f), new Vector2(1f, 1f), new Vector2(0f, 0f), new Color(0.04f, 0.05f, 0.06f, 0.85f));
         
         GameObject titleGo = CreateText(topBarGo.transform, "TitleText", "🌿 HERB & FAUNA SCANNER", 22, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
         RectTransform titleRect = titleGo.GetComponent<RectTransform>();
@@ -114,7 +127,7 @@ public class SetupUI
 
         GameObject dropdownGo = DefaultControls.CreateDropdown(uiResources);
         dropdownGo.name = "ModeDropdown";
-        dropdownGo.transform.SetParent(canvasGo.transform, false);
+        dropdownGo.transform.SetParent(safeAreaGo.transform, false);
         Undo.RegisterCreatedObjectUndo(dropdownGo, "Create ModeDropdown");
 
         RectTransform ddRect = dropdownGo.GetComponent<RectTransform>();
@@ -161,7 +174,7 @@ public class SetupUI
 
         // Scan Button (Circular bottom shutter)
         GameObject btnGo = new GameObject("ScanButton", typeof(Image), typeof(Button));
-        btnGo.transform.SetParent(canvasGo.transform, false);
+        btnGo.transform.SetParent(safeAreaGo.transform, false);
         RectTransform btnRect = btnGo.GetComponent<RectTransform>();
         btnRect.anchorMin = new Vector2(0.5f, 0.08f);
         btnRect.anchorMax = new Vector2(0.5f, 0.08f);
@@ -192,7 +205,7 @@ public class SetupUI
         Button scanButton = btnGo.GetComponent<Button>();
 
         // Status Panel (centered above dropdown) with subtle background
-        GameObject statusPanelGo = CreatePanel(canvasGo.transform, "StatusPanel", new Vector2(0.1f, 0.25f), new Vector2(0.9f, 0.29f), Vector2.zero, new Color(0f, 0f, 0f, 0.4f));
+        GameObject statusPanelGo = CreatePanel(safeAreaGo.transform, "StatusPanel", new Vector2(0.1f, 0.25f), new Vector2(0.9f, 0.29f), Vector2.zero, new Color(0f, 0f, 0f, 0.4f));
 
         GameObject statusGo = CreateText(statusPanelGo.transform, "StatusText", "Gotowy do skanowania", 16, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
         RectTransform statusRect = statusGo.GetComponent<RectTransform>();
@@ -202,7 +215,7 @@ public class SetupUI
         Text statusText = statusGo.GetComponent<Text>();
 
         // 4. Result Panel (Bottom Sheet style card)
-        GameObject resPanelGo = CreatePanel(canvasGo.transform, "ResultPanel", new Vector2(0.05f, 0.32f), new Vector2(0.95f, 0.85f), new Vector2(0f, 0f), new Color(0.08f, 0.09f, 0.12f, 0.95f));
+        GameObject resPanelGo = CreatePanel(safeAreaGo.transform, "ResultPanel", new Vector2(0.05f, 0.32f), new Vector2(0.95f, 0.85f), new Vector2(0f, 0f), new Color(0.08f, 0.09f, 0.12f, 0.95f));
         
         // Handle Bar
         GameObject handleGo = CreatePanel(resPanelGo.transform, "HandleBar", new Vector2(0.42f, 0.96f), new Vector2(0.58f, 0.98f), new Vector2(0f, 0f), new Color(0.3f, 0.3f, 0.3f, 0.8f));
@@ -236,8 +249,19 @@ public class SetupUI
         GameObject descGo = CreateText(resPanelGo.transform, "DescriptionText", "Opis rośliny...", 15, TextAnchor.UpperLeft, Color.white);
         RectTransform descRect = descGo.GetComponent<RectTransform>();
         descRect.anchorMin = new Vector2(0.05f, 0.38f);
-        descRect.anchorMax = new Vector2(0.95f, 0.72f);
+        descRect.anchorMax = new Vector2(0.68f, 0.72f);
         descRect.sizeDelta = Vector2.zero;
+
+        // Thumbnail Image
+        GameObject thumbGo = new GameObject("ThumbnailImage", typeof(RawImage));
+        thumbGo.transform.SetParent(resPanelGo.transform, false);
+        RectTransform thumbRect = thumbGo.GetComponent<RectTransform>();
+        thumbRect.anchorMin = new Vector2(0.72f, 0.42f);
+        thumbRect.anchorMax = new Vector2(0.95f, 0.68f);
+        thumbRect.sizeDelta = Vector2.zero;
+        RawImage thumbRaw = thumbGo.GetComponent<RawImage>();
+        thumbRaw.color = Color.white;
+        thumbGo.SetActive(false);
 
         // Fun Fact
         GameObject factGo = CreateText(resPanelGo.transform, "FunFactText", "Ciekawostka...", 14, TextAnchor.UpperLeft, new Color(0.5f, 0.8f, 1f));
@@ -255,7 +279,7 @@ public class SetupUI
         edibRect.sizeDelta = Vector2.zero;
 
         // 4.5 Debug Text Panel for Screen Diagnostics (semi-transparent black panel)
-        GameObject debugPanelGo = CreatePanel(canvasGo.transform, "DebugDiagnosticsPanel", new Vector2(0.1f, 0.45f), new Vector2(0.9f, 0.88f), Vector2.zero, new Color(0f, 0f, 0f, 0.7f));
+        GameObject debugPanelGo = CreatePanel(safeAreaGo.transform, "DebugDiagnosticsPanel", new Vector2(0.1f, 0.45f), new Vector2(0.9f, 0.88f), Vector2.zero, new Color(0f, 0f, 0f, 0.7f));
         GameObject debugTextGo = CreateText(debugPanelGo.transform, "DebugText", "Inicjalizowanie diagnostyki...", 11, TextAnchor.UpperLeft, Color.green, FontStyle.Normal);
         RectTransform debugTextRect = debugTextGo.GetComponent<RectTransform>();
         debugTextRect.anchorMin = Vector2.zero;
@@ -275,6 +299,7 @@ public class SetupUI
         SetRef(uiManager, "backendUrlInput", urlInputField);
         SetRef(uiManager, "modeDropdown", dropdown);
         SetRef(uiManager, "cameraPreviewUI", preview);
+        SetRef(uiManager, "thumbnailPreviewUI", thumbRaw);
         SetRef(uiManager, "resultPanel", resPanelGo);
         SetRef(uiManager, "commonNameText", commGo.GetComponent<Text>());
         SetRef(uiManager, "scientificNameText", sciGo.GetComponent<Text>());
