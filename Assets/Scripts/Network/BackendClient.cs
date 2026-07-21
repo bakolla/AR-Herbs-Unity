@@ -166,6 +166,26 @@ namespace ARHerb.Network
         {
             if (!string.IsNullOrEmpty(newUrl))
             {
+                newUrl = newUrl.Trim();
+
+                // Fix duplicated http(s):// prefixes if user pasted or appended twice
+                int lastHttpsIndex = newUrl.LastIndexOf("https://", StringComparison.OrdinalIgnoreCase);
+                int lastHttpIndex = newUrl.LastIndexOf("http://", StringComparison.OrdinalIgnoreCase);
+
+                if (lastHttpsIndex > 0)
+                {
+                    newUrl = newUrl.Substring(lastHttpsIndex);
+                }
+                else if (lastHttpIndex > 0)
+                {
+                    newUrl = newUrl.Substring(lastHttpIndex);
+                }
+
+                if (newUrl.EndsWith("/"))
+                {
+                    newUrl = newUrl.TrimEnd('/');
+                }
+
                 backendUrl = newUrl;
                 Debug.Log($"[BackendClient] Updated backend URL to: {backendUrl}");
             }

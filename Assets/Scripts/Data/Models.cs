@@ -60,6 +60,7 @@ namespace ARHerb.Data
     [Serializable]
     public class EnrichmentData
     {
+        public string commonName;
         public string edibleStatus; // "edible" | "toxic" | "both" | "unknown"
         public string edibleNote;
         public string funFact;

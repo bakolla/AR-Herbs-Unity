@@ -89,11 +89,94 @@ public class SetupUI
         // Top Header
         GameObject topBarGo = CreatePanel(safeAreaGo.transform, "TopBar", new Vector2(0f, 0.92f), new Vector2(1f, 1f), new Vector2(0f, 0f), new Color(0.04f, 0.05f, 0.06f, 0.85f));
         
-        GameObject titleGo = CreateText(topBarGo.transform, "TitleText", "🌿 HERB & FAUNA SCANNER", 22, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+        GameObject titleGo = CreateText(topBarGo.transform, "TitleText", "🌿 HERB & FAUNA", 18, TextAnchor.MiddleLeft, Color.white, FontStyle.Bold);
         RectTransform titleRect = titleGo.GetComponent<RectTransform>();
-        titleRect.anchorMin = new Vector2(0f, 0.5f);
-        titleRect.anchorMax = new Vector2(1f, 1f);
+        titleRect.anchorMin = new Vector2(0.02f, 0.5f);
+        titleRect.anchorMax = new Vector2(0.46f, 1f);
         titleRect.sizeDelta = Vector2.zero;
+
+        // UI Resources
+        DefaultControls.Resources uiResources = new DefaultControls.Resources();
+        uiResources.standard = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Background.psd");
+        uiResources.background = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/InputFieldBackground.psd");
+        uiResources.inputField = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/InputFieldBackground.psd");
+        uiResources.knob = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
+        uiResources.checkmark = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Checkmark.psd");
+        uiResources.dropdown = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/DropdownArrow.psd");
+        uiResources.mask = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UIMask.psd");
+
+        // Language Overlay Canvas (sortingOrder=1000, always above camera preview)
+        GameObject langOverlayCanvasGo = new GameObject("LanguageOverlayCanvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+        Canvas langCanvas = langOverlayCanvasGo.GetComponent<Canvas>();
+        langCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        langCanvas.sortingOrder = 1000;
+        langCanvas.overrideSorting = true;
+
+        CanvasScaler langCanvasScaler = langOverlayCanvasGo.GetComponent<CanvasScaler>();
+        langCanvasScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        langCanvasScaler.referenceResolution = new Vector2(1080, 2340);
+        langCanvasScaler.matchWidthOrHeight = 0.5f;
+
+        // Language Dropdown (PL / EN / EL)
+        GameObject langDropdownGo = DefaultControls.CreateDropdown(uiResources);
+        langDropdownGo.name = "LanguageDropdown";
+        langDropdownGo.transform.SetParent(langOverlayCanvasGo.transform, false);
+        RectTransform langRect = langDropdownGo.GetComponent<RectTransform>();
+        langRect.anchorMin = new Vector2(0f, 0f);
+        langRect.anchorMax = new Vector2(0f, 0f);
+        langRect.pivot = new Vector2(1f, 1f);
+        langRect.sizeDelta = new Vector2(160f, 60f);
+        langRect.anchoredPosition = new Vector2(-10f, -10f);
+        // anchor to top-right of screen
+        langRect.anchorMin = new Vector2(1f, 1f);
+        langRect.anchorMax = new Vector2(1f, 1f);
+
+        Image langImage = langDropdownGo.GetComponent<Image>();
+        if (langImage != null)
+        {
+            langImage.color = new Color(0.12f, 0.13f, 0.16f, 1f);
+            langImage.raycastTarget = true;
+        }
+
+        Dropdown langDropdown = langDropdownGo.GetComponent<Dropdown>();
+        langDropdown.interactable = true;
+        if (langDropdown.captionText != null)
+        {
+            langDropdown.captionText.color = Color.white;
+            langDropdown.captionText.fontSize = 15;
+            langDropdown.captionText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            langDropdown.captionText.alignment = TextAnchor.MiddleCenter;
+            langDropdown.captionText.raycastTarget = false;
+        }
+
+        // Make all child texts non-raycasting
+        foreach (Text t in langDropdownGo.GetComponentsInChildren<Text>(true))
+        {
+            t.color = Color.white;
+            t.raycastTarget = false;
+        }
+
+        langDropdown.options = new List<Dropdown.OptionData>
+        {
+            new Dropdown.OptionData("PL"),
+            new Dropdown.OptionData("EN"),
+            new Dropdown.OptionData("EL")
+        };
+
+        // History Button
+        GameObject historyBtnGo = new GameObject("HistoryButton", typeof(Image), typeof(Button));
+        historyBtnGo.transform.SetParent(topBarGo.transform, false);
+        RectTransform historyBtnRect = historyBtnGo.GetComponent<RectTransform>();
+        historyBtnRect.anchorMin = new Vector2(0.70f, 0.55f);
+        historyBtnRect.anchorMax = new Vector2(0.97f, 0.92f);
+        historyBtnRect.sizeDelta = Vector2.zero;
+        Image histImg = historyBtnGo.GetComponent<Image>();
+        histImg.color = new Color(0.18f, 0.8f, 0.44f, 0.9f);
+        histImg.raycastTarget = true;
+        GameObject historyBtnTextGo = CreateText(historyBtnGo.transform, "Text", "📜 Historia", 12, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+        historyBtnTextGo.GetComponent<Text>().raycastTarget = false;
+        Button historyButton = historyBtnGo.GetComponent<Button>();
+        historyButton.interactable = true;
 
         // URL Input (like a pill search bar below title)
         GameObject urlGo = new GameObject("BackendUrlInput", typeof(Image), typeof(InputField));
@@ -116,15 +199,6 @@ public class SetupUI
         urlInputField.text = "http://localhost:3001";
 
         // Dropdown (styled dark above scan button)
-        DefaultControls.Resources uiResources = new DefaultControls.Resources();
-        uiResources.standard = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Background.psd");
-        uiResources.background = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/InputFieldBackground.psd");
-        uiResources.inputField = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/InputFieldBackground.psd");
-        uiResources.knob = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
-        uiResources.checkmark = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Checkmark.psd");
-        uiResources.dropdown = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/DropdownArrow.psd");
-        uiResources.mask = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UIMask.psd");
-
         GameObject dropdownGo = DefaultControls.CreateDropdown(uiResources);
         dropdownGo.name = "ModeDropdown";
         dropdownGo.transform.SetParent(safeAreaGo.transform, false);
@@ -204,8 +278,30 @@ public class SetupUI
         btnTextRect.sizeDelta = Vector2.zero;
         Button scanButton = btnGo.GetComponent<Button>();
 
-        // Status Panel (centered above dropdown) with subtle background
+        // Gallery Button (Pick photo from gallery)
+        GameObject galleryBtnGo = new GameObject("GalleryButton", typeof(Image), typeof(Button));
+        galleryBtnGo.transform.SetParent(safeAreaGo.transform, false);
+        RectTransform galleryBtnRect = galleryBtnGo.GetComponent<RectTransform>();
+        galleryBtnRect.anchorMin = new Vector2(0.80f, 0.08f);
+        galleryBtnRect.anchorMax = new Vector2(0.80f, 0.08f);
+        galleryBtnRect.sizeDelta = new Vector2(70f, 70f);
+        galleryBtnRect.anchoredPosition = Vector2.zero;
+
+        Image galleryImg = galleryBtnGo.GetComponent<Image>();
+        galleryImg.sprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
+        galleryImg.color = new Color(0.2f, 0.55f, 0.9f, 0.95f);
+
+        GameObject galleryTxtGo = CreateText(galleryBtnGo.transform, "BtnText", "🖼️", 24, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+        RectTransform galleryTxtRect = galleryTxtGo.GetComponent<RectTransform>();
+        galleryTxtRect.anchorMin = Vector2.zero;
+        galleryTxtRect.anchorMax = Vector2.one;
+        galleryTxtRect.sizeDelta = Vector2.zero;
+        galleryTxtGo.GetComponent<Text>().raycastTarget = false;
+        Button galleryButton = galleryBtnGo.GetComponent<Button>();
+
+        // Status Panel (centered above dropdown) with subtle background and button capability
         GameObject statusPanelGo = CreatePanel(safeAreaGo.transform, "StatusPanel", new Vector2(0.1f, 0.25f), new Vector2(0.9f, 0.29f), Vector2.zero, new Color(0f, 0f, 0f, 0.4f));
+        Button statusBtn = statusPanelGo.AddComponent<Button>();
 
         GameObject statusGo = CreateText(statusPanelGo.transform, "StatusText", "Gotowy do skanowania", 16, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
         RectTransform statusRect = statusGo.GetComponent<RectTransform>();
@@ -220,6 +316,17 @@ public class SetupUI
         // Handle Bar
         GameObject handleGo = CreatePanel(resPanelGo.transform, "HandleBar", new Vector2(0.42f, 0.96f), new Vector2(0.58f, 0.98f), new Vector2(0f, 0f), new Color(0.3f, 0.3f, 0.3f, 0.8f));
         handleGo.GetComponent<Image>().sprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
+
+        // Close Result Button ("X" / Powrót)
+        GameObject closeResBtnGo = new GameObject("CloseResultButton", typeof(Image), typeof(Button));
+        closeResBtnGo.transform.SetParent(resPanelGo.transform, false);
+        RectTransform closeResRect = closeResBtnGo.GetComponent<RectTransform>();
+        closeResRect.anchorMin = new Vector2(0.88f, 0.93f);
+        closeResRect.anchorMax = new Vector2(0.97f, 0.98f);
+        closeResRect.sizeDelta = Vector2.zero;
+        closeResBtnGo.GetComponent<Image>().color = new Color(0.2f, 0.2f, 0.25f, 0.8f);
+        CreateText(closeResBtnGo.transform, "Text", "✕", 14, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+        Button closeResultBtn = closeResBtnGo.GetComponent<Button>();
 
         // Common Name
         GameObject commGo = CreateText(resPanelGo.transform, "CommonNameText", "Nazwa rośliny", 22, TextAnchor.MiddleLeft, new Color(0.18f, 0.8f, 0.44f), FontStyle.Bold);
@@ -266,27 +373,149 @@ public class SetupUI
         // Fun Fact
         GameObject factGo = CreateText(resPanelGo.transform, "FunFactText", "Ciekawostka...", 14, TextAnchor.UpperLeft, new Color(0.5f, 0.8f, 1f));
         RectTransform factRect = factGo.GetComponent<RectTransform>();
-        factRect.anchorMin = new Vector2(0.05f, 0.16f);
-        factRect.anchorMax = new Vector2(0.95f, 0.35f);
+        factRect.anchorMin = new Vector2(0.05f, 0.22f);
+        factRect.anchorMax = new Vector2(0.95f, 0.43f);
         factRect.sizeDelta = Vector2.zero;
 
-        // Edibility status pill
-        GameObject ediblePanelGo = CreatePanel(resPanelGo.transform, "EdibilityPanel", new Vector2(0.05f, 0.03f), new Vector2(0.95f, 0.13f), new Vector2(0f, 0f), new Color(0.15f, 0.2f, 0.15f, 0.9f));
-        GameObject edibGo = CreateText(ediblePanelGo.transform, "EdibilityText", "Status spożywczy: Brak danych", 14, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+        // Location GPS label
+        GameObject locationGo = CreateText(resPanelGo.transform, "ResultGpsLabel", "📍 GPS: Brak danych", 13, TextAnchor.MiddleLeft, new Color(0.8f, 0.9f, 1f), FontStyle.Italic);
+        RectTransform locationRect = locationGo.GetComponent<RectTransform>();
+        locationRect.anchorMin = new Vector2(0.05f, 0.14f);
+        locationRect.anchorMax = new Vector2(0.95f, 0.21f);
+        locationRect.sizeDelta = Vector2.zero;
+
+        // Debug text for MapsButton verification
+        GameObject resDebugGo = CreateText(resPanelGo.transform, "ResultDebugText", "MAP BUTTON EXISTS", 12, TextAnchor.MiddleLeft, Color.yellow, FontStyle.Bold);
+        RectTransform resDebugRect = resDebugGo.GetComponent<RectTransform>();
+        resDebugRect.anchorMin = new Vector2(0.05f, 0.22f);
+        resDebugRect.anchorMax = new Vector2(0.95f, 0.26f);
+        resDebugRect.sizeDelta = Vector2.zero;
+        resDebugGo.GetComponent<Text>().raycastTarget = false;
+
+        // Edibility status pill (Left side of bottom bar)
+        GameObject ediblePanelGo = CreatePanel(resPanelGo.transform, "EdibilityPanel", new Vector2(0.05f, 0.02f), new Vector2(0.53f, 0.12f), new Vector2(0f, 0f), new Color(0.15f, 0.2f, 0.15f, 0.9f));
+        GameObject edibGo = CreateText(ediblePanelGo.transform, "EdibilityText", "Status spożywczy: Brak danych", 11, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
         RectTransform edibRect = edibGo.GetComponent<RectTransform>();
         edibRect.anchorMin = Vector2.zero;
         edibRect.anchorMax = Vector2.one;
         edibRect.sizeDelta = Vector2.zero;
 
-        // 4.5 Debug Text Panel for Screen Diagnostics (semi-transparent black panel)
-        GameObject debugPanelGo = CreatePanel(safeAreaGo.transform, "DebugDiagnosticsPanel", new Vector2(0.1f, 0.45f), new Vector2(0.9f, 0.88f), Vector2.zero, new Color(0f, 0f, 0f, 0.7f));
-        GameObject debugTextGo = CreateText(debugPanelGo.transform, "DebugText", "Inicjalizowanie diagnostyki...", 11, TextAnchor.UpperLeft, Color.green, FontStyle.Normal);
-        RectTransform debugTextRect = debugTextGo.GetComponent<RectTransform>();
-        debugTextRect.anchorMin = Vector2.zero;
-        debugTextRect.anchorMax = Vector2.one;
-        debugTextRect.offsetMin = new Vector2(10f, 10f);
-        debugTextRect.offsetMax = new Vector2(-10f, -10f);
-        Text dText = debugTextGo.GetComponent<Text>();
+        // Open in Maps Button (Right side of bottom bar)
+        GameObject resMapsBtnGo = new GameObject("ResultOpenInMapsButton", typeof(Image), typeof(Button));
+        resMapsBtnGo.transform.SetParent(resPanelGo.transform, false);
+        RectTransform resMapsRect = resMapsBtnGo.GetComponent<RectTransform>();
+        resMapsRect.anchorMin = new Vector2(0.55f, 0.02f);
+        resMapsRect.anchorMax = new Vector2(0.95f, 0.12f);
+        resMapsRect.sizeDelta = Vector2.zero;
+        Image resMapsImg = resMapsBtnGo.GetComponent<Image>();
+        resMapsImg.color = new Color(0.12f, 0.45f, 0.9f, 1.0f);
+        resMapsImg.raycastTarget = true;
+        GameObject resMapsTextGo = CreateText(resMapsBtnGo.transform, "Text", "🗺️ Otwórz w Mapach", 11, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+        resMapsTextGo.GetComponent<Text>().raycastTarget = false;
+        Button resultOpenInMapsBtn = resMapsBtnGo.GetComponent<Button>();
+        resultOpenInMapsBtn.enabled = true;
+
+
+
+        // 4.8 Dedicated History Overlay Canvas (Screen Space Overlay - Sorting Order 9999)
+        GameObject historyOverlayCanvasGo = new GameObject("HistoryOverlayCanvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+        Canvas historyCanvas = historyOverlayCanvasGo.GetComponent<Canvas>();
+        historyCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        historyCanvas.sortingOrder = 9999;
+        historyCanvas.overrideSorting = true;
+
+        CanvasScaler historyScaler = historyOverlayCanvasGo.GetComponent<CanvasScaler>();
+        historyScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        historyScaler.referenceResolution = new Vector2(1080, 2340);
+        historyScaler.matchWidthOrHeight = 0.5f;
+
+        GameObject historyPanelGo = CreatePanel(historyOverlayCanvasGo.transform, "HistoryPanel", new Vector2(0.05f, 0.12f), new Vector2(0.95f, 0.88f), Vector2.zero, new Color(0.05f, 0.05f, 0.07f, 0.98f));
+        historyOverlayCanvasGo.SetActive(false);
+
+        // Header
+        GameObject hTitleGo = CreateText(historyPanelGo.transform, "HistoryTitle", "📜 HISTORIA SKANOWANIA", 20, TextAnchor.MiddleLeft, Color.white, FontStyle.Bold);
+        RectTransform hTitleRect = hTitleGo.GetComponent<RectTransform>();
+        hTitleRect.anchorMin = new Vector2(0.05f, 0.92f);
+        hTitleRect.anchorMax = new Vector2(0.55f, 0.98f);
+        hTitleRect.sizeDelta = Vector2.zero;
+
+        // Debug text for HistoryPanel verification
+        GameObject hDebugGo = CreateText(historyPanelGo.transform, "HistoryDebugText", "HISTORY PANEL OPEN", 11, TextAnchor.MiddleRight, Color.yellow, FontStyle.Bold);
+        RectTransform hDebugRect = hDebugGo.GetComponent<RectTransform>();
+        hDebugRect.anchorMin = new Vector2(0.56f, 0.92f);
+        hDebugRect.anchorMax = new Vector2(0.84f, 0.98f);
+        hDebugRect.sizeDelta = Vector2.zero;
+        hDebugGo.GetComponent<Text>().raycastTarget = false;
+
+        // Close History Button ("X")
+        GameObject closeHistBtnGo = new GameObject("CloseHistoryButton", typeof(Image), typeof(Button));
+        closeHistBtnGo.transform.SetParent(historyPanelGo.transform, false);
+        RectTransform closeHistRect = closeHistBtnGo.GetComponent<RectTransform>();
+        closeHistRect.anchorMin = new Vector2(0.85f, 0.92f);
+        closeHistRect.anchorMax = new Vector2(0.95f, 0.98f);
+        closeHistRect.sizeDelta = Vector2.zero;
+        closeHistBtnGo.GetComponent<Image>().color = new Color(0.8f, 0.2f, 0.2f, 0.8f);
+        CreateText(closeHistBtnGo.transform, "Text", "✕", 16, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+        Button closeHistBtn = closeHistBtnGo.GetComponent<Button>();
+
+        // Separator
+        CreatePanel(historyPanelGo.transform, "HLine", new Vector2(0.03f, 0.91f), new Vector2(0.97f, 0.915f), Vector2.zero, new Color(0.25f, 0.25f, 0.25f, 1f));
+
+        // Scroll View
+        GameObject scrollGo = new GameObject("HistoryScrollView", typeof(RectTransform), typeof(ScrollRect), typeof(Image));
+        scrollGo.transform.SetParent(historyPanelGo.transform, false);
+        RectTransform scrollRectTransform = scrollGo.GetComponent<RectTransform>();
+        scrollRectTransform.anchorMin = new Vector2(0.03f, 0.12f);
+        scrollRectTransform.anchorMax = new Vector2(0.97f, 0.90f);
+        scrollRectTransform.sizeDelta = Vector2.zero;
+        scrollGo.GetComponent<Image>().color = new Color(0.04f, 0.05f, 0.07f, 0.5f);
+        ScrollRect scrollRect = scrollGo.GetComponent<ScrollRect>();
+        scrollRect.horizontal = false;
+        scrollRect.vertical = true;
+
+        // Viewport
+        GameObject viewportGo = new GameObject("Viewport", typeof(RectTransform), typeof(Mask), typeof(Image));
+        viewportGo.transform.SetParent(scrollGo.transform, false);
+        RectTransform viewportRect = viewportGo.GetComponent<RectTransform>();
+        viewportRect.anchorMin = Vector2.zero;
+        viewportRect.anchorMax = Vector2.one;
+        viewportRect.sizeDelta = Vector2.zero;
+        viewportGo.GetComponent<Image>().color = Color.white;
+        Mask mask = viewportGo.GetComponent<Mask>();
+        mask.showMaskGraphic = false;
+        scrollRect.viewport = viewportRect;
+
+        // Content
+        GameObject contentGo = new GameObject("Content", typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
+        contentGo.transform.SetParent(viewportGo.transform, false);
+        RectTransform contentRect = contentGo.GetComponent<RectTransform>();
+        contentRect.anchorMin = new Vector2(0f, 1f);
+        contentRect.anchorMax = new Vector2(1f, 1f);
+        contentRect.pivot = new Vector2(0.5f, 1f);
+        contentRect.sizeDelta = new Vector2(0f, 0f);
+
+        VerticalLayoutGroup vlg = contentGo.GetComponent<VerticalLayoutGroup>();
+        vlg.childControlWidth = true;
+        vlg.childControlHeight = false;
+        vlg.childForceExpandWidth = true;
+        vlg.childForceExpandHeight = false;
+        vlg.spacing = 10f;
+        vlg.padding = new RectOffset(10, 10, 10, 10);
+
+        ContentSizeFitter csf = contentGo.GetComponent<ContentSizeFitter>();
+        csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+        scrollRect.content = contentRect;
+
+        // Bottom Bar (Clear History Button)
+        GameObject clearHistBtnGo = new GameObject("ClearHistoryButton", typeof(Image), typeof(Button));
+        clearHistBtnGo.transform.SetParent(historyPanelGo.transform, false);
+        RectTransform clearHistRect = clearHistBtnGo.GetComponent<RectTransform>();
+        clearHistRect.anchorMin = new Vector2(0.05f, 0.03f);
+        clearHistRect.anchorMax = new Vector2(0.95f, 0.09f);
+        clearHistRect.sizeDelta = Vector2.zero;
+        clearHistBtnGo.GetComponent<Image>().color = new Color(0.6f, 0.15f, 0.15f, 0.9f);
+        CreateText(clearHistBtnGo.transform, "Text", "🗑️ WYCZYŚĆ HISTORIĘ", 14, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+        Button clearHistBtn = clearHistBtnGo.GetComponent<Button>();
 
         // 5. Create AppManager
         GameObject appManagerGo = new GameObject("AppManager");
@@ -301,15 +530,34 @@ public class SetupUI
         SetRef(uiManager, "cameraPreviewUI", preview);
         SetRef(uiManager, "thumbnailPreviewUI", thumbRaw);
         SetRef(uiManager, "resultPanel", resPanelGo);
+        SetRef(uiManager, "languageOverlayCanvas", langCanvas);
+        SetRef(uiManager, "languageDropdown", langDropdown);
+        SetRef(uiManager, "titleText", titleGo.GetComponent<Text>());
+        SetRef(uiManager, "historyButtonText", historyBtnTextGo.GetComponent<Text>());
+        SetRef(uiManager, "historyTitleText", hTitleGo.GetComponent<Text>());
+        SetRef(uiManager, "clearHistoryButtonText", clearHistBtnGo.GetComponentInChildren<Text>());
+        SetRef(uiManager, "historyButton", historyButton);
+        SetRef(uiManager, "historyOverlayCanvas", historyCanvas);
+        SetRef(uiManager, "historyPanel", historyPanelGo);
+        SetRef(uiManager, "closeHistoryButton", closeHistBtn);
+        SetRef(uiManager, "clearHistoryButton", clearHistBtn);
+        SetRef(uiManager, "historyContentContainer", contentGo.transform);
+        SetRef(uiManager, "historyDebugText", hDebugGo.GetComponent<Text>());
         SetRef(uiManager, "commonNameText", commGo.GetComponent<Text>());
         SetRef(uiManager, "scientificNameText", sciGo.GetComponent<Text>());
         SetRef(uiManager, "scoreText", scoreGo.GetComponent<Text>());
         SetRef(uiManager, "descriptionText", descGo.GetComponent<Text>());
         SetRef(uiManager, "funFactText", factGo.GetComponent<Text>());
         SetRef(uiManager, "edibilityText", edibGo.GetComponent<Text>());
+        SetRef(uiManager, "resultGpsLabel", locationGo.GetComponent<Text>());
+        SetRef(uiManager, "resultOpenInMapsButton", resultOpenInMapsBtn);
+        SetRef(uiManager, "resultDebugText", resDebugGo.GetComponent<Text>());
+        Debug.Log("[MapsButton] SetupUI created ResultOpenInMapsButton");
         SetRef(uiManager, "statusMessageText", statusText);
-        SetRef(uiManager, "debugText", dText);
+        SetRef(uiManager, "statusButton", statusBtn);
+        SetRef(uiManager, "closeResultButton", closeResultBtn);
         SetRef(uiManager, "scanButton", scanButton);
+        SetRef(uiManager, "galleryButton", galleryButton);
         SetRef(uiManager, "arMobileRoot", arMobileRoot);
         SetRef(uiManager, "pcCamera", GameObject.Find("Main Camera"));
 

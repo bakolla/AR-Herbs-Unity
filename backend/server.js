@@ -243,6 +243,7 @@ async function enrichPlantWithGemini(scientificName, commonNames, lang = 'en') {
 
 Reply ONLY as valid JSON (no markdown, no extra text) using exactly this structure:
 {
+  "commonName": "common name of this plant in ${targetLanguage}",
   "edibleStatus": "edible" | "toxic" | "both" | "unknown",
   "edibleNote": "one sentence about edibility or toxicity in ${targetLanguage}",
   "funFact": "one interesting fact about this plant in ${targetLanguage} (max 2 sentences)",
@@ -515,9 +516,10 @@ app.post('/api/identify', identifyLimiter, jsonLarge, upload.single('image'), as
     form.append('images', imageBuffer, { filename, contentType: 'image/jpeg' });
     organs.forEach(o => form.append('organs', o));
 
+    const plantnetLang = (lang === 'el') ? 'en' : (lang || 'en');
     const plantnetUrl =
       `https://my-api.plantnet.org/v2/identify/${encodeURIComponent(PLANTNET_PROJECT)}` +
-      `?api-key=${encodeURIComponent(PLANTNET_API_KEY)}&lang=${encodeURIComponent(lang)}&nb-results=3` +
+      `?api-key=${encodeURIComponent(PLANTNET_API_KEY)}&lang=${encodeURIComponent(plantnetLang)}&nb-results=3` +
       // Return reference photos for each match so the app can show the user a
       // real picture of the identified plant (results[].images[].url.{s,m,o}).
       `&include-related-images=true`;
