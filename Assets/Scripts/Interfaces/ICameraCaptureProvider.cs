@@ -21,6 +21,41 @@ namespace ARHerb.Camera
         void CaptureFrame(Action<byte[]> onCaptured);
         
         /// <summary>
+        /// Sets the digital zoom factor (clamped between 1.0f and 3.0f).
+        /// </summary>
+        void SetZoom(float zoomFactor);
+
+        /// <summary>
+        /// Gets the current digital zoom factor.
+        /// </summary>
+        float GetZoom();
+
+        /// <summary>
+        /// Switches between rear and front facing camera.
+        /// </summary>
+        void SwitchCamera();
+
+        /// <summary>
+        /// Returns true if currently using front camera.
+        /// </summary>
+        bool IsFrontCamera();
+
+        /// <summary>
+        /// Returns an array of human-readable device names for all cameras available on the system.
+        /// </summary>
+        string[] GetAvailableCameraDevices();
+
+        /// <summary>
+        /// Gets the index of the currently active camera device.
+        /// </summary>
+        int GetCurrentCameraDeviceIndex();
+
+        /// <summary>
+        /// Selects a specific camera device by index.
+        /// </summary>
+        void SelectCameraDevice(int deviceIndex);
+
+        /// <summary>
         /// Deinitializes and releases all resources/camera locks.
         /// </summary>
         void Release();

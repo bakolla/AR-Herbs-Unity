@@ -15,6 +15,43 @@ namespace ARHerb.Camera
         [SerializeField] private Texture2D testImage;
         
         private RawImage previewUI;
+        private float currentZoomFactor = 1.0f;
+
+        public void SetZoom(float zoomFactor)
+        {
+            currentZoomFactor = Mathf.Clamp(zoomFactor, 1.0f, 3.0f);
+            Debug.Log($"[Zoom] Current level = {currentZoomFactor:F2}x");
+        }
+
+        public float GetZoom()
+        {
+            return currentZoomFactor;
+        }
+
+        public bool IsFrontCamera()
+        {
+            return false;
+        }
+
+        public void SwitchCamera()
+        {
+            Debug.Log("[TestImage] SwitchCamera called.");
+        }
+
+        public string[] GetAvailableCameraDevices()
+        {
+            return new string[] { "Kamera Testowa" };
+        }
+
+        public int GetCurrentCameraDeviceIndex()
+        {
+            return 0;
+        }
+
+        public void SelectCameraDevice(int deviceIndex)
+        {
+            Debug.Log($"[TestImage] SelectCameraDevice({deviceIndex})");
+        }
 
         public void SetTestImage(Texture2D image)
         {

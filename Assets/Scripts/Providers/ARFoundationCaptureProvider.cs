@@ -16,6 +16,43 @@ namespace ARHerb.Camera
     {
         [Header("AR References")]
         [SerializeField] private ARCameraManager cameraManager;
+        private float currentZoomFactor = 1.0f;
+
+        public void SetZoom(float zoomFactor)
+        {
+            currentZoomFactor = Mathf.Clamp(zoomFactor, 1.0f, 3.0f);
+            Debug.Log($"[Zoom] Current level = {currentZoomFactor:F2}x");
+        }
+
+        public float GetZoom()
+        {
+            return currentZoomFactor;
+        }
+
+        public bool IsFrontCamera()
+        {
+            return false;
+        }
+
+        public void SwitchCamera()
+        {
+            Debug.Log("[ARFoundation] SwitchCamera called.");
+        }
+
+        public string[] GetAvailableCameraDevices()
+        {
+            return new string[] { "Kamera AR Foundation" };
+        }
+
+        public int GetCurrentCameraDeviceIndex()
+        {
+            return 0;
+        }
+
+        public void SelectCameraDevice(int deviceIndex)
+        {
+            Debug.Log($"[ARFoundation] SelectCameraDevice({deviceIndex})");
+        }
 
         public void Initialize(RawImage previewTarget)
         {

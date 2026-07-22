@@ -13,10 +13,59 @@ namespace ARHerb.Camera
         private WebCamTexture webcamTexture;
         private Texture2D mockTexture;
         private RawImage previewUI;
+        private float currentZoomFactor = 1.0f;
+
+        public void SetZoom(float zoomFactor)
+        {
+            currentZoomFactor = Mathf.Clamp(zoomFactor, 1.0f, 3.0f);
+            Debug.Log($"[Zoom] Current level = {currentZoomFactor:F2}x");
+            AdjustPreviewOrientation();
+            if (mockTexture != null) AdjustPreviewOrientationMock();
+        }
+
+        public float GetZoom()
+        {
+            return currentZoomFactor;
+        }
+
+        public bool IsFrontCamera()
+        {
+            return false;
+        }
+
+        public void SwitchCamera()
+        {
+            Debug.Log("[EditorWebcam] SwitchCamera called in Editor.");
+        }
+
+        public string[] GetAvailableCameraDevices()
+        {
+            WebCamDevice[] devices = WebCamTexture.devices;
+            if (devices == null || devices.Length == 0) return new string[] { "Kamera Editor (Mock)" };
+            string[] names = new string[devices.Length];
+            for (int i = 0; i < devices.Length; i++)
+            {
+                names[i] = $"📷 Kamera {i + 1} ({devices[i].name})";
+            }
+            return names;
+        }
+
+        public int GetCurrentCameraDeviceIndex()
+        {
+            return 0;
+        }
+
+        public void SelectCameraDevice(int deviceIndex)
+        {
+            Debug.Log($"[EditorWebcam] SelectCameraDevice({deviceIndex}) called");
+        }
 
         public void Initialize(RawImage previewTarget)
         {
             previewUI = previewTarget;
+            currentZoomFactor = 1.0f;
+            Debug.Log("[Zoom] Zoom reset after camera change");
+            Debug.Log($"[Zoom] Current level = {currentZoomFactor:F2}x");
             
             if (WebCamTexture.devices.Length > 0)
             {
@@ -78,7 +127,12 @@ namespace ARHerb.Camera
             int rotationAngle = webcamTexture.videoRotationAngle;
             bool isRotated = (rotationAngle == 90 || rotationAngle == 270);
 
-            previewUI.uvRect = new Rect(0, 0, 1, 1);
+            float uWidth = 1.0f / currentZoomFactor;
+            float uHeight = 1.0f / currentZoomFactor;
+            float uX = (1.0f - uWidth) * 0.5f;
+            float uY = (1.0f - uHeight) * 0.5f;
+
+            previewUI.uvRect = new Rect(uX, uY, uWidth, uHeight);
 
             float targetWidth;
             float targetHeight;

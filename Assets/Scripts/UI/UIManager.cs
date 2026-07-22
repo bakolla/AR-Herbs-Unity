@@ -52,6 +52,16 @@ namespace ARHerb.UI
         private float currentScanLng = 0f;
         private string currentCommonName = "";
 
+        [Header("Zoom UI Elements")]
+        [SerializeField] private Button zoom1xButton;
+        [SerializeField] private Button zoom2xButton;
+        [SerializeField] private GameObject scanningFrame;
+
+        [Header("Flashlight & Camera UI Elements")]
+        [SerializeField] private Button flashlightButton;
+        [SerializeField] private Button switchCameraButton;
+        [SerializeField] private Dropdown cameraDropdown;
+
         [Header("Localization UI Elements")]
         [SerializeField] private Canvas languageOverlayCanvas;
         [SerializeField] private Dropdown languageDropdown;
@@ -132,9 +142,12 @@ namespace ARHerb.UI
                 modeDropdown.onValueChanged.AddListener(OnModeChanged);
             }
 
-            // Guarantee all UI buttons (Scan, Gallery, History, Maps) exist and are setup
+            // Guarantee all UI buttons (Scan, Gallery, History, Maps, Zoom) exist and are setup
             EnsureAllButtonsSetup();
             EnsureLanguageDropdownVisible();
+            EnsureZoomButtonSetup();
+            EnsureCameraControlBarSetup();
+            SetScanningFrameVisible(true);
 
             Debug.Log($"[History] HistoryButton assigned = {(historyButton != null)}");
             Debug.Log($"[History] HistoryPanel assigned = {(historyPanel != null)}");
@@ -344,6 +357,12 @@ namespace ARHerb.UI
             if (activeCaptureProvider != null)
             {
                 activeCaptureProvider.Initialize(cameraPreviewUI);
+                if (activeCaptureProvider is MobileWebcamCaptureProvider mobileProv)
+                {
+                    mobileProv.OnZoomChanged += (z) => UpdateZoomButtonUI();
+                }
+                EnsureZoomButtonSetup();
+                EnsureCameraControlBarSetup();
             }
         }
 
@@ -373,6 +392,7 @@ namespace ARHerb.UI
             {
                 thumbnailPreviewUI.gameObject.SetActive(false);
             }
+            SetScanningFrameVisible(false);
 
             SetStatusText(ARHerb.Localization.LocalizationManager.Get("status_capturing"), StatusType.Loading);
             SetScanButtonState(false, ARHerb.Localization.LocalizationManager.Get("btn_wait"));
@@ -471,6 +491,7 @@ namespace ARHerb.UI
             {
                 thumbnailPreviewUI.gameObject.SetActive(false);
             }
+            SetScanningFrameVisible(false);
 
             lastCapturedJpegBytes = jpegBytes;
 
@@ -704,6 +725,7 @@ namespace ARHerb.UI
             {
                 historyPanel.SetActive(false);
             }
+            SetScanningFrameVisible(true);
             SetStatusText("Gotowy do skanowania", StatusType.Ready);
             SetScanButtonState(true, "SCAN");
             isScanning = false;
@@ -736,6 +758,7 @@ namespace ARHerb.UI
             Debug.Log("[History] OnHistoryButtonClicked called");
 
             SetStatusText("History opened", StatusType.Loading);
+            SetScanningFrameVisible(false);
 
             OpenRuntimeHistoryOverlay();
         }
@@ -853,6 +876,7 @@ namespace ARHerb.UI
                 {
                     Destroy(runtimeHistoryOverlayCanvasGo);
                 }
+                SetScanningFrameVisible(true);
             });
 
             // 6. Content Container (Scroll View)
@@ -1258,6 +1282,7 @@ namespace ARHerb.UI
             {
                 resultPanel.SetActive(true);
             }
+            SetScanningFrameVisible(false);
 
             if (enrichment != null && !string.IsNullOrEmpty(enrichment.commonName))
             {
@@ -1777,6 +1802,797 @@ namespace ARHerb.UI
                 });
 
                 Debug.Log("[Language] visible on Android = true (runtime fallback)");
+            }
+        }
+
+        private void EnsureScanningFrameSetup()
+        {
+            if (scanningFrame == null)
+            {
+                scanningFrame = GameObject.Find("ScanningFrame");
+            }
+
+            if (scanningFrame == null)
+            {
+                Debug.Log("[ScanningFrame] Creating runtime ScanningFrame overlay");
+
+                GameObject parentGo = GameObject.Find("SafeArea");
+                if (parentGo == null) parentGo = GameObject.Find("Canvas");
+
+                if (parentGo != null)
+                {
+                    scanningFrame = new GameObject("ScanningFrame", typeof(RectTransform));
+                    scanningFrame.transform.SetParent(parentGo.transform, false);
+                    RectTransform frameRect = scanningFrame.GetComponent<RectTransform>();
+                    frameRect.anchorMin = new Vector2(0.5f, 0.5f);
+                    frameRect.anchorMax = new Vector2(0.5f, 0.5f);
+                    frameRect.pivot = new Vector2(0.5f, 0.5f);
+                    frameRect.sizeDelta = new Vector2(700f, 700f);
+                    frameRect.anchoredPosition = new Vector2(0f, 60f);
+
+                    CreateCornerBarRuntime(scanningFrame.transform, "TL_H", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(80f, 10f));
+                    CreateCornerBarRuntime(scanningFrame.transform, "TL_V", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(10f, 80f));
+
+                    CreateCornerBarRuntime(scanningFrame.transform, "TR_H", new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(80f, 10f));
+                    CreateCornerBarRuntime(scanningFrame.transform, "TR_V", new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(10f, 80f));
+
+                    CreateCornerBarRuntime(scanningFrame.transform, "BL_H", new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(80f, 10f));
+                    CreateCornerBarRuntime(scanningFrame.transform, "BL_V", new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(10f, 80f));
+
+                    CreateCornerBarRuntime(scanningFrame.transform, "BR_H", new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(80f, 10f));
+                    CreateCornerBarRuntime(scanningFrame.transform, "BR_V", new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(10f, 80f));
+                }
+            }
+        }
+
+        private void CreateCornerBarRuntime(Transform parent, string name, Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot, Vector2 size)
+        {
+            GameObject barGo = new GameObject(name, typeof(Image));
+            barGo.transform.SetParent(parent, false);
+            RectTransform rect = barGo.GetComponent<RectTransform>();
+            rect.anchorMin = anchorMin;
+            rect.anchorMax = anchorMax;
+            rect.pivot = pivot;
+            rect.sizeDelta = size;
+            rect.anchoredPosition = Vector2.zero;
+
+            Image img = barGo.GetComponent<Image>();
+            img.color = Color.white;
+            img.raycastTarget = false;
+        }
+
+        private void SetScanningFrameVisible(bool visible)
+        {
+            EnsureScanningFrameSetup();
+            if (scanningFrame != null)
+            {
+                scanningFrame.SetActive(visible);
+            }
+        }
+
+        private void EnsureZoomButtonSetup()
+        {
+            // Destroy legacy single toggle ZoomButton if it exists
+            GameObject oldSingleZoomBtn = GameObject.Find("ZoomButton");
+            if (oldSingleZoomBtn != null)
+            {
+                Destroy(oldSingleZoomBtn);
+            }
+
+            if (zoom1xButton == null)
+            {
+                GameObject foundBtnGo = GameObject.Find("Zoom1xButton");
+                if (foundBtnGo != null) zoom1xButton = foundBtnGo.GetComponent<Button>();
+            }
+            if (zoom2xButton == null)
+            {
+                GameObject foundBtnGo = GameObject.Find("Zoom2xButton");
+                if (foundBtnGo != null) zoom2xButton = foundBtnGo.GetComponent<Button>();
+            }
+
+            if (zoom1xButton == null || zoom2xButton == null)
+            {
+                Debug.Log("[Zoom] Creating runtime side-by-side ZoomButtons overlay");
+
+                GameObject zoomCanvasGo = GameObject.Find("ZoomOverlayCanvas");
+                if (zoomCanvasGo == null)
+                {
+                    zoomCanvasGo = new GameObject("ZoomOverlayCanvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+                    Canvas c = zoomCanvasGo.GetComponent<Canvas>();
+                    c.renderMode = RenderMode.ScreenSpaceOverlay;
+                    c.sortingOrder = 900;
+                    c.overrideSorting = true;
+
+                    CanvasScaler cs = zoomCanvasGo.GetComponent<CanvasScaler>();
+                    cs.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                    cs.referenceResolution = new Vector2(1080, 2340);
+                    cs.matchWidthOrHeight = 0.5f;
+                }
+
+                if (zoom1xButton == null)
+                {
+                    GameObject btnGo = new GameObject("Zoom1xButton", typeof(Image), typeof(Button));
+                    btnGo.transform.SetParent(zoomCanvasGo.transform, false);
+                    RectTransform rect = btnGo.GetComponent<RectTransform>();
+                    rect.anchorMin = new Vector2(0.5f, 0f);
+                    rect.anchorMax = new Vector2(0.5f, 0f);
+                    rect.pivot = new Vector2(0.5f, 0f);
+                    rect.sizeDelta = new Vector2(90f, 90f);
+                    rect.anchoredPosition = new Vector2(-55f, 360f);
+
+                    Image img = btnGo.GetComponent<Image>();
+                    img.color = new Color(0.18f, 0.8f, 0.44f, 1f);
+                    img.raycastTarget = true;
+
+                    GameObject txtGo = new GameObject("Text", typeof(Text));
+                    txtGo.transform.SetParent(btnGo.transform, false);
+                    RectTransform txtRect = txtGo.GetComponent<RectTransform>();
+                    txtRect.anchorMin = Vector2.zero;
+                    txtRect.anchorMax = Vector2.one;
+                    txtRect.sizeDelta = Vector2.zero;
+
+                    Text txt = txtGo.GetComponent<Text>();
+                    txt.text = "1x";
+                    txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+                    txt.fontSize = 28;
+                    txt.fontStyle = FontStyle.Bold;
+                    txt.alignment = TextAnchor.MiddleCenter;
+                    txt.color = Color.white;
+                    txt.raycastTarget = false;
+
+                    zoom1xButton = btnGo.GetComponent<Button>();
+                }
+
+                if (zoom2xButton == null)
+                {
+                    GameObject btnGo = new GameObject("Zoom2xButton", typeof(Image), typeof(Button));
+                    btnGo.transform.SetParent(zoomCanvasGo.transform, false);
+                    RectTransform rect = btnGo.GetComponent<RectTransform>();
+                    rect.anchorMin = new Vector2(0.5f, 0f);
+                    rect.anchorMax = new Vector2(0.5f, 0f);
+                    rect.pivot = new Vector2(0.5f, 0f);
+                    rect.sizeDelta = new Vector2(90f, 90f);
+                    rect.anchoredPosition = new Vector2(55f, 360f);
+
+                    Image img = btnGo.GetComponent<Image>();
+                    img.color = new Color(0.1f, 0.12f, 0.16f, 0.85f);
+                    img.raycastTarget = true;
+
+                    GameObject txtGo = new GameObject("Text", typeof(Text));
+                    txtGo.transform.SetParent(btnGo.transform, false);
+                    RectTransform txtRect = txtGo.GetComponent<RectTransform>();
+                    txtRect.anchorMin = Vector2.zero;
+                    txtRect.anchorMax = Vector2.one;
+                    txtRect.sizeDelta = Vector2.zero;
+
+                    Text txt = txtGo.GetComponent<Text>();
+                    txt.text = "2x";
+                    txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+                    txt.fontSize = 28;
+                    txt.fontStyle = FontStyle.Bold;
+                    txt.alignment = TextAnchor.MiddleCenter;
+                    txt.color = new Color(0.7f, 0.7f, 0.7f);
+                    txt.raycastTarget = false;
+
+                    zoom2xButton = btnGo.GetComponent<Button>();
+                }
+            }
+
+            if (zoom1xButton != null)
+            {
+                zoom1xButton.onClick.RemoveAllListeners();
+                zoom1xButton.onClick.AddListener(() => OnZoomLevelSelected(1.0f));
+            }
+            if (zoom2xButton != null)
+            {
+                zoom2xButton.onClick.RemoveAllListeners();
+                zoom2xButton.onClick.AddListener(() => OnZoomLevelSelected(2.0f));
+            }
+
+            UpdateZoomButtonUI();
+        }
+
+        private void OnZoomLevelSelected(float targetZoom)
+        {
+            if (activeCaptureProvider == null) return;
+
+            activeCaptureProvider.SetZoom(targetZoom);
+            UpdateZoomButtonUI();
+        }
+
+        private Image cachedZoom1xImg;
+        private Text cachedZoom1xTxt;
+        private Image cachedZoom2xImg;
+        private Text cachedZoom2xTxt;
+        private string lastZoom1xStr = "";
+        private string lastZoom2xStr = "";
+
+        private void UpdateZoomButtonUI()
+        {
+            float currentZoom = (activeCaptureProvider != null) ? activeCaptureProvider.GetZoom() : 1.0f;
+
+            if (zoom1xButton != null)
+            {
+                if (cachedZoom1xImg == null) cachedZoom1xImg = zoom1xButton.GetComponent<Image>();
+                if (cachedZoom1xTxt == null) cachedZoom1xTxt = zoom1xButton.GetComponentInChildren<Text>();
+
+                bool is1xActive = (currentZoom <= 1.2f);
+                string newStr = is1xActive ? $"{currentZoom:F1}x" : "1.0x";
+
+                if (newStr != lastZoom1xStr)
+                {
+                    lastZoom1xStr = newStr;
+                    if (cachedZoom1xImg != null) cachedZoom1xImg.color = is1xActive ? new Color(0.18f, 0.8f, 0.44f, 1f) : new Color(0.1f, 0.12f, 0.16f, 0.85f);
+                    if (cachedZoom1xTxt != null)
+                    {
+                        cachedZoom1xTxt.text = newStr;
+                        cachedZoom1xTxt.color = is1xActive ? Color.white : new Color(0.7f, 0.7f, 0.7f, 1f);
+                    }
+                }
+            }
+
+            if (zoom2xButton != null)
+            {
+                if (cachedZoom2xImg == null) cachedZoom2xImg = zoom2xButton.GetComponent<Image>();
+                if (cachedZoom2xTxt == null) cachedZoom2xTxt = zoom2xButton.GetComponentInChildren<Text>();
+
+                bool is2xActive = (currentZoom > 1.2f);
+                string newStr = is2xActive ? $"{currentZoom:F1}x" : "2.0x";
+
+                if (newStr != lastZoom2xStr)
+                {
+                    lastZoom2xStr = newStr;
+                    if (cachedZoom2xImg != null) cachedZoom2xImg.color = is2xActive ? new Color(0.18f, 0.8f, 0.44f, 1f) : new Color(0.1f, 0.12f, 0.16f, 0.85f);
+                    if (cachedZoom2xTxt != null)
+                    {
+                        cachedZoom2xTxt.text = newStr;
+                        cachedZoom2xTxt.color = is2xActive ? Color.white : new Color(0.7f, 0.7f, 0.7f, 1f);
+                    }
+                }
+            }
+        }
+
+        [SerializeField] private Button cameraSelectButton;
+
+        private void EnsureCameraControlBarSetup()
+        {
+            GameObject cameraBarGo = GameObject.Find("CameraControlBar");
+            if (cameraBarGo == null)
+            {
+                Debug.Log("[CameraUI] Creating runtime CameraControlBar");
+                GameObject safeAreaGo = GameObject.Find("SafeArea");
+                if (safeAreaGo == null) safeAreaGo = GameObject.Find("Canvas");
+
+                if (safeAreaGo != null)
+                {
+                    cameraBarGo = new GameObject("CameraControlBar", typeof(Image));
+                    cameraBarGo.transform.SetParent(safeAreaGo.transform, false);
+                    RectTransform barRect = cameraBarGo.GetComponent<RectTransform>();
+                    barRect.anchorMin = new Vector2(0.03f, 0.86f);
+                    barRect.anchorMax = new Vector2(0.97f, 0.92f);
+                    barRect.sizeDelta = Vector2.zero;
+
+                    Image barImg = cameraBarGo.GetComponent<Image>();
+                    barImg.color = new Color(0.06f, 0.08f, 0.12f, 0.90f);
+                    barImg.raycastTarget = false;
+                }
+            }
+
+            if (cameraBarGo != null)
+            {
+                // Flashlight Button
+                if (flashlightButton == null)
+                {
+                    Transform foundFlash = cameraBarGo.transform.Find("FlashlightButton");
+                    if (foundFlash != null) flashlightButton = foundFlash.GetComponent<Button>();
+                }
+                if (flashlightButton == null)
+                {
+                    GameObject btnGo = new GameObject("FlashlightButton", typeof(Image), typeof(Button));
+                    btnGo.transform.SetParent(cameraBarGo.transform, false);
+                    RectTransform rect = btnGo.GetComponent<RectTransform>();
+                    rect.anchorMin = new Vector2(0.01f, 0.08f);
+                    rect.anchorMax = new Vector2(0.24f, 0.92f);
+                    rect.sizeDelta = Vector2.zero;
+
+                    Image img = btnGo.GetComponent<Image>();
+                    img.color = new Color(0.12f, 0.14f, 0.18f, 0.95f);
+                    img.raycastTarget = true;
+
+                    GameObject txtGo = new GameObject("Text", typeof(Text));
+                    txtGo.transform.SetParent(btnGo.transform, false);
+                    RectTransform txtRect = txtGo.GetComponent<RectTransform>();
+                    txtRect.anchorMin = Vector2.zero;
+                    txtRect.anchorMax = Vector2.one;
+                    txtRect.sizeDelta = Vector2.zero;
+
+                    Text txt = txtGo.GetComponent<Text>();
+                    txt.text = "⚡ OFF";
+                    txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+                    txt.fontSize = 18;
+                    txt.fontStyle = FontStyle.Bold;
+                    txt.alignment = TextAnchor.MiddleCenter;
+                    txt.color = Color.white;
+                    txt.raycastTarget = false;
+
+                    flashlightButton = btnGo.GetComponent<Button>();
+                }
+
+                // Camera Select Button (Center - opens modal picker)
+                if (cameraSelectButton == null)
+                {
+                    Transform foundSelect = cameraBarGo.transform.Find("CameraDropdown");
+                    if (foundSelect == null) foundSelect = cameraBarGo.transform.Find("CameraSelectButton");
+                    if (foundSelect != null) cameraSelectButton = foundSelect.GetComponent<Button>();
+                }
+                if (cameraSelectButton == null)
+                {
+                    GameObject btnGo = new GameObject("CameraSelectButton", typeof(Image), typeof(Button));
+                    btnGo.transform.SetParent(cameraBarGo.transform, false);
+                    RectTransform rect = btnGo.GetComponent<RectTransform>();
+                    rect.anchorMin = new Vector2(0.26f, 0.08f);
+                    rect.anchorMax = new Vector2(0.80f, 0.92f);
+                    rect.sizeDelta = Vector2.zero;
+
+                    Image img = btnGo.GetComponent<Image>();
+                    img.color = new Color(0.12f, 0.14f, 0.18f, 0.95f);
+                    img.raycastTarget = true;
+
+                    GameObject txtGo = new GameObject("Text", typeof(Text));
+                    txtGo.transform.SetParent(btnGo.transform, false);
+                    RectTransform txtRect = txtGo.GetComponent<RectTransform>();
+                    txtRect.anchorMin = Vector2.zero;
+                    txtRect.anchorMax = Vector2.one;
+                    txtRect.sizeDelta = Vector2.zero;
+
+                    Text txt = txtGo.GetComponent<Text>();
+                    txt.text = "📷 Wybierz Kamere ▾";
+                    txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+                    txt.fontSize = 16;
+                    txt.fontStyle = FontStyle.Bold;
+                    txt.alignment = TextAnchor.MiddleCenter;
+                    txt.color = Color.white;
+                    txt.raycastTarget = false;
+
+                    cameraSelectButton = btnGo.GetComponent<Button>();
+                }
+
+                // SwitchCameraButton
+                if (switchCameraButton == null)
+                {
+                    Transform foundSwitch = cameraBarGo.transform.Find("SwitchCameraButton");
+                    if (foundSwitch != null) switchCameraButton = foundSwitch.GetComponent<Button>();
+                }
+                if (switchCameraButton == null)
+                {
+                    GameObject btnGo = new GameObject("SwitchCameraButton", typeof(Image), typeof(Button));
+                    btnGo.transform.SetParent(cameraBarGo.transform, false);
+                    RectTransform rect = btnGo.GetComponent<RectTransform>();
+                    rect.anchorMin = new Vector2(0.82f, 0.08f);
+                    rect.anchorMax = new Vector2(0.99f, 0.92f);
+                    rect.sizeDelta = Vector2.zero;
+
+                    Image img = btnGo.GetComponent<Image>();
+                    img.color = new Color(0.12f, 0.14f, 0.18f, 0.95f);
+                    img.raycastTarget = true;
+
+                    GameObject txtGo = new GameObject("Text", typeof(Text));
+                    txtGo.transform.SetParent(btnGo.transform, false);
+                    RectTransform txtRect = txtGo.GetComponent<RectTransform>();
+                    txtRect.anchorMin = Vector2.zero;
+                    txtRect.anchorMax = Vector2.one;
+                    txtRect.sizeDelta = Vector2.zero;
+
+                    Text txt = txtGo.GetComponent<Text>();
+                    txt.text = "🔄";
+                    txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+                    txt.fontSize = 22;
+                    txt.fontStyle = FontStyle.Bold;
+                    txt.alignment = TextAnchor.MiddleCenter;
+                    txt.color = Color.white;
+                    txt.raycastTarget = false;
+
+                    switchCameraButton = btnGo.GetComponent<Button>();
+                }
+            }
+
+            // Bind listeners
+            if (flashlightButton != null)
+            {
+                flashlightButton.onClick.RemoveAllListeners();
+                flashlightButton.onClick.AddListener(ToggleFlashlight);
+                UpdateFlashlightButtonUI();
+            }
+            if (switchCameraButton != null)
+            {
+                switchCameraButton.onClick.RemoveAllListeners();
+                switchCameraButton.onClick.AddListener(OnSwitchCameraButtonClicked);
+            }
+            if (cameraSelectButton != null)
+            {
+                cameraSelectButton.onClick.RemoveAllListeners();
+                cameraSelectButton.onClick.AddListener(ShowCameraPickerModal);
+            }
+
+            UpdateCameraSelectButtonLabel();
+        }
+
+        private void UpdateCameraSelectButtonLabel()
+        {
+            if (cameraSelectButton == null || activeCaptureProvider == null) return;
+
+            string[] devices = activeCaptureProvider.GetAvailableCameraDevices();
+            int currentIdx = activeCaptureProvider.GetCurrentCameraDeviceIndex();
+
+            Text txt = cameraSelectButton.GetComponentInChildren<Text>();
+            if (txt != null && devices != null && currentIdx >= 0 && currentIdx < devices.Length)
+            {
+                txt.text = devices[currentIdx] + " ▾";
+            }
+        }
+
+        private void ShowCameraPickerModal()
+        {
+            if (activeCaptureProvider == null) return;
+            string[] devices = activeCaptureProvider.GetAvailableCameraDevices();
+            if (devices == null || devices.Length == 0) return;
+
+            GameObject existingOverlay = GameObject.Find("RuntimeCameraOverlayCanvas");
+            if (existingOverlay != null) Destroy(existingOverlay);
+
+            GameObject overlayCanvasGo = new GameObject("RuntimeCameraOverlayCanvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+            Canvas overlayCanvas = overlayCanvasGo.GetComponent<Canvas>();
+            overlayCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            overlayCanvas.sortingOrder = 32767;
+            overlayCanvas.overrideSorting = true;
+
+            CanvasScaler scaler = overlayCanvasGo.GetComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1080, 2340);
+            scaler.matchWidthOrHeight = 0.5f;
+
+            // Semi-transparent dark backdrop
+            GameObject backdropGo = new GameObject("Backdrop", typeof(Image), typeof(Button));
+            backdropGo.transform.SetParent(overlayCanvasGo.transform, false);
+            RectTransform bdRect = backdropGo.GetComponent<RectTransform>();
+            bdRect.anchorMin = Vector2.zero;
+            bdRect.anchorMax = Vector2.one;
+            bdRect.sizeDelta = Vector2.zero;
+
+            Image bdImg = backdropGo.GetComponent<Image>();
+            bdImg.color = new Color(0f, 0f, 0f, 0.70f);
+            bdImg.raycastTarget = true;
+
+            Button bdBtn = backdropGo.GetComponent<Button>();
+            bdBtn.onClick.AddListener(() => Destroy(overlayCanvasGo));
+
+            // Modal dialog container
+            GameObject dialogGo = new GameObject("Dialog", typeof(Image));
+            dialogGo.transform.SetParent(overlayCanvasGo.transform, false);
+            RectTransform dialogRect = dialogGo.GetComponent<RectTransform>();
+            dialogRect.anchorMin = new Vector2(0.08f, 0.22f);
+            dialogRect.anchorMax = new Vector2(0.92f, 0.78f);
+            dialogRect.sizeDelta = Vector2.zero;
+
+            Image dialogImg = dialogGo.GetComponent<Image>();
+            dialogImg.color = new Color(0.08f, 0.10f, 0.14f, 0.98f);
+            dialogImg.raycastTarget = true;
+
+            // Title
+            GameObject titleGo = new GameObject("TitleText", typeof(Text));
+            titleGo.transform.SetParent(dialogGo.transform, false);
+            RectTransform titleRect = titleGo.GetComponent<RectTransform>();
+            titleRect.anchorMin = new Vector2(0.04f, 0.88f);
+            titleRect.anchorMax = new Vector2(0.96f, 0.98f);
+            titleRect.sizeDelta = Vector2.zero;
+
+            Text titleTxt = titleGo.GetComponent<Text>();
+            titleTxt.text = "📷 Wybierz Aparat";
+            titleTxt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            titleTxt.fontSize = 28;
+            titleTxt.fontStyle = FontStyle.Bold;
+            titleTxt.alignment = TextAnchor.MiddleCenter;
+            titleTxt.color = new Color(0.2f, 0.82f, 0.48f, 1f);
+
+            int currentIdx = activeCaptureProvider.GetCurrentCameraDeviceIndex();
+            float availableHeight = 0.72f;
+            float slotHeightRatio = availableHeight / Mathf.Max(devices.Length, 1);
+
+            for (int i = 0; i < devices.Length; i++)
+            {
+                int camIdx = i;
+                GameObject itemBtnGo = new GameObject($"CamBtn_{i}", typeof(Image), typeof(Button));
+                itemBtnGo.transform.SetParent(dialogGo.transform, false);
+                RectTransform itemRect = itemBtnGo.GetComponent<RectTransform>();
+
+                float yTop = 0.86f - (i * slotHeightRatio);
+                float yBottom = yTop - (slotHeightRatio * 0.88f);
+                itemRect.anchorMin = new Vector2(0.04f, Mathf.Max(yBottom, 0.14f));
+                itemRect.anchorMax = new Vector2(0.96f, Mathf.Min(yTop, 0.86f));
+                itemRect.sizeDelta = Vector2.zero;
+
+                Image itemImg = itemBtnGo.GetComponent<Image>();
+                bool isSelected = (i == currentIdx);
+                itemImg.color = isSelected ? new Color(0.18f, 0.55f, 0.30f, 0.98f) : new Color(0.15f, 0.18f, 0.24f, 0.95f);
+                itemImg.raycastTarget = true;
+
+                GameObject itemTxtGo = new GameObject("Text", typeof(Text));
+                itemTxtGo.transform.SetParent(itemBtnGo.transform, false);
+                RectTransform itemTxtRect = itemTxtGo.GetComponent<RectTransform>();
+                itemTxtRect.anchorMin = Vector2.zero;
+                itemTxtRect.anchorMax = Vector2.one;
+                itemTxtRect.sizeDelta = Vector2.zero;
+
+                Text itemTxt = itemTxtGo.GetComponent<Text>();
+                itemTxt.text = devices[i] + (isSelected ? "  ✓" : "");
+                itemTxt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+                itemTxt.fontSize = 20;
+                itemTxt.fontStyle = isSelected ? FontStyle.Bold : FontStyle.Normal;
+                itemTxt.alignment = TextAnchor.MiddleCenter;
+                itemTxt.color = Color.white;
+                itemTxt.raycastTarget = false;
+
+                Button itemBtn = itemBtnGo.GetComponent<Button>();
+                itemBtn.onClick.AddListener(() =>
+                {
+                    Debug.Log($"[CameraPickerModal] Selected camera index {camIdx}: {devices[camIdx]}");
+                    activeCaptureProvider.SelectCameraDevice(camIdx);
+                    UpdateCameraSelectButtonLabel();
+                    UpdateZoomButtonUI();
+                    Destroy(overlayCanvasGo);
+                });
+            }
+
+            // Visible note message required for Android WebCamTexture limitations
+            GameObject noteGo = new GameObject("NoteText", typeof(Text));
+            noteGo.transform.SetParent(dialogGo.transform, false);
+            RectTransform noteRect = noteGo.GetComponent<RectTransform>();
+            noteRect.anchorMin = new Vector2(0.03f, 0.01f);
+            noteRect.anchorMax = new Vector2(0.97f, 0.13f);
+            noteRect.sizeDelta = Vector2.zero;
+
+            Text noteTxt = noteGo.GetComponent<Text>();
+            noteTxt.text = "Some Android devices do not expose every physical lens through Unity WebCamTexture.";
+            noteTxt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            noteTxt.fontSize = 15;
+            noteTxt.fontStyle = FontStyle.Italic;
+            noteTxt.alignment = TextAnchor.MiddleCenter;
+            noteTxt.color = new Color(0.75f, 0.75f, 0.75f, 1f);
+        }
+
+        private void OnSwitchCameraButtonClicked()
+        {
+            if (activeCaptureProvider != null)
+            {
+                Debug.Log("[Camera] Switching camera (rear <-> front)...");
+                activeCaptureProvider.SwitchCamera();
+                UpdateZoomButtonUI();
+                UpdateCameraSelectButtonLabel();
+            }
+        }
+
+        private void OnCameraDropdownChanged(int selectedIndex)
+        {
+            if (activeCaptureProvider == null) return;
+            Debug.Log($"[CameraDropdown] User selected camera index {selectedIndex}");
+            activeCaptureProvider.SelectCameraDevice(selectedIndex);
+            UpdateZoomButtonUI();
+        }
+
+        private bool isFlashlightOn = false;
+
+        private void EnsureFlashlightButtonSetup()
+        {
+            if (flashlightButton == null)
+            {
+                GameObject foundBtnGo = GameObject.Find("FlashlightButton");
+                if (foundBtnGo != null) flashlightButton = foundBtnGo.GetComponent<Button>();
+            }
+
+            if (flashlightButton == null)
+            {
+                Debug.Log("[Flashlight] Creating runtime FlashlightButton in TopBar");
+
+                GameObject topBarGo = GameObject.Find("TopBar");
+                if (topBarGo == null) topBarGo = GameObject.Find("SafeArea");
+                if (topBarGo == null) topBarGo = GameObject.Find("Canvas");
+
+                if (topBarGo != null)
+                {
+                    GameObject btnGo = new GameObject("FlashlightButton", typeof(Image), typeof(Button));
+                    btnGo.transform.SetParent(topBarGo.transform, false);
+                    RectTransform rect = btnGo.GetComponent<RectTransform>();
+
+                    if (topBarGo.name == "TopBar")
+                    {
+                        rect.anchorMin = new Vector2(1f, 0.1f);
+                        rect.anchorMax = new Vector2(1f, 0.1f);
+                        rect.pivot = new Vector2(1f, 0.5f);
+                        rect.sizeDelta = new Vector2(110f, 64f);
+                        rect.anchoredPosition = new Vector2(-96f, 0f);
+                    }
+                    else
+                    {
+                        rect.anchorMin = new Vector2(0.55f, 0.94f);
+                        rect.anchorMax = new Vector2(0.72f, 0.98f);
+                        rect.sizeDelta = Vector2.zero;
+                    }
+
+                    Image img = btnGo.GetComponent<Image>();
+                    img.color = new Color(0.1f, 0.12f, 0.16f, 0.85f);
+                    img.raycastTarget = true;
+
+                    GameObject txtGo = new GameObject("Text", typeof(Text));
+                    txtGo.transform.SetParent(btnGo.transform, false);
+                    RectTransform txtRect = txtGo.GetComponent<RectTransform>();
+                    txtRect.anchorMin = Vector2.zero;
+                    txtRect.anchorMax = Vector2.one;
+                    txtRect.sizeDelta = Vector2.zero;
+
+                    Text txt = txtGo.GetComponent<Text>();
+                    txt.text = "⚡ OFF";
+                    txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+                    txt.fontSize = 20;
+                    txt.fontStyle = FontStyle.Bold;
+                    txt.alignment = TextAnchor.MiddleCenter;
+                    txt.color = Color.white;
+                    txt.raycastTarget = false;
+
+                    flashlightButton = btnGo.GetComponent<Button>();
+                }
+            }
+
+            if (flashlightButton != null)
+            {
+                flashlightButton.onClick.RemoveAllListeners();
+                flashlightButton.onClick.AddListener(ToggleFlashlight);
+                UpdateFlashlightButtonUI();
+            }
+        }
+
+        private void ToggleFlashlight()
+        {
+            isFlashlightOn = !isFlashlightOn;
+            Debug.Log($"[Flashlight] Toggle flashlight = {isFlashlightOn}");
+
+            SetFlashlightState(isFlashlightOn);
+            UpdateFlashlightButtonUI();
+        }
+
+        private void SetFlashlightState(bool enabled)
+        {
+#if UNITY_ANDROID && !UNITY_EDITOR
+            bool success = false;
+
+            // Strategy 1: CameraManager.setTorchMode (Camera2 API)
+            try
+            {
+                using (AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+                using (AndroidJavaObject currentActivity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity"))
+                using (AndroidJavaObject context = currentActivity.Call<AndroidJavaObject>("getApplicationContext"))
+                using (AndroidJavaObject cameraManager = context.Call<AndroidJavaObject>("getSystemService", "camera"))
+                {
+                    string[] cameraIdList = cameraManager.Call<string[]>("getCameraIdList");
+                    if (cameraIdList != null && cameraIdList.Length > 0)
+                    {
+                        foreach (string id in cameraIdList)
+                        {
+                            try
+                            {
+                                using (AndroidJavaObject characteristics = cameraManager.Call<AndroidJavaObject>("getCameraCharacteristics", id))
+                                {
+                                    using (AndroidJavaClass charClass = new AndroidJavaClass("android.hardware.camera2.CameraCharacteristics"))
+                                    using (AndroidJavaObject flashKey = charClass.GetStatic<AndroidJavaObject>("FLASH_INFO_AVAILABLE"))
+                                    using (AndroidJavaObject hasFlashObj = characteristics.Call<AndroidJavaObject>("get", flashKey))
+                                    {
+                                        if (hasFlashObj != null && hasFlashObj.Call<bool>("booleanValue"))
+                                        {
+                                            cameraManager.Call("setTorchMode", id, enabled);
+                                            Debug.Log($"[Flashlight] setTorchMode succeeded on camera id '{id}' (enabled={enabled})");
+                                            success = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            catch (System.Exception innerEx)
+                            {
+                                Debug.LogWarning($"[Flashlight] setTorchMode check failed on camera id '{id}': {innerEx.Message}");
+                            }
+                        }
+
+                        // Fallback: If FLASH_INFO_AVAILABLE key check failed or returned false, try setting torch mode on camera ID "0" or "1" directly
+                        if (!success)
+                        {
+                            for (int i = 0; i < cameraIdList.Length; i++)
+                            {
+                                try
+                                {
+                                    cameraManager.Call("setTorchMode", cameraIdList[i], enabled);
+                                    Debug.Log($"[Flashlight] Direct setTorchMode succeeded on camera id '{cameraIdList[i]}'");
+                                    success = true;
+                                    break;
+                                }
+                                catch {}
+                            }
+                        }
+                    }
+                }
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"[Flashlight] CameraManager strategy failed: {ex.Message}");
+            }
+
+            // Strategy 2: Legacy Camera API fallback if Camera2 strategy failed
+            if (!success)
+            {
+                try
+                {
+                    using (AndroidJavaClass cameraClass = new AndroidJavaClass("android.hardware.Camera"))
+                    {
+                        int numCameras = cameraClass.CallStatic<int>("getNumberOfCameras");
+                        for (int i = 0; i < numCameras; i++)
+                        {
+                            try
+                            {
+                                using (AndroidJavaObject cam = cameraClass.CallStatic<AndroidJavaObject>("open", i))
+                                {
+                                    if (cam != null)
+                                    {
+                                        using (AndroidJavaObject paramsObj = cam.Call<AndroidJavaObject>("getParameters"))
+                                        {
+                                            string mode = enabled ? "torch" : "off";
+                                            paramsObj.Call("setFlashMode", mode);
+                                            cam.Call("setParameters", paramsObj);
+                                            if (enabled)
+                                            {
+                                                cam.Call("startPreview");
+                                            }
+                                            else
+                                            {
+                                                cam.Call("stopPreview");
+                                                cam.Call("release");
+                                            }
+                                            Debug.Log($"[Flashlight] Legacy Camera API succeeded on camera index {i}");
+                                            success = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            catch {}
+                        }
+                    }
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.LogError($"[Flashlight] Legacy Camera strategy failed: {ex.Message}");
+                }
+            }
+#else
+            Debug.Log($"[Flashlight] Editor/Mock mode torch = {enabled}");
+#endif
+        }
+
+        private void UpdateFlashlightButtonUI()
+        {
+            if (flashlightButton != null)
+            {
+                Image img = flashlightButton.GetComponent<Image>();
+                Text txt = flashlightButton.GetComponentInChildren<Text>();
+
+                if (img != null)
+                {
+                    img.color = isFlashlightOn 
+                        ? new Color(0.95f, 0.75f, 0.1f, 1f)  // Bright yellow when ON
+                        : new Color(0.1f, 0.12f, 0.16f, 0.85f); // Dark translucent when OFF
+                }
+                if (txt != null)
+                {
+                    txt.text = isFlashlightOn ? "⚡ ON" : "⚡ OFF";
+                    txt.color = isFlashlightOn ? Color.black : Color.white;
+                }
             }
         }
 

@@ -39,7 +39,7 @@ public class SetupUI
         }
 
         // Clean up existing duplicates
-        string[] oldNames = { "Canvas", "AppManager", "EventSystem", "AR Session", "XR Origin", "AR Session Origin", "ARMobileRoot", "Main Camera" };
+        string[] oldNames = { "Canvas", "AppManager", "EventSystem", "AR Session", "XR Origin", "AR Session Origin", "ARMobileRoot", "Main Camera", "ZoomButton", "ZoomOverlayCanvas", "ScanningFrame", "FlashlightButton", "SwitchCameraButton", "CameraDropdown" };
         foreach (var name in oldNames)
         {
             GameObject oldGo = GameObject.Find(name);
@@ -86,16 +86,171 @@ public class SetupUI
         safeAreaRect.sizeDelta = Vector2.zero;
         Undo.RegisterCreatedObjectUndo(safeAreaGo, "Create SafeArea");
 
-        // Top Header
-        GameObject topBarGo = CreatePanel(safeAreaGo.transform, "TopBar", new Vector2(0f, 0.92f), new Vector2(1f, 1f), new Vector2(0f, 0f), new Color(0.04f, 0.05f, 0.06f, 0.85f));
-        
-        GameObject titleGo = CreateText(topBarGo.transform, "TitleText", "🌿 HERB & FAUNA", 18, TextAnchor.MiddleLeft, Color.white, FontStyle.Bold);
+        // ─── CENTERED SCANNING FRAME (4 Corner Brackets Only) ──────────────────────
+        GameObject scanFrameGo = new GameObject("ScanningFrame", typeof(RectTransform));
+        scanFrameGo.transform.SetParent(safeAreaGo.transform, false);
+        RectTransform frameRect = scanFrameGo.GetComponent<RectTransform>();
+        frameRect.anchorMin = new Vector2(0.5f, 0.5f);
+        frameRect.anchorMax = new Vector2(0.5f, 0.5f);
+        frameRect.pivot = new Vector2(0.5f, 0.5f);
+        frameRect.sizeDelta = new Vector2(700f, 700f); // 65% of 1080 screen width
+        frameRect.anchoredPosition = new Vector2(0f, 60f);
+
+        CreateCornerBar(scanFrameGo.transform, "TL_H", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(80f, 10f));
+        CreateCornerBar(scanFrameGo.transform, "TL_V", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(10f, 80f));
+
+        CreateCornerBar(scanFrameGo.transform, "TR_H", new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(80f, 10f));
+        CreateCornerBar(scanFrameGo.transform, "TR_V", new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(10f, 80f));
+
+        CreateCornerBar(scanFrameGo.transform, "BL_H", new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(80f, 10f));
+        CreateCornerBar(scanFrameGo.transform, "BL_V", new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(10f, 80f));
+
+        CreateCornerBar(scanFrameGo.transform, "BR_H", new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(80f, 10f));
+        CreateCornerBar(scanFrameGo.transform, "BR_V", new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(10f, 80f));
+
+        // ─── TOP BAR ───────────────────────────────────────────────────────────────
+        // TopBar: thin strip at top 8% of screen
+        GameObject topBarGo = CreatePanel(safeAreaGo.transform, "TopBar",
+            new Vector2(0f, 0.93f), new Vector2(1f, 1.0f),
+            Vector2.zero, new Color(0.04f, 0.05f, 0.07f, 0.92f));
+
+        // App title centered
+        GameObject titleGo = CreateText(topBarGo.transform, "TitleText", "🌿 HERB & FAUNA",
+            28, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
         RectTransform titleRect = titleGo.GetComponent<RectTransform>();
-        titleRect.anchorMin = new Vector2(0.02f, 0.5f);
-        titleRect.anchorMax = new Vector2(0.46f, 1f);
+        titleRect.anchorMin = new Vector2(0.15f, 0.1f);
+        titleRect.anchorMax = new Vector2(0.85f, 0.9f);
         titleRect.sizeDelta = Vector2.zero;
 
-        // UI Resources
+        // Compact History button — top-left corner
+        GameObject historyBtnGo = new GameObject("HistoryButton", typeof(Image), typeof(Button));
+        historyBtnGo.transform.SetParent(topBarGo.transform, false);
+        RectTransform historyBtnRect = historyBtnGo.GetComponent<RectTransform>();
+        historyBtnRect.anchorMin = new Vector2(0.01f, 0.1f);
+        historyBtnRect.anchorMax = new Vector2(0.01f, 0.1f);
+        historyBtnRect.pivot = new Vector2(0f, 0.5f);
+        historyBtnRect.sizeDelta = new Vector2(140f, 64f);
+        historyBtnRect.anchoredPosition = new Vector2(8f, 0f);
+        Image histImg = historyBtnGo.GetComponent<Image>();
+        histImg.color = new Color(0.18f, 0.55f, 0.3f, 0.95f);
+        histImg.raycastTarget = true;
+        GameObject historyBtnTextGo = CreateText(historyBtnGo.transform, "Text", "📜 Historia",
+            20, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+        historyBtnTextGo.GetComponent<Text>().raycastTarget = false;
+        Button historyButton = historyBtnGo.GetComponent<Button>();
+        historyButton.interactable = true;
+
+        // Settings button (top-right) — hides URL input
+        GameObject settingsBtnGo = new GameObject("SettingsButton", typeof(Image), typeof(Button));
+        settingsBtnGo.transform.SetParent(topBarGo.transform, false);
+        RectTransform settingsBtnRect = settingsBtnGo.GetComponent<RectTransform>();
+        settingsBtnRect.anchorMin = new Vector2(1f, 0.1f);
+        settingsBtnRect.anchorMax = new Vector2(1f, 0.1f);
+        settingsBtnRect.pivot = new Vector2(1f, 0.5f);
+        settingsBtnRect.sizeDelta = new Vector2(80f, 64f);
+        settingsBtnRect.anchoredPosition = new Vector2(-8f, 0f);
+        settingsBtnGo.GetComponent<Image>().color = new Color(0.2f, 0.22f, 0.28f, 0.9f);
+        GameObject settingsTxtGo = CreateText(settingsBtnGo.transform, "Text", "⚙️",
+            26, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+        settingsTxtGo.GetComponent<Text>().raycastTarget = false;
+
+        // ─── CAMERA CONTROL BAR (Floating below TopBar) ───────────────────────
+        GameObject cameraControlBarGo = new GameObject("CameraControlBar", typeof(Image));
+        cameraControlBarGo.transform.SetParent(safeAreaGo.transform, false);
+        RectTransform cameraBarRect = cameraControlBarGo.GetComponent<RectTransform>();
+        cameraBarRect.anchorMin = new Vector2(0.03f, 0.86f);
+        cameraBarRect.anchorMax = new Vector2(0.97f, 0.92f);
+        cameraBarRect.sizeDelta = Vector2.zero;
+        Image cameraBarImg = cameraControlBarGo.GetComponent<Image>();
+        cameraBarImg.color = new Color(0.06f, 0.08f, 0.12f, 0.90f);
+        cameraBarImg.raycastTarget = false;
+
+        // Flashlight Button (Left)
+        GameObject flashlightBtnGo = new GameObject("FlashlightButton", typeof(Image), typeof(Button));
+        flashlightBtnGo.transform.SetParent(cameraControlBarGo.transform, false);
+        RectTransform flashBtnRect = flashlightBtnGo.GetComponent<RectTransform>();
+        flashBtnRect.anchorMin = new Vector2(0.01f, 0.08f);
+        flashBtnRect.anchorMax = new Vector2(0.24f, 0.92f);
+        flashBtnRect.sizeDelta = Vector2.zero;
+        flashlightBtnGo.GetComponent<Image>().color = new Color(0.12f, 0.14f, 0.18f, 0.95f);
+        flashlightBtnGo.GetComponent<Image>().raycastTarget = true;
+        GameObject flashTxtGo = CreateText(flashlightBtnGo.transform, "Text", "⚡ OFF",
+            18, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+        flashTxtGo.GetComponent<Text>().raycastTarget = false;
+        Button flashlightButton = flashlightBtnGo.GetComponent<Button>();
+
+        // Camera Selector Dropdown (Center)
+        GameObject cameraDropdownGo = new GameObject("CameraDropdown", typeof(Image), typeof(Dropdown));
+        cameraDropdownGo.transform.SetParent(cameraControlBarGo.transform, false);
+        RectTransform camDropRect = cameraDropdownGo.GetComponent<RectTransform>();
+        camDropRect.anchorMin = new Vector2(0.26f, 0.08f);
+        camDropRect.anchorMax = new Vector2(0.80f, 0.92f);
+        camDropRect.sizeDelta = Vector2.zero;
+        cameraDropdownGo.GetComponent<Image>().color = new Color(0.12f, 0.14f, 0.18f, 0.95f);
+        cameraDropdownGo.GetComponent<Image>().raycastTarget = true;
+        GameObject camDropTxtGo = CreateText(cameraDropdownGo.transform, "Label", "📷 Kamera ▾",
+            17, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+        Text camDropTxt = camDropTxtGo.GetComponent<Text>();
+        camDropTxt.raycastTarget = false;
+        Dropdown cameraDropdown = cameraDropdownGo.GetComponent<Dropdown>();
+        cameraDropdown.captionText = camDropTxt;
+
+        // Switch Camera Button (Right)
+        GameObject switchCamBtnGo = new GameObject("SwitchCameraButton", typeof(Image), typeof(Button));
+        switchCamBtnGo.transform.SetParent(cameraControlBarGo.transform, false);
+        RectTransform switchCamBtnRect = switchCamBtnGo.GetComponent<RectTransform>();
+        switchCamBtnRect.anchorMin = new Vector2(0.82f, 0.08f);
+        switchCamBtnRect.anchorMax = new Vector2(0.99f, 0.92f);
+        switchCamBtnRect.sizeDelta = Vector2.zero;
+        switchCamBtnGo.GetComponent<Image>().color = new Color(0.12f, 0.14f, 0.18f, 0.95f);
+        switchCamBtnGo.GetComponent<Image>().raycastTarget = true;
+        GameObject switchCamTxtGo = CreateText(switchCamBtnGo.transform, "Text", "🔄",
+            22, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+        switchCamTxtGo.GetComponent<Text>().raycastTarget = false;
+        Button switchCameraButton = switchCamBtnGo.GetComponent<Button>();
+
+        // ─── SETTINGS PANEL (hidden by default, shows URL) ─────────────────────────
+        GameObject settingsPanelGo = CreatePanel(safeAreaGo.transform, "SettingsPanel",
+            new Vector2(0.02f, 0.85f), new Vector2(0.98f, 0.93f),
+            Vector2.zero, new Color(0.08f, 0.1f, 0.14f, 0.97f));
+        settingsPanelGo.SetActive(false);
+
+        GameObject settingsLabelGo = CreateText(settingsPanelGo.transform, "SettingsLabel",
+            "Backend URL:", 22, TextAnchor.MiddleLeft, new Color(0.7f, 0.7f, 0.7f));
+        RectTransform settingsLabelRect = settingsLabelGo.GetComponent<RectTransform>();
+        settingsLabelRect.anchorMin = new Vector2(0.02f, 0.55f);
+        settingsLabelRect.anchorMax = new Vector2(0.3f, 0.95f);
+        settingsLabelRect.sizeDelta = Vector2.zero;
+
+        // URL Input field
+        GameObject urlGo = new GameObject("BackendUrlInput", typeof(Image), typeof(InputField));
+        urlGo.transform.SetParent(settingsPanelGo.transform, false);
+        RectTransform urlRect = urlGo.GetComponent<RectTransform>();
+        urlRect.anchorMin = new Vector2(0.32f, 0.1f);
+        urlRect.anchorMax = new Vector2(0.98f, 0.9f);
+        urlRect.sizeDelta = Vector2.zero;
+        urlGo.GetComponent<Image>().color = new Color(0.15f, 0.17f, 0.22f, 0.9f);
+
+        GameObject urlTextGo = CreateText(urlGo.transform, "Text", "http://localhost:3001",
+            20, TextAnchor.MiddleLeft, Color.white);
+        RectTransform urlTextRect = urlTextGo.GetComponent<RectTransform>();
+        urlTextRect.anchorMin = Vector2.zero;
+        urlTextRect.anchorMax = Vector2.one;
+        urlTextRect.offsetMin = new Vector2(15f, 5f);
+        urlTextRect.offsetMax = new Vector2(-15f, -5f);
+
+        InputField urlInputField = urlGo.GetComponent<InputField>();
+        urlInputField.textComponent = urlTextGo.GetComponent<Text>();
+        urlInputField.text = "http://localhost:3001";
+
+        // Wire Settings button toggle
+        Button settingsBtn = settingsBtnGo.GetComponent<Button>();
+        settingsBtn.onClick.AddListener(() =>
+        {
+            settingsPanelGo.SetActive(!settingsPanelGo.activeSelf);
+        });
+
+        // ─── UI RESOURCES (needed for DefaultControls) ───────────────────────────
         DefaultControls.Resources uiResources = new DefaultControls.Resources();
         uiResources.standard = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Background.psd");
         uiResources.background = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/InputFieldBackground.psd");
@@ -104,6 +259,273 @@ public class SetupUI
         uiResources.checkmark = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Checkmark.psd");
         uiResources.dropdown = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/DropdownArrow.psd");
         uiResources.mask = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UIMask.psd");
+
+        // ─── MODE DROPDOWN ────────────────────────────────────────────────────────
+        // Centered above scan button, at bottom 20-27% of screen
+        GameObject dropdownGo = DefaultControls.CreateDropdown(uiResources);
+        dropdownGo.name = "ModeDropdown";
+        dropdownGo.transform.SetParent(safeAreaGo.transform, false);
+        Undo.RegisterCreatedObjectUndo(dropdownGo, "Create ModeDropdown");
+
+        RectTransform ddRect = dropdownGo.GetComponent<RectTransform>();
+        ddRect.anchorMin = new Vector2(0.5f, 0f);
+        ddRect.anchorMax = new Vector2(0.5f, 0f);
+        ddRect.pivot = new Vector2(0.5f, 0f);
+        ddRect.sizeDelta = new Vector2(480f, 72f);
+        ddRect.anchoredPosition = new Vector2(0f, 270f); // above scan button
+
+        Image ddImage = dropdownGo.GetComponent<Image>();
+        if (ddImage != null) ddImage.color = new Color(0.1f, 0.12f, 0.16f, 0.97f);
+
+        Dropdown dropdown = dropdownGo.GetComponent<Dropdown>();
+        if (dropdown.captionText != null)
+        {
+            dropdown.captionText.color = Color.white;
+            dropdown.captionText.fontSize = 26;
+            dropdown.captionText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            dropdown.captionText.alignment = TextAnchor.MiddleCenter;
+        }
+
+        Image arrowImg = dropdownGo.transform.Find("Arrow")?.GetComponent<Image>();
+        if (arrowImg != null) arrowImg.color = Color.white;
+
+        if (dropdown.template != null)
+        {
+            Image templateImg = dropdown.template.GetComponent<Image>();
+            if (templateImg != null) templateImg.color = new Color(0.1f, 0.12f, 0.16f, 0.98f);
+
+            Text itemText = dropdown.template.GetComponentInChildren<Text>(true);
+            if (itemText != null)
+            {
+                itemText.color = Color.white;
+                itemText.fontSize = 24;
+                itemText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            }
+        }
+
+        dropdown.options = new List<Dropdown.OptionData>
+        {
+            new Dropdown.OptionData("🌿 Rośliny"),
+            new Dropdown.OptionData("🍄 Grzyby"),
+            new Dropdown.OptionData("🐛 Owady"),
+            new Dropdown.OptionData("🪨 Kamienie")
+        };
+
+        // ─── SCAN BUTTON (large circular shutter) ────────────────────────────────
+        GameObject btnGo = new GameObject("ScanButton", typeof(Image), typeof(Button));
+        btnGo.transform.SetParent(safeAreaGo.transform, false);
+        RectTransform btnRect = btnGo.GetComponent<RectTransform>();
+        btnRect.anchorMin = new Vector2(0.5f, 0f);
+        btnRect.anchorMax = new Vector2(0.5f, 0f);
+        btnRect.pivot = new Vector2(0.5f, 0f);
+        btnRect.sizeDelta = new Vector2(200f, 200f);
+        btnRect.anchoredPosition = new Vector2(0f, 40f);
+
+        Image btnImg = btnGo.GetComponent<Image>();
+        btnImg.sprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
+        btnImg.color = new Color(0.18f, 0.8f, 0.44f, 1f);
+
+        // Outer ring
+        GameObject ringGo = new GameObject("OuterRing", typeof(Image));
+        ringGo.transform.SetParent(btnGo.transform, false);
+        RectTransform ringRect = ringGo.GetComponent<RectTransform>();
+        ringRect.anchorMin = Vector2.zero;
+        ringRect.anchorMax = Vector2.one;
+        ringRect.sizeDelta = new Vector2(20f, 20f);
+        Image ringImg = ringGo.GetComponent<Image>();
+        ringImg.sprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
+        ringImg.color = new Color(1f, 1f, 1f, 0.25f);
+        ringImg.raycastTarget = false;
+
+        GameObject btnTextGo = CreateText(btnGo.transform, "BtnText", "SCAN",
+            30, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+        RectTransform btnTextRect = btnTextGo.GetComponent<RectTransform>();
+        btnTextRect.anchorMin = Vector2.zero;
+        btnTextRect.anchorMax = Vector2.one;
+        btnTextRect.sizeDelta = Vector2.zero;
+        btnTextGo.GetComponent<Text>().raycastTarget = false;
+        Button scanButton = btnGo.GetComponent<Button>();
+
+        // ─── GALLERY BUTTON (labeled pill next to scan) ──────────────────────────
+        GameObject galleryBtnGo = new GameObject("GalleryButton", typeof(Image), typeof(Button));
+        galleryBtnGo.transform.SetParent(safeAreaGo.transform, false);
+        RectTransform galleryBtnRect = galleryBtnGo.GetComponent<RectTransform>();
+        galleryBtnRect.anchorMin = new Vector2(1f, 0f);
+        galleryBtnRect.anchorMax = new Vector2(1f, 0f);
+        galleryBtnRect.pivot = new Vector2(1f, 0f);
+        galleryBtnRect.sizeDelta = new Vector2(180f, 80f);
+        galleryBtnRect.anchoredPosition = new Vector2(-24f, 100f);
+
+        Image galleryImg = galleryBtnGo.GetComponent<Image>();
+        galleryImg.color = new Color(0.15f, 0.45f, 0.85f, 0.95f);
+        galleryImg.raycastTarget = true;
+
+        GameObject galleryTxtGo = CreateText(galleryBtnGo.transform, "BtnText", "🖼️ Galeria",
+            24, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+        RectTransform galleryTxtRect = galleryTxtGo.GetComponent<RectTransform>();
+        galleryTxtRect.anchorMin = Vector2.zero;
+        galleryTxtRect.anchorMax = Vector2.one;
+        galleryTxtRect.sizeDelta = Vector2.zero;
+        galleryTxtGo.GetComponent<Text>().raycastTarget = false;
+        Button galleryButton = galleryBtnGo.GetComponent<Button>();
+
+        // ─── STATUS TEXT (above dropdown) ────────────────────────────────────────
+        GameObject statusPanelGo = CreatePanel(safeAreaGo.transform, "StatusPanel",
+            new Vector2(0.05f, 0f), new Vector2(0.95f, 0f),
+            Vector2.zero, new Color(0f, 0f, 0f, 0.5f));
+        RectTransform statusPanelRect = statusPanelGo.GetComponent<RectTransform>();
+        statusPanelRect.anchorMin = new Vector2(0.05f, 0f);
+        statusPanelRect.anchorMax = new Vector2(0.95f, 0f);
+        statusPanelRect.pivot = new Vector2(0.5f, 0f);
+        statusPanelRect.sizeDelta = new Vector2(0f, 60f);
+        statusPanelRect.anchoredPosition = new Vector2(0f, 350f);
+        Button statusBtn = statusPanelGo.AddComponent<Button>();
+
+        GameObject statusGo = CreateText(statusPanelGo.transform, "StatusText",
+            "Gotowy do skanowania", 24, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+        RectTransform statusRect = statusGo.GetComponent<RectTransform>();
+        statusRect.anchorMin = Vector2.zero;
+        statusRect.anchorMax = Vector2.one;
+        statusRect.sizeDelta = Vector2.zero;
+        Text statusText = statusGo.GetComponent<Text>();
+
+        // ─── RESULT PANEL (bottom sheet, 45% screen height) ───────────────────────
+        // Anchored from bottom, covering bottom 45%
+        GameObject resPanelGo = new GameObject("ResultPanel", typeof(Image), typeof(RectTransform));
+        resPanelGo.transform.SetParent(safeAreaGo.transform, false);
+        RectTransform resPanelRect = resPanelGo.GetComponent<RectTransform>();
+        resPanelRect.anchorMin = new Vector2(0f, 0f);
+        resPanelRect.anchorMax = new Vector2(1f, 0.47f);
+        resPanelRect.offsetMin = Vector2.zero;
+        resPanelRect.offsetMax = Vector2.zero;
+        Image resPanelImg = resPanelGo.GetComponent<Image>();
+        resPanelImg.color = new Color(0.07f, 0.08f, 0.11f, 0.98f);
+
+        // Handle bar
+        GameObject handleGo = CreatePanel(resPanelGo.transform, "HandleBar",
+            new Vector2(0.40f, 0.975f), new Vector2(0.60f, 0.993f),
+            Vector2.zero, new Color(0.35f, 0.35f, 0.38f, 0.8f));
+        handleGo.GetComponent<Image>().sprite =
+            AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
+
+        // Close button (top-right of result panel)
+        GameObject closeResBtnGo = new GameObject("CloseResultButton", typeof(Image), typeof(Button));
+        closeResBtnGo.transform.SetParent(resPanelGo.transform, false);
+        RectTransform closeResRect = closeResBtnGo.GetComponent<RectTransform>();
+        closeResRect.anchorMin = new Vector2(1f, 1f);
+        closeResRect.anchorMax = new Vector2(1f, 1f);
+        closeResRect.pivot = new Vector2(1f, 1f);
+        closeResRect.sizeDelta = new Vector2(80f, 70f);
+        closeResRect.anchoredPosition = new Vector2(-8f, -4f);
+        closeResBtnGo.GetComponent<Image>().color = new Color(0.22f, 0.22f, 0.28f, 0.9f);
+        CreateText(closeResBtnGo.transform, "Text", "✕", 28, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+        Button closeResultBtn = closeResBtnGo.GetComponent<Button>();
+
+        // ── Common name (large, top-left of result panel) ──
+        GameObject commGo = CreateText(resPanelGo.transform, "CommonNameText", "Nazwa rośliny",
+            36, TextAnchor.UpperLeft, new Color(0.22f, 0.85f, 0.5f), FontStyle.Bold);
+        RectTransform commRect = commGo.GetComponent<RectTransform>();
+        commRect.anchorMin = new Vector2(0.04f, 0.82f);
+        commRect.anchorMax = new Vector2(0.72f, 0.97f);
+        commRect.sizeDelta = Vector2.zero;
+
+        // ── Confidence badge (top-right) ──
+        GameObject scoreBadgeGo = CreatePanel(resPanelGo.transform, "ScoreBadge",
+            new Vector2(0.74f, 0.86f), new Vector2(0.96f, 0.97f),
+            Vector2.zero, new Color(0.18f, 0.55f, 0.18f, 0.85f));
+        GameObject scoreGo = CreateText(scoreBadgeGo.transform, "ScoreText", "100%",
+            26, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+        RectTransform scoreRect = scoreGo.GetComponent<RectTransform>();
+        scoreRect.anchorMin = Vector2.zero;
+        scoreRect.anchorMax = Vector2.one;
+        scoreRect.sizeDelta = Vector2.zero;
+
+        // ── Scientific name ──
+        GameObject sciGo = CreateText(resPanelGo.transform, "ScientificNameText", "Scientific Name",
+            24, TextAnchor.UpperLeft, new Color(0.65f, 0.68f, 0.75f), FontStyle.Italic);
+        RectTransform sciRect = sciGo.GetComponent<RectTransform>();
+        sciRect.anchorMin = new Vector2(0.04f, 0.74f);
+        sciRect.anchorMax = new Vector2(0.96f, 0.83f);
+        sciRect.sizeDelta = Vector2.zero;
+
+        // ── Separator ──
+        CreatePanel(resPanelGo.transform, "Line",
+            new Vector2(0.04f, 0.725f), new Vector2(0.96f, 0.732f),
+            Vector2.zero, new Color(0.22f, 0.22f, 0.28f, 1f));
+
+        // ── Description (left ~60%) ──
+        GameObject descGo = CreateText(resPanelGo.transform, "DescriptionText", "Opis rośliny...",
+            22, TextAnchor.UpperLeft, new Color(0.88f, 0.88f, 0.88f));
+        RectTransform descRect = descGo.GetComponent<RectTransform>();
+        descRect.anchorMin = new Vector2(0.04f, 0.44f);
+        descRect.anchorMax = new Vector2(0.62f, 0.71f);
+        descRect.sizeDelta = Vector2.zero;
+
+        // ── Thumbnail (right side, upper half) ──
+        GameObject thumbGo = new GameObject("ThumbnailImage", typeof(RawImage));
+        thumbGo.transform.SetParent(resPanelGo.transform, false);
+        RectTransform thumbRect = thumbGo.GetComponent<RectTransform>();
+        thumbRect.anchorMin = new Vector2(0.65f, 0.46f);
+        thumbRect.anchorMax = new Vector2(0.96f, 0.71f);
+        thumbRect.sizeDelta = Vector2.zero;
+        RawImage thumbRaw = thumbGo.GetComponent<RawImage>();
+        thumbRaw.color = Color.white;
+        thumbGo.SetActive(false);
+
+        // ── Fun Fact ──
+        GameObject factGo = CreateText(resPanelGo.transform, "FunFactText", "Ciekawostka...",
+            22, TextAnchor.UpperLeft, new Color(0.45f, 0.75f, 1f));
+        RectTransform factRect = factGo.GetComponent<RectTransform>();
+        factRect.anchorMin = new Vector2(0.04f, 0.28f);
+        factRect.anchorMax = new Vector2(0.96f, 0.43f);
+        factRect.sizeDelta = Vector2.zero;
+
+        // ── GPS label ──
+        GameObject locationGo = CreateText(resPanelGo.transform, "ResultGpsLabel", "📍 GPS: Brak danych",
+            20, TextAnchor.MiddleLeft, new Color(0.7f, 0.85f, 1f), FontStyle.Italic);
+        RectTransform locationRect = locationGo.GetComponent<RectTransform>();
+        locationRect.anchorMin = new Vector2(0.04f, 0.20f);
+        locationRect.anchorMax = new Vector2(0.96f, 0.27f);
+        locationRect.sizeDelta = Vector2.zero;
+
+        // ── Debug text (hidden, for diagnostics only) ──
+        GameObject resDebugGo = CreateText(resPanelGo.transform, "ResultDebugText", "",
+            16, TextAnchor.MiddleLeft, Color.yellow, FontStyle.Bold);
+        RectTransform resDebugRect = resDebugGo.GetComponent<RectTransform>();
+        resDebugRect.anchorMin = new Vector2(0.04f, 0.16f);
+        resDebugRect.anchorMax = new Vector2(0.96f, 0.20f);
+        resDebugRect.sizeDelta = Vector2.zero;
+        resDebugGo.GetComponent<Text>().raycastTarget = false;
+
+        // ── Bottom action row ─────────────────────────────────────────────────────
+        // Edibility pill (left)
+        GameObject ediblePanelGo = CreatePanel(resPanelGo.transform, "EdibilityPanel",
+            new Vector2(0.04f, 0.03f), new Vector2(0.52f, 0.14f),
+            Vector2.zero, new Color(0.1f, 0.18f, 0.1f, 0.95f));
+        GameObject edibGo = CreateText(ediblePanelGo.transform, "EdibilityText",
+            "Status: Brak danych", 20, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+        RectTransform edibRect = edibGo.GetComponent<RectTransform>();
+        edibRect.anchorMin = Vector2.zero;
+        edibRect.anchorMax = Vector2.one;
+        edibRect.sizeDelta = Vector2.zero;
+
+        // Open in Maps button (right)
+        GameObject resMapsBtnGo = new GameObject("ResultOpenInMapsButton", typeof(Image), typeof(Button));
+        resMapsBtnGo.transform.SetParent(resPanelGo.transform, false);
+        RectTransform resMapsRect = resMapsBtnGo.GetComponent<RectTransform>();
+        resMapsRect.anchorMin = new Vector2(0.54f, 0.03f);
+        resMapsRect.anchorMax = new Vector2(0.96f, 0.14f);
+        resMapsRect.sizeDelta = Vector2.zero;
+        Image resMapsImg = resMapsBtnGo.GetComponent<Image>();
+        resMapsImg.color = new Color(0.12f, 0.42f, 0.88f, 1f);
+        resMapsImg.raycastTarget = true;
+        GameObject resMapsTextGo = CreateText(resMapsBtnGo.transform, "Text",
+            "🗺️ Otwórz w Mapach", 20, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+        resMapsTextGo.GetComponent<Text>().raycastTarget = false;
+        Button resultOpenInMapsBtn = resMapsBtnGo.GetComponent<Button>();
+        resultOpenInMapsBtn.enabled = true;
+
+
 
         // Language Overlay Canvas (sortingOrder=1000, always above camera preview)
         GameObject langOverlayCanvasGo = new GameObject("LanguageOverlayCanvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
@@ -163,261 +585,9 @@ public class SetupUI
             new Dropdown.OptionData("EL")
         };
 
-        // History Button
-        GameObject historyBtnGo = new GameObject("HistoryButton", typeof(Image), typeof(Button));
-        historyBtnGo.transform.SetParent(topBarGo.transform, false);
-        RectTransform historyBtnRect = historyBtnGo.GetComponent<RectTransform>();
-        historyBtnRect.anchorMin = new Vector2(0.70f, 0.55f);
-        historyBtnRect.anchorMax = new Vector2(0.97f, 0.92f);
-        historyBtnRect.sizeDelta = Vector2.zero;
-        Image histImg = historyBtnGo.GetComponent<Image>();
-        histImg.color = new Color(0.18f, 0.8f, 0.44f, 0.9f);
-        histImg.raycastTarget = true;
-        GameObject historyBtnTextGo = CreateText(historyBtnGo.transform, "Text", "📜 Historia", 12, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
-        historyBtnTextGo.GetComponent<Text>().raycastTarget = false;
-        Button historyButton = historyBtnGo.GetComponent<Button>();
-        historyButton.interactable = true;
-
-        // URL Input (like a pill search bar below title)
-        GameObject urlGo = new GameObject("BackendUrlInput", typeof(Image), typeof(InputField));
-        urlGo.transform.SetParent(topBarGo.transform, false);
-        RectTransform urlRect = urlGo.GetComponent<RectTransform>();
-        urlRect.anchorMin = new Vector2(0.1f, 0.15f);
-        urlRect.anchorMax = new Vector2(0.9f, 0.45f);
-        urlRect.sizeDelta = Vector2.zero;
-        urlGo.GetComponent<Image>().color = new Color(0.15f, 0.17f, 0.22f, 0.9f);
-
-        GameObject urlTextGo = CreateText(urlGo.transform, "Text", "http://localhost:3001", 14, TextAnchor.MiddleLeft, Color.white);
-        RectTransform urlTextRect = urlTextGo.GetComponent<RectTransform>();
-        urlTextRect.anchorMin = Vector2.zero;
-        urlTextRect.anchorMax = Vector2.one;
-        urlTextRect.offsetMin = new Vector2(15f, 5f);
-        urlTextRect.offsetMax = new Vector2(-15f, -5f);
-
-        InputField urlInputField = urlGo.GetComponent<InputField>();
-        urlInputField.textComponent = urlTextGo.GetComponent<Text>();
-        urlInputField.text = "http://localhost:3001";
-
-        // Dropdown (styled dark above scan button)
-        GameObject dropdownGo = DefaultControls.CreateDropdown(uiResources);
-        dropdownGo.name = "ModeDropdown";
-        dropdownGo.transform.SetParent(safeAreaGo.transform, false);
-        Undo.RegisterCreatedObjectUndo(dropdownGo, "Create ModeDropdown");
-
-        RectTransform ddRect = dropdownGo.GetComponent<RectTransform>();
-        ddRect.anchorMin = new Vector2(0.2f, 0.18f);
-        ddRect.anchorMax = new Vector2(0.8f, 0.23f);
-        ddRect.sizeDelta = Vector2.zero;
-
-        Image ddImage = dropdownGo.GetComponent<Image>();
-        if (ddImage != null) ddImage.color = new Color(0.12f, 0.13f, 0.16f, 0.95f);
-
-        Dropdown dropdown = dropdownGo.GetComponent<Dropdown>();
-        if (dropdown.captionText != null)
-        {
-            dropdown.captionText.color = Color.white;
-            dropdown.captionText.fontSize = 18;
-            dropdown.captionText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            dropdown.captionText.alignment = TextAnchor.MiddleCenter;
-        }
-
-        Image arrowImg = dropdownGo.transform.Find("Arrow")?.GetComponent<Image>();
-        if (arrowImg != null) arrowImg.color = Color.white;
-
-        if (dropdown.template != null)
-        {
-            Image templateImg = dropdown.template.GetComponent<Image>();
-            if (templateImg != null) templateImg.color = new Color(0.12f, 0.13f, 0.16f, 0.98f);
-
-            Text itemText = dropdown.template.GetComponentInChildren<Text>(true);
-            if (itemText != null)
-            {
-                itemText.color = Color.white;
-                itemText.fontSize = 16;
-                itemText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            }
-        }
-
-        dropdown.options = new List<Dropdown.OptionData>
-        {
-            new Dropdown.OptionData("Plants"),
-            new Dropdown.OptionData("Mushrooms"),
-            new Dropdown.OptionData("Insects"),
-            new Dropdown.OptionData("Stones")
-        };
-
-        // Scan Button (Circular bottom shutter)
-        GameObject btnGo = new GameObject("ScanButton", typeof(Image), typeof(Button));
-        btnGo.transform.SetParent(safeAreaGo.transform, false);
-        RectTransform btnRect = btnGo.GetComponent<RectTransform>();
-        btnRect.anchorMin = new Vector2(0.5f, 0.08f);
-        btnRect.anchorMax = new Vector2(0.5f, 0.08f);
-        btnRect.sizeDelta = new Vector2(100f, 100f);
-        btnRect.anchoredPosition = Vector2.zero;
-
-        // Use knob sprite for circle, fallback to color
-        Image btnImg = btnGo.GetComponent<Image>();
-        btnImg.sprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
-        btnImg.color = new Color(0.18f, 0.8f, 0.44f, 1f); // Vibrant emerald green
-
-        // Soft outer glow highlight circle
-        GameObject ringGo = new GameObject("OuterRing", typeof(Image));
-        ringGo.transform.SetParent(btnGo.transform, false);
-        RectTransform ringRect = ringGo.GetComponent<RectTransform>();
-        ringRect.anchorMin = Vector2.zero;
-        ringRect.anchorMax = Vector2.one;
-        ringRect.sizeDelta = new Vector2(16f, 16f);
-        Image ringImg = ringGo.GetComponent<Image>();
-        ringImg.sprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
-        ringImg.color = new Color(1f, 1f, 1f, 0.25f);
-
-        GameObject btnTextGo = CreateText(btnGo.transform, "BtnText", "SCAN", 16, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
-        RectTransform btnTextRect = btnTextGo.GetComponent<RectTransform>();
-        btnTextRect.anchorMin = Vector2.zero;
-        btnTextRect.anchorMax = Vector2.one;
-        btnTextRect.sizeDelta = Vector2.zero;
-        Button scanButton = btnGo.GetComponent<Button>();
-
-        // Gallery Button (Pick photo from gallery)
-        GameObject galleryBtnGo = new GameObject("GalleryButton", typeof(Image), typeof(Button));
-        galleryBtnGo.transform.SetParent(safeAreaGo.transform, false);
-        RectTransform galleryBtnRect = galleryBtnGo.GetComponent<RectTransform>();
-        galleryBtnRect.anchorMin = new Vector2(0.80f, 0.08f);
-        galleryBtnRect.anchorMax = new Vector2(0.80f, 0.08f);
-        galleryBtnRect.sizeDelta = new Vector2(70f, 70f);
-        galleryBtnRect.anchoredPosition = Vector2.zero;
-
-        Image galleryImg = galleryBtnGo.GetComponent<Image>();
-        galleryImg.sprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
-        galleryImg.color = new Color(0.2f, 0.55f, 0.9f, 0.95f);
-
-        GameObject galleryTxtGo = CreateText(galleryBtnGo.transform, "BtnText", "🖼️", 24, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
-        RectTransform galleryTxtRect = galleryTxtGo.GetComponent<RectTransform>();
-        galleryTxtRect.anchorMin = Vector2.zero;
-        galleryTxtRect.anchorMax = Vector2.one;
-        galleryTxtRect.sizeDelta = Vector2.zero;
-        galleryTxtGo.GetComponent<Text>().raycastTarget = false;
-        Button galleryButton = galleryBtnGo.GetComponent<Button>();
-
-        // Status Panel (centered above dropdown) with subtle background and button capability
-        GameObject statusPanelGo = CreatePanel(safeAreaGo.transform, "StatusPanel", new Vector2(0.1f, 0.25f), new Vector2(0.9f, 0.29f), Vector2.zero, new Color(0f, 0f, 0f, 0.4f));
-        Button statusBtn = statusPanelGo.AddComponent<Button>();
-
-        GameObject statusGo = CreateText(statusPanelGo.transform, "StatusText", "Gotowy do skanowania", 16, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
-        RectTransform statusRect = statusGo.GetComponent<RectTransform>();
-        statusRect.anchorMin = Vector2.zero;
-        statusRect.anchorMax = Vector2.one;
-        statusRect.sizeDelta = Vector2.zero;
-        Text statusText = statusGo.GetComponent<Text>();
-
-        // 4. Result Panel (Bottom Sheet style card)
-        GameObject resPanelGo = CreatePanel(safeAreaGo.transform, "ResultPanel", new Vector2(0.05f, 0.32f), new Vector2(0.95f, 0.85f), new Vector2(0f, 0f), new Color(0.08f, 0.09f, 0.12f, 0.95f));
-        
-        // Handle Bar
-        GameObject handleGo = CreatePanel(resPanelGo.transform, "HandleBar", new Vector2(0.42f, 0.96f), new Vector2(0.58f, 0.98f), new Vector2(0f, 0f), new Color(0.3f, 0.3f, 0.3f, 0.8f));
-        handleGo.GetComponent<Image>().sprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
-
-        // Close Result Button ("X" / Powrót)
-        GameObject closeResBtnGo = new GameObject("CloseResultButton", typeof(Image), typeof(Button));
-        closeResBtnGo.transform.SetParent(resPanelGo.transform, false);
-        RectTransform closeResRect = closeResBtnGo.GetComponent<RectTransform>();
-        closeResRect.anchorMin = new Vector2(0.88f, 0.93f);
-        closeResRect.anchorMax = new Vector2(0.97f, 0.98f);
-        closeResRect.sizeDelta = Vector2.zero;
-        closeResBtnGo.GetComponent<Image>().color = new Color(0.2f, 0.2f, 0.25f, 0.8f);
-        CreateText(closeResBtnGo.transform, "Text", "✕", 14, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
-        Button closeResultBtn = closeResBtnGo.GetComponent<Button>();
-
-        // Common Name
-        GameObject commGo = CreateText(resPanelGo.transform, "CommonNameText", "Nazwa rośliny", 22, TextAnchor.MiddleLeft, new Color(0.18f, 0.8f, 0.44f), FontStyle.Bold);
-        RectTransform commRect = commGo.GetComponent<RectTransform>();
-        commRect.anchorMin = new Vector2(0.05f, 0.85f);
-        commRect.anchorMax = new Vector2(0.6f, 0.94f);
-        commRect.sizeDelta = Vector2.zero;
-
-        // Score
-        GameObject scoreGo = CreateText(resPanelGo.transform, "ScoreText", "Prawdopodobieństwo: 100%", 15, TextAnchor.MiddleRight, new Color(0.95f, 0.77f, 0.06f), FontStyle.Bold);
-        RectTransform scoreRect = scoreGo.GetComponent<RectTransform>();
-        scoreRect.anchorMin = new Vector2(0.6f, 0.85f);
-        scoreRect.anchorMax = new Vector2(0.95f, 0.94f);
-        scoreRect.sizeDelta = Vector2.zero;
-
-        // Scientific Name
-        GameObject sciGo = CreateText(resPanelGo.transform, "ScientificNameText", "Scientific Name", 16, TextAnchor.MiddleLeft, new Color(0.7f, 0.7f, 0.7f), FontStyle.Italic);
-        RectTransform sciRect = sciGo.GetComponent<RectTransform>();
-        sciRect.anchorMin = new Vector2(0.05f, 0.77f);
-        sciRect.anchorMax = new Vector2(0.95f, 0.84f);
-        sciRect.sizeDelta = Vector2.zero;
-
-        // Separator line
-        CreatePanel(resPanelGo.transform, "Line", new Vector2(0.05f, 0.75f), new Vector2(0.95f, 0.755f), new Vector2(0f, 0f), new Color(0.2f, 0.2f, 0.2f, 1f));
-
-        // Description
-        GameObject descGo = CreateText(resPanelGo.transform, "DescriptionText", "Opis rośliny...", 15, TextAnchor.UpperLeft, Color.white);
-        RectTransform descRect = descGo.GetComponent<RectTransform>();
-        descRect.anchorMin = new Vector2(0.05f, 0.38f);
-        descRect.anchorMax = new Vector2(0.68f, 0.72f);
-        descRect.sizeDelta = Vector2.zero;
-
-        // Thumbnail Image
-        GameObject thumbGo = new GameObject("ThumbnailImage", typeof(RawImage));
-        thumbGo.transform.SetParent(resPanelGo.transform, false);
-        RectTransform thumbRect = thumbGo.GetComponent<RectTransform>();
-        thumbRect.anchorMin = new Vector2(0.72f, 0.42f);
-        thumbRect.anchorMax = new Vector2(0.95f, 0.68f);
-        thumbRect.sizeDelta = Vector2.zero;
-        RawImage thumbRaw = thumbGo.GetComponent<RawImage>();
-        thumbRaw.color = Color.white;
-        thumbGo.SetActive(false);
-
-        // Fun Fact
-        GameObject factGo = CreateText(resPanelGo.transform, "FunFactText", "Ciekawostka...", 14, TextAnchor.UpperLeft, new Color(0.5f, 0.8f, 1f));
-        RectTransform factRect = factGo.GetComponent<RectTransform>();
-        factRect.anchorMin = new Vector2(0.05f, 0.22f);
-        factRect.anchorMax = new Vector2(0.95f, 0.43f);
-        factRect.sizeDelta = Vector2.zero;
-
-        // Location GPS label
-        GameObject locationGo = CreateText(resPanelGo.transform, "ResultGpsLabel", "📍 GPS: Brak danych", 13, TextAnchor.MiddleLeft, new Color(0.8f, 0.9f, 1f), FontStyle.Italic);
-        RectTransform locationRect = locationGo.GetComponent<RectTransform>();
-        locationRect.anchorMin = new Vector2(0.05f, 0.14f);
-        locationRect.anchorMax = new Vector2(0.95f, 0.21f);
-        locationRect.sizeDelta = Vector2.zero;
-
-        // Debug text for MapsButton verification
-        GameObject resDebugGo = CreateText(resPanelGo.transform, "ResultDebugText", "MAP BUTTON EXISTS", 12, TextAnchor.MiddleLeft, Color.yellow, FontStyle.Bold);
-        RectTransform resDebugRect = resDebugGo.GetComponent<RectTransform>();
-        resDebugRect.anchorMin = new Vector2(0.05f, 0.22f);
-        resDebugRect.anchorMax = new Vector2(0.95f, 0.26f);
-        resDebugRect.sizeDelta = Vector2.zero;
-        resDebugGo.GetComponent<Text>().raycastTarget = false;
-
-        // Edibility status pill (Left side of bottom bar)
-        GameObject ediblePanelGo = CreatePanel(resPanelGo.transform, "EdibilityPanel", new Vector2(0.05f, 0.02f), new Vector2(0.53f, 0.12f), new Vector2(0f, 0f), new Color(0.15f, 0.2f, 0.15f, 0.9f));
-        GameObject edibGo = CreateText(ediblePanelGo.transform, "EdibilityText", "Status spożywczy: Brak danych", 11, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
-        RectTransform edibRect = edibGo.GetComponent<RectTransform>();
-        edibRect.anchorMin = Vector2.zero;
-        edibRect.anchorMax = Vector2.one;
-        edibRect.sizeDelta = Vector2.zero;
-
-        // Open in Maps Button (Right side of bottom bar)
-        GameObject resMapsBtnGo = new GameObject("ResultOpenInMapsButton", typeof(Image), typeof(Button));
-        resMapsBtnGo.transform.SetParent(resPanelGo.transform, false);
-        RectTransform resMapsRect = resMapsBtnGo.GetComponent<RectTransform>();
-        resMapsRect.anchorMin = new Vector2(0.55f, 0.02f);
-        resMapsRect.anchorMax = new Vector2(0.95f, 0.12f);
-        resMapsRect.sizeDelta = Vector2.zero;
-        Image resMapsImg = resMapsBtnGo.GetComponent<Image>();
-        resMapsImg.color = new Color(0.12f, 0.45f, 0.9f, 1.0f);
-        resMapsImg.raycastTarget = true;
-        GameObject resMapsTextGo = CreateText(resMapsBtnGo.transform, "Text", "🗺️ Otwórz w Mapach", 11, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
-        resMapsTextGo.GetComponent<Text>().raycastTarget = false;
-        Button resultOpenInMapsBtn = resMapsBtnGo.GetComponent<Button>();
-        resultOpenInMapsBtn.enabled = true;
-
-
 
         // 4.8 Dedicated History Overlay Canvas (Screen Space Overlay - Sorting Order 9999)
+
         GameObject historyOverlayCanvasGo = new GameObject("HistoryOverlayCanvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
         Canvas historyCanvas = historyOverlayCanvasGo.GetComponent<Canvas>();
         historyCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
@@ -560,6 +730,61 @@ public class SetupUI
         SetRef(uiManager, "galleryButton", galleryButton);
         SetRef(uiManager, "arMobileRoot", arMobileRoot);
         SetRef(uiManager, "pcCamera", GameObject.Find("Main Camera"));
+
+        // Zoom Overlay Canvas (sortingOrder=900, above camera preview)
+        GameObject zoomOverlayCanvasGo = new GameObject("ZoomOverlayCanvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+        Canvas zoomCanvas = zoomOverlayCanvasGo.GetComponent<Canvas>();
+        zoomCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        zoomCanvas.sortingOrder = 900;
+        zoomCanvas.overrideSorting = true;
+
+        CanvasScaler zoomScaler = zoomOverlayCanvasGo.GetComponent<CanvasScaler>();
+        zoomScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        zoomScaler.referenceResolution = new Vector2(1080, 2340);
+        zoomScaler.matchWidthOrHeight = 0.5f;
+
+        // Zoom 1x Button (left)
+        GameObject zoom1xBtnGo = new GameObject("Zoom1xButton", typeof(Image), typeof(Button));
+        zoom1xBtnGo.transform.SetParent(zoomOverlayCanvasGo.transform, false);
+        RectTransform z1Rect = zoom1xBtnGo.GetComponent<RectTransform>();
+        z1Rect.anchorMin = new Vector2(0.5f, 0f);
+        z1Rect.anchorMax = new Vector2(0.5f, 0f);
+        z1Rect.pivot = new Vector2(0.5f, 0f);
+        z1Rect.sizeDelta = new Vector2(90f, 90f);
+        z1Rect.anchoredPosition = new Vector2(-55f, 360f);
+
+        Image z1Img = zoom1xBtnGo.GetComponent<Image>();
+        z1Img.color = new Color(0.18f, 0.8f, 0.44f, 1f);
+        z1Img.raycastTarget = true;
+
+        GameObject z1TxtGo = CreateText(zoom1xBtnGo.transform, "Text", "1x", 28, TextAnchor.MiddleCenter, Color.white, FontStyle.Bold);
+        z1TxtGo.GetComponent<Text>().raycastTarget = false;
+        Button zoom1xButton = zoom1xBtnGo.GetComponent<Button>();
+
+        // Zoom 2x Button (right)
+        GameObject zoom2xBtnGo = new GameObject("Zoom2xButton", typeof(Image), typeof(Button));
+        zoom2xBtnGo.transform.SetParent(zoomOverlayCanvasGo.transform, false);
+        RectTransform z2Rect = zoom2xBtnGo.GetComponent<RectTransform>();
+        z2Rect.anchorMin = new Vector2(0.5f, 0f);
+        z2Rect.anchorMax = new Vector2(0.5f, 0f);
+        z2Rect.pivot = new Vector2(0.5f, 0f);
+        z2Rect.sizeDelta = new Vector2(90f, 90f);
+        z2Rect.anchoredPosition = new Vector2(55f, 360f);
+
+        Image z2Img = zoom2xBtnGo.GetComponent<Image>();
+        z2Img.color = new Color(0.1f, 0.12f, 0.16f, 0.85f);
+        z2Img.raycastTarget = true;
+
+        GameObject z2TxtGo = CreateText(zoom2xBtnGo.transform, "Text", "2x", 28, TextAnchor.MiddleCenter, new Color(0.7f, 0.7f, 0.7f), FontStyle.Bold);
+        z2TxtGo.GetComponent<Text>().raycastTarget = false;
+        Button zoom2xButton = zoom2xBtnGo.GetComponent<Button>();
+
+        SetRef(uiManager, "zoom1xButton", zoom1xButton);
+        SetRef(uiManager, "zoom2xButton", zoom2xButton);
+        SetRef(uiManager, "scanningFrame", scanFrameGo);
+        SetRef(uiManager, "flashlightButton", flashlightButton);
+        SetRef(uiManager, "switchCameraButton", switchCameraButton);
+        SetRef(uiManager, "cameraSelectButton", cameraDropdown.GetComponent<Button>());
 
         // Mark scene dirty and save it
         EditorSceneManager.MarkSceneDirty(scene);
@@ -779,5 +1004,21 @@ public class SetupUI
         Debug.Log("[SetupUI] AR Foundation components structured under ARMobileRoot and deactivated by default.");
 
         return arMobileRoot;
+    }
+
+    private static void CreateCornerBar(Transform parent, string name, Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot, Vector2 size)
+    {
+        GameObject barGo = new GameObject(name, typeof(Image));
+        barGo.transform.SetParent(parent, false);
+        RectTransform rect = barGo.GetComponent<RectTransform>();
+        rect.anchorMin = anchorMin;
+        rect.anchorMax = anchorMax;
+        rect.pivot = pivot;
+        rect.sizeDelta = size;
+        rect.anchoredPosition = Vector2.zero;
+
+        Image img = barGo.GetComponent<Image>();
+        img.color = Color.white;
+        img.raycastTarget = false;
     }
 }
