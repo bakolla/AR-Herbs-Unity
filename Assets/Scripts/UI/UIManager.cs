@@ -140,13 +140,16 @@ namespace ARHerb.UI
                 modeDropdown.value = savedMode;
                 modeDropdown.onValueChanged.RemoveAllListeners();
                 modeDropdown.onValueChanged.AddListener(OnModeChanged);
+                SetupModeButtonTiles();
             }
 
             // Guarantee all UI buttons (Scan, Gallery, History, Maps, Zoom) exist and are setup
             EnsureAllButtonsSetup();
+            EnsureSettingsPanelSetup();
             EnsureLanguageDropdownVisible();
             EnsureZoomButtonSetup();
             EnsureCameraControlBarSetup();
+            AttachButtonIcons();
             SetScanningFrameVisible(true);
 
             Debug.Log($"[History] HistoryButton assigned = {(historyButton != null)}");
@@ -261,6 +264,89 @@ namespace ARHerb.UI
             PlayerPrefs.SetInt("SavedMode", newIndex);
             PlayerPrefs.Save();
             Debug.Log($"[UIManager] Saved selected mode index: {newIndex}");
+        }
+
+        public void SetupModeButtonTiles()
+        {
+            if (modeDropdown == null) return;
+            Transform container = modeDropdown.transform;
+            string[] buttonNames = new string[] { "ModeAutoButton", "ModePlantsButton", "ModeMushroomsButton", "ModeStonesButton", "ModeInsectsButton" };
+            int[] modeValues = new int[] { 0, 0, 1, 3, 2 };
+
+            for (int i = 0; i < buttonNames.Length; i++)
+            {
+                int tileIndex = i;
+                int modeValue = modeValues[i];
+                Transform btnTr = container.Find(buttonNames[i]);
+                if (btnTr != null)
+                {
+                    Button btn = btnTr.GetComponent<Button>();
+                    if (btn != null)
+                    {
+                        btn.onClick.RemoveAllListeners();
+                        btn.onClick.AddListener(() => {
+                            SelectModeTile(tileIndex, modeValue);
+                        });
+                    }
+                }
+            }
+
+            int savedTile = PlayerPrefs.GetInt("SavedTileIndex", 0);
+            UpdateModeTileVisuals(savedTile);
+        }
+
+        public void SelectModeTile(int tileIndex, int modeValue)
+        {
+            if (modeDropdown != null)
+            {
+                modeDropdown.value = modeValue;
+            }
+            PlayerPrefs.SetInt("SavedMode", modeValue);
+            PlayerPrefs.SetInt("SavedTileIndex", tileIndex);
+            PlayerPrefs.Save();
+            UpdateModeTileVisuals(tileIndex);
+        }
+
+        public void UpdateModeTileVisuals(int activeTileIndex)
+        {
+            if (modeDropdown == null) return;
+            Transform container = modeDropdown.transform;
+            string[] buttonNames = new string[] { "ModeAutoButton", "ModePlantsButton", "ModeMushroomsButton", "ModeStonesButton", "ModeInsectsButton" };
+
+            for (int i = 0; i < buttonNames.Length; i++)
+            {
+                Transform btnTr = container.Find(buttonNames[i]);
+                if (btnTr != null)
+                {
+                    Image bg = btnTr.GetComponent<Image>();
+                    if (bg != null)
+                    {
+                        bg.color = (i == activeTileIndex) 
+                            ? new Color(0.18f, 0.80f, 0.44f, 1.0f) 
+                            : new Color(1.0f, 1.0f, 1.0f, 1.0f);
+                    }
+
+                    Transform iconTr = btnTr.Find("Icon");
+                    if (iconTr != null)
+                    {
+                        Image iconImg = iconTr.GetComponent<Image>();
+                        if (iconImg != null)
+                        {
+                            iconImg.color = (i == activeTileIndex) ? Color.white : new Color(0.15f, 0.18f, 0.22f, 1.0f);
+                        }
+                    }
+
+                    Transform textTr = btnTr.Find("Text");
+                    if (textTr != null)
+                    {
+                        Text txt = textTr.GetComponent<Text>();
+                        if (txt != null)
+                        {
+                            txt.color = (i == activeTileIndex) ? Color.white : new Color(0.15f, 0.18f, 0.22f, 1.0f);
+                        }
+                    }
+                }
+            }
         }
 
         private void OnLanguageChanged(int index)
@@ -397,11 +483,16 @@ namespace ARHerb.UI
             SetStatusText(ARHerb.Localization.LocalizationManager.Get("status_capturing"), StatusType.Loading);
             SetScanButtonState(false, ARHerb.Localization.LocalizationManager.Get("btn_wait"));
 
+            // Start 15s watchdog to guarantee UI never gets stuck in isScanning = true
+            StopCoroutine("ScanTimeoutWatchdog");
+            StartCoroutine("ScanTimeoutWatchdog");
+
             // Capture the image from the active provider (Editor webcam or mobile webcam)
             activeCaptureProvider.CaptureFrame(jpegBytes =>
             {
                 if (jpegBytes == null || jpegBytes.Length == 0)
                 {
+                    StopCoroutine("ScanTimeoutWatchdog");
                     SetStatusText(ARHerb.Localization.LocalizationManager.Get("status_camera_error"), StatusType.Error);
                     SetScanButtonState(true, ARHerb.Localization.LocalizationManager.Get("btn_scan"));
                     isScanning = false;
@@ -435,11 +526,13 @@ namespace ARHerb.UI
                     defaultLanguage,
                     onSuccess: scanResult =>
                     {
+                        StopCoroutine("ScanTimeoutWatchdog");
                         SetStatusText(ARHerb.Localization.LocalizationManager.Get("status_analyzing"), StatusType.Loading);
                         ProcessIdentifyResult(scanResult, selectedMode);
                     },
                     onFailure: error =>
                     {
+                        StopCoroutine("ScanTimeoutWatchdog");
                         Debug.LogError($"[UIManager] Backend Error: {error}");
                         if (!string.IsNullOrEmpty(error) && (error.Contains("No matching") || error.Contains("404")))
                         {
@@ -458,6 +551,18 @@ namespace ARHerb.UI
                     }
                 );
             });
+        }
+
+        private System.Collections.IEnumerator ScanTimeoutWatchdog()
+        {
+            yield return new WaitForSeconds(15f);
+            if (isScanning)
+            {
+                Debug.LogWarning("[UIManager] Scan operation timed out after 15s. Unlocking scan button.");
+                SetStatusText(ARHerb.Localization.LocalizationManager.Get("status_backend_error"), StatusType.Error);
+                SetScanButtonState(true, ARHerb.Localization.LocalizationManager.Get("btn_scan"));
+                isScanning = false;
+            }
         }
 
         private void OnGalleryButtonClicked()
@@ -1610,6 +1715,66 @@ namespace ARHerb.UI
                 historyButton.onClick.AddListener(OnHistoryButtonClicked);
                 historyButton.gameObject.SetActive(true);
             }
+        }
+
+        private void EnsureSettingsPanelSetup()
+        {
+            Canvas canvas = GetComponentInParent<Canvas>();
+            if (canvas == null) canvas = FindObjectOfType<Canvas>();
+            if (canvas == null) return;
+
+            Transform safeAreaTr = canvas.transform.Find("SafeArea");
+            Transform parentTr = safeAreaTr != null ? safeAreaTr : canvas.transform;
+
+            // Find SettingsButton
+            Transform settingsBtnTr = parentTr.Find("TopHeaderPanel/SettingsButton");
+            if (settingsBtnTr == null) settingsBtnTr = parentTr.Find("SettingsButton");
+            if (settingsBtnTr == null) settingsBtnTr = canvas.transform.Find("SettingsButton");
+
+            // Find SettingsPanel
+            Transform settingsPanelTr = parentTr.Find("SettingsPanel");
+            if (settingsPanelTr == null) settingsPanelTr = canvas.transform.Find("SettingsPanel");
+            if (settingsPanelTr == null) settingsPanelTr = parentTr.Find("TopHeaderPanel/SettingsPanel");
+
+            // Connect InputField if null
+            if (backendUrlInput == null && settingsPanelTr != null)
+            {
+                Transform inputTr = settingsPanelTr.Find("BackendUrlInput");
+                if (inputTr != null)
+                {
+                    backendUrlInput = inputTr.GetComponent<InputField>();
+                }
+            }
+
+            if (backendUrlInput != null)
+            {
+                string savedUrl = PlayerPrefs.GetString("SavedBackendUrl", "");
+                if (string.IsNullOrEmpty(savedUrl) && backendClient != null)
+                {
+                    savedUrl = backendClient.GetBackendUrl();
+                }
+                if (string.IsNullOrEmpty(savedUrl)) savedUrl = "http://localhost:3001";
+                backendUrlInput.text = savedUrl;
+                backendUrlInput.onEndEdit.RemoveAllListeners();
+                backendUrlInput.onEndEdit.AddListener(OnBackendUrlChanged);
+            }
+
+            // Connect SettingsButton onClick to toggle SettingsPanel
+            if (settingsBtnTr != null && settingsPanelTr != null)
+            {
+                Button settingsBtn = settingsBtnTr.GetComponent<Button>();
+                GameObject panelGo = settingsPanelTr.gameObject;
+
+                if (settingsBtn != null)
+                {
+                    settingsBtn.onClick.RemoveAllListeners();
+                    settingsBtn.onClick.AddListener(() => {
+                        bool newState = !panelGo.activeSelf;
+                        panelGo.SetActive(newState);
+                        Debug.Log($"[UIManager] Settings panel toggled active: {newState}");
+                    });
+                }
+            }
 
             // 2. Guarantee GalleryButton
             if (galleryButton == null)
@@ -1868,6 +2033,132 @@ namespace ARHerb.UI
             {
                 scanningFrame.SetActive(visible);
             }
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Button Icons
+        // ─────────────────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Loads transparent PNG sprites from Assets/Icons/ and attaches them
+        /// as centered, full-size child Image GameObjects inside each UI button.
+        /// Icon names correspond to the file names in Assets/Icons/.
+        /// </summary>
+        private void AttachButtonIcons()
+        {
+            // Map: button reference → icon path (relative to Resources, or absolute via AssetDatabase in editor)
+            // Since we can't use Resources.Load for non-Resources assets at runtime we load via Sprite reference
+            // We use the approach of loading sprites by path at edit-time in the Editor, but at runtime we use
+            // a helper that tries AssetDatabase first (editor), then falls back to a Resources folder.
+
+            var buttonIconMap = new System.Collections.Generic.Dictionary<Button, string>
+            {
+                { scanButton,         "scan"         },  // scan.png
+                { galleryButton,      "gallery"      },  // gallery.png
+                { flashlightButton,   "blyskawica"   },  // blyskawica.png (lightning / flashlight)
+                { switchCameraButton, "kamera"       },  // kamera.png
+                { historyButton,      "time"         },  // time.png (history / clock)
+            };
+
+            if (cameraSelectButton != null) buttonIconMap[cameraSelectButton] = "chose_camera";
+            Button camDropdownBtn = FindButtonByName("CameraDropdown");
+            if (camDropdownBtn != null) buttonIconMap[camDropdownBtn] = "chose_camera";
+
+            // Also try to find a LanguageButton / SettingsButton by name in the hierarchy
+            Button langBtn = FindButtonByName("LanguageButton");
+            if (langBtn != null) buttonIconMap[langBtn] = "jezyk";
+
+            Button settingsBtn = FindButtonByName("SettingsButton");
+            if (settingsBtn != null) buttonIconMap[settingsBtn] = "jezyk";
+
+            foreach (var kvp in buttonIconMap)
+            {
+                Button btn = kvp.Key;
+                string iconName = kvp.Value;
+                if (btn == null) continue;
+
+                Sprite sprite = LoadIconSprite(iconName);
+                if (sprite == null)
+                {
+                    Debug.LogWarning($"[UIManager] Icon sprite not found: Icons/{iconName}");
+                    continue;
+                }
+
+                AttachIconToButton(btn, sprite);
+            }
+        }
+
+        private Button FindButtonByName(string name)
+        {
+            Canvas canvas = GetComponentInParent<Canvas>();
+            if (canvas == null) canvas = FindObjectOfType<Canvas>();
+            if (canvas == null) return null;
+            Transform t = canvas.transform.Find(name);
+            if (t == null)
+            {
+                // Deep search
+                foreach (Transform child in canvas.GetComponentsInChildren<Transform>(true))
+                {
+                    if (child.name == name)
+                    {
+                        t = child;
+                        break;
+                    }
+                }
+            }
+            return t?.GetComponent<Button>();
+        }
+
+        private Sprite LoadIconSprite(string iconName)
+        {
+#if UNITY_EDITOR
+            string path = $"Assets/Icons/{iconName}.png";
+            Sprite s = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(path);
+            if (s != null) return s;
+#endif
+            // Runtime fallback: place PNGs in Assets/Resources/Icons/ for Resources.Load
+            return Resources.Load<Sprite>($"Icons/{iconName}");
+        }
+
+        private void AttachIconToButton(Button btn, Sprite sprite)
+        {
+            if (btn == null || sprite == null) return;
+
+            // If an Icon child already exists, just update its sprite
+            Transform existing = btn.transform.Find("Icon");
+            if (existing != null)
+            {
+                Image img = existing.GetComponent<Image>();
+                if (img != null)
+                {
+                    img.sprite = sprite;
+                    img.color = Color.white;
+                    img.preserveAspect = true;
+                }
+                return;
+            }
+
+            // Create a new centered Icon child
+            GameObject iconGo = new GameObject("Icon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            iconGo.transform.SetParent(btn.transform, false);
+
+            RectTransform rt = iconGo.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0.1f, 0.1f);
+            rt.anchorMax = new Vector2(0.9f, 0.9f);
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+            rt.anchoredPosition = Vector2.zero;
+
+            Image image = iconGo.GetComponent<Image>();
+            image.sprite = sprite;
+            image.color = Color.white;
+            image.preserveAspect = true;
+            image.raycastTarget = false; // Don't block button clicks
+
+            // Move icon behind any existing Text children
+            iconGo.transform.SetAsFirstSibling();
+
+            Debug.Log($"[UIManager] Icon '{sprite.name}' attached to button '{btn.name}'");
         }
 
         private void EnsureZoomButtonSetup()
@@ -2214,20 +2505,37 @@ namespace ARHerb.UI
                 cameraSelectButton.onClick.AddListener(ShowCameraPickerModal);
             }
 
+            // Hide any child text or label overlay on the camera select button
+            if (cameraSelectButton != null)
+            {
+                foreach (Transform child in cameraSelectButton.transform)
+                {
+                    if (child.name == "Text" || child.name == "Label")
+                    {
+                        child.gameObject.SetActive(false);
+                    }
+                }
+            }
+
             UpdateCameraSelectButtonLabel();
         }
 
         private void UpdateCameraSelectButtonLabel()
         {
-            if (cameraSelectButton == null || activeCaptureProvider == null) return;
+            if (cameraSelectButton == null) return;
 
-            string[] devices = activeCaptureProvider.GetAvailableCameraDevices();
-            int currentIdx = activeCaptureProvider.GetCurrentCameraDeviceIndex();
-
-            Text txt = cameraSelectButton.GetComponentInChildren<Text>();
-            if (txt != null && devices != null && currentIdx >= 0 && currentIdx < devices.Length)
+            // Keep text overlay on round icon button hidden
+            Text txt = cameraSelectButton.GetComponentInChildren<Text>(true);
+            if (txt != null)
             {
-                txt.text = devices[currentIdx] + " ▾";
+                txt.gameObject.SetActive(false);
+            }
+            foreach (Transform child in cameraSelectButton.transform)
+            {
+                if (child.name == "Text" || child.name == "Label")
+                {
+                    child.gameObject.SetActive(false);
+                }
             }
         }
 

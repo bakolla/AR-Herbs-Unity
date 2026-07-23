@@ -12,24 +12,59 @@ public class SetupUI
     [MenuItem("AR Herb/Build MVP Scene")]
     public static void BuildMVPScene()
     {
-        // 1. Ensure Scenes directory exists
+        string scenePath = "Assets/Scenes/TE.unity";
+        string protectedScenePath = "Assets/Scenes/TE_UI.unity";
+
+        UnityEngine.SceneManagement.Scene activeScene = EditorSceneManager.GetActiveScene();
+        string activePath = activeScene.path;
+        string normActivePath = string.IsNullOrEmpty(activePath) ? "" : activePath.Replace('\\', '/');
+
+        // 1. If currently open scene is TE_UI.unity, cancel immediately
+        if (normActivePath.Equals(protectedScenePath, System.StringComparison.OrdinalIgnoreCase) ||
+            normActivePath.EndsWith("/TE_UI.unity", System.StringComparison.OrdinalIgnoreCase) ||
+            activeScene.name == "TE_UI")
+        {
+            EditorUtility.DisplayDialog(
+                "Protected Scene",
+                "The TE_UI scene is protected. Open TE.unity to rebuild the generated MVP scene.",
+                "OK"
+            );
+            return;
+        }
+
+        // 2. If currently open scene is not TE.unity, cancel immediately
+        if (!normActivePath.Equals(scenePath, System.StringComparison.OrdinalIgnoreCase) &&
+            !normActivePath.EndsWith("/TE.unity", System.StringComparison.OrdinalIgnoreCase) &&
+            activeScene.name != "TE")
+        {
+            EditorUtility.DisplayDialog(
+                "Incorrect Scene",
+                "Open Assets/Scenes/TE.unity before rebuilding the MVP scene.",
+                "OK"
+            );
+            return;
+        }
+
+        // 3. Confirmation dialog before rebuilding TE.unity
+        bool confirmed = EditorUtility.DisplayDialog(
+            "Rebuild MVP Scene",
+            "This will rebuild the generated TE scene and may overwrite its UI. Continue?",
+            "Continue",
+            "Cancel"
+        );
+
+        if (!confirmed)
+        {
+            return;
+        }
+
+        // Ensure Scenes directory exists
         if (!Directory.Exists("Assets/Scenes"))
         {
             Directory.CreateDirectory("Assets/Scenes");
         }
 
-        string scenePath = "Assets/Scenes/MainARScene.unity";
-        UnityEngine.SceneManagement.Scene scene;
-
-        // Open or create the scene
-        if (File.Exists(scenePath))
-        {
-            scene = EditorSceneManager.OpenScene(scenePath);
-        }
-        else
-        {
-            scene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
-        }
+        UnityEngine.SceneManagement.Scene scene = activeScene;
 
         // Remove default Main Camera
         GameObject defaultCam = GameObject.Find("Main Camera");
@@ -797,21 +832,30 @@ public class SetupUI
         PlayerSettings.SetGraphicsAPIs(BuildTarget.Android, new[] { UnityEngine.Rendering.GraphicsDeviceType.OpenGLES3 });
 
         List<EditorBuildSettingsScene> buildScenes = new List<EditorBuildSettingsScene>();
-        buildScenes.Add(new EditorBuildSettingsScene(scenePath, true));
+        bool targetAdded = false;
         foreach (var s in EditorBuildSettings.scenes)
         {
-            if (s.path != scenePath)
+            if (s.path.Equals(scenePath, System.StringComparison.OrdinalIgnoreCase))
+            {
+                buildScenes.Add(new EditorBuildSettingsScene(scenePath, true));
+                targetAdded = true;
+            }
+            else
             {
                 buildScenes.Add(s);
             }
+        }
+        if (!targetAdded)
+        {
+            buildScenes.Insert(0, new EditorBuildSettingsScene(scenePath, true));
         }
         EditorBuildSettings.scenes = buildScenes.ToArray();
 
         // 8. Ensure URP Renderer features include AR Background Renderer Feature (fixes mobile blue/gray screen)
         AddARBackgroundRendererFeatureToAllRenderers();
 
-        Debug.Log($"[SetupUI] Successfully generated MainARScene at '{scenePath}'. AppManager is completely configured.");
-        EditorUtility.DisplayDialog("AR Herb Setup", "Pomyślnie wygenerowano scenę MainARScene!\nUstawiono identyfikator pakietu Android na com.bakolla.arherb oraz dodano scenę do okna Build Settings.", "OK");
+        Debug.Log($"[SetupUI] Successfully generated TE scene at '{scenePath}'. AppManager is completely configured.");
+        EditorUtility.DisplayDialog("AR Herb Setup", "Pomyślnie wygenerowano scenę TE!\nUstawiono identyfikator pakietu Android na com.bakolla.arherb oraz dodano scenę do okna Build Settings.", "OK");
     }
 
     private static void AddARBackgroundRendererFeatureToAllRenderers()

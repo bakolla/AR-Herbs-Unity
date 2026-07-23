@@ -1,0 +1,4 @@
+[Licensing::Module] Trying to connect to existing licensing client channel...
+[Licensing::IpcConnector] Successfully connected to the License Client on channel: "LicenseClient-acer" at "2026-07-23T07:51:12.9402862Z"
+[Licensing::Client] Error: Code 10 while verifying Licensing Client signature (process Id: 18696, path: "E:/OLUSIA/UNITY/Unity Hub/UnityLicensingClient_V1/Unity.Licensing.Client.exe")
+[Licensing::Module] Error: LicensingClient has failed validation; ignoring

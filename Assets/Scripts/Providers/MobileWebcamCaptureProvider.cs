@@ -158,6 +158,26 @@ namespace ARHerb.Camera
             }
         }
 
+        private System.Collections.IEnumerator WaitForCameraPermissionAndInit(RawImage previewTarget)
+        {
+            float timeout = 10f;
+            float elapsed = 0f;
+            while (elapsed < timeout)
+            {
+#if UNITY_ANDROID && !UNITY_EDITOR
+                if (UnityEngine.Android.Permission.HasUserAuthorizedPermission(UnityEngine.Android.Permission.Camera))
+                {
+                    break;
+                }
+#endif
+                yield return new WaitForSeconds(0.5f);
+                elapsed += 0.5f;
+            }
+
+            Debug.Log("[MobileWebcam] Camera permission granted. Initializing camera...");
+            Initialize(previewTarget);
+        }
+
         public void SwitchCamera()
         {
             WebCamDevice[] devices = WebCamTexture.devices;
@@ -171,15 +191,20 @@ namespace ARHerb.Camera
         {
             previewUI = previewTarget;
 
+#if UNITY_ANDROID && !UNITY_EDITOR
             // Check Android camera permission
             bool permissionGranted = UnityEngine.Android.Permission.HasUserAuthorizedPermission(UnityEngine.Android.Permission.Camera);
             Debug.Log($"Android MVP mode: camera permission status = {(permissionGranted ? "GRANTED" : "DENIED")}");
 
             if (!permissionGranted)
             {
-                Debug.LogError("[MobileWebcam] Camera permission is not granted. Cannot initialize WebCamTexture.");
+                Debug.LogWarning("[MobileWebcam] Camera permission is not granted. Requesting Android Camera permission...");
+                UnityEngine.Android.Permission.RequestUserPermission(UnityEngine.Android.Permission.Camera);
+                StopAllCoroutines();
+                StartCoroutine(WaitForCameraPermissionAndInit(previewTarget));
                 return;
             }
+#endif
 
             // Find first rear camera as default
             WebCamDevice[] devices = WebCamTexture.devices;
@@ -377,6 +402,12 @@ namespace ARHerb.Camera
         {
             if (webcamTexture == null || !webcamTexture.isPlaying)
             {
+                Debug.LogWarning("[MobileWebcam] WebCamTexture is not playing. Attempting re-initialization...");
+                if (previewUI != null) Initialize(previewUI);
+            }
+
+            if (webcamTexture == null || !webcamTexture.isPlaying)
+            {
                 Debug.LogError("[MobileWebcam] Cannot capture: WebCamTexture is not active or initialized.");
                 onCaptured?.Invoke(null);
                 return;
@@ -387,16 +418,17 @@ namespace ARHerb.Camera
                 int texW = webcamTexture.width;
                 int texH = webcamTexture.height;
 
-                int cropW = Mathf.Clamp(Mathf.RoundToInt(texW / currentZoomFactor), 1, texW);
-                int cropH = Mathf.Clamp(Mathf.RoundToInt(texH / currentZoomFactor), 1, texH);
-                int cropX = Mathf.RoundToInt((texW - cropW) * 0.5f);
-                int cropY = Mathf.RoundToInt((texH - cropH) * 0.5f);
+                // Calculate 1:1 square crop centered on sensor to eliminate image stretching & maximize AI confidence
+                int baseSquareSide = Mathf.Min(texW, texH);
+                int cropSide = Mathf.Clamp(Mathf.RoundToInt(baseSquareSide / currentZoomFactor), 64, baseSquareSide);
 
-                Debug.Log("[Zoom] Capture uses current zoom crop");
-                Debug.Log($"[Zoom] Capture crop rect = (x={cropX}, y={cropY}, width={cropW}, height={cropH})");
+                int cropX = (texW - cropSide) / 2;
+                int cropY = (texH - cropSide) / 2;
 
-                Color[] pixels = webcamTexture.GetPixels(cropX, cropY, cropW, cropH);
-                Texture2D croppedPhoto = new Texture2D(cropW, cropH, TextureFormat.RGB24, false);
+                Debug.Log($"[MobileWebcam] Capturing undistorted 1:1 square crop = (x={cropX}, y={cropY}, side={cropSide}, zoom={currentZoomFactor:F2}x)");
+
+                Color[] pixels = webcamTexture.GetPixels(cropX, cropY, cropSide, cropSide);
+                Texture2D croppedPhoto = new Texture2D(cropSide, cropSide, TextureFormat.RGB24, false);
                 croppedPhoto.SetPixels(pixels);
                 croppedPhoto.Apply();
 
@@ -406,7 +438,7 @@ namespace ARHerb.Camera
                 if (rotationAngle != 0)
                 {
                     orientedPhoto = RotateTexture(croppedPhoto, rotationAngle);
-                    Destroy(croppedPhoto);
+                    if (orientedPhoto != croppedPhoto) Destroy(croppedPhoto);
                 }
 
                 if (isUsingFrontCamera)
@@ -416,20 +448,10 @@ namespace ARHerb.Camera
                     orientedPhoto = flippedPhoto;
                 }
 
-                int normalW = (rotationAngle == 90 || rotationAngle == 270) ? texH : texW;
-                int normalH = (rotationAngle == 90 || rotationAngle == 270) ? texW : texH;
+                byte[] jpegBytes = orientedPhoto.EncodeToJPG(88);
+                Destroy(orientedPhoto);
 
-                Texture2D finalPhoto = orientedPhoto;
-                if (currentZoomFactor > 1.01f)
-                {
-                    finalPhoto = ResizeTexture(orientedPhoto, normalW, normalH);
-                    Destroy(orientedPhoto);
-                }
-
-                byte[] jpegBytes = finalPhoto.EncodeToJPG(85);
-                Destroy(finalPhoto);
-
-                Debug.Log($"[MobileWebcam] Frame captured successfully ({jpegBytes.Length} bytes, output resolution {normalW}x{normalH}, zoom {currentZoomFactor:F2}x).");
+                Debug.Log($"[MobileWebcam] Frame captured successfully ({jpegBytes.Length} bytes, resolution {cropSide}x{cropSide}).");
                 onCaptured?.Invoke(jpegBytes);
             }
             catch (Exception ex)
