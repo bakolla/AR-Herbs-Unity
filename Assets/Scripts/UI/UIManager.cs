@@ -51,6 +51,7 @@ namespace ARHerb.UI
         private float currentScanLat = 0f;
         private float currentScanLng = 0f;
         private string currentCommonName = "";
+        private float lastLanguageDropdownCloseTime = 0f;
 
         [Header("Zoom UI Elements")]
         [SerializeField] private Button zoom1xButton;
@@ -312,6 +313,7 @@ namespace ARHerb.UI
             if (modeDropdown == null) return;
             Transform container = modeDropdown.transform;
             string[] buttonNames = new string[] { "ModeAutoButton", "ModePlantsButton", "ModeMushroomsButton", "ModeStonesButton", "ModeInsectsButton" };
+            string[] langKeys = new string[] { "mode_auto", "mode_plants", "mode_mushrooms", "mode_stones", "mode_insects" };
 
             for (int i = 0; i < buttonNames.Length; i++)
             {
@@ -342,6 +344,7 @@ namespace ARHerb.UI
                         Text txt = textTr.GetComponent<Text>();
                         if (txt != null)
                         {
+                            txt.text = ARHerb.Localization.LocalizationManager.Get(langKeys[i]);
                             txt.color = (i == activeTileIndex) ? Color.white : new Color(0.15f, 0.18f, 0.22f, 1.0f);
                         }
                     }
@@ -377,6 +380,31 @@ namespace ARHerb.UI
                 if (btnTxt != null) btnTxt.text = ARHerb.Localization.LocalizationManager.Get("btn_open_maps");
             }
 
+            // Refresh Mode Tile Button Texts
+            if (modeDropdown != null)
+            {
+                Transform container = modeDropdown.transform;
+                string[] buttonNames = new string[] { "ModeAutoButton", "ModePlantsButton", "ModeMushroomsButton", "ModeStonesButton", "ModeInsectsButton" };
+                string[] langKeys = new string[] { "mode_auto", "mode_plants", "mode_mushrooms", "mode_stones", "mode_insects" };
+
+                for (int i = 0; i < buttonNames.Length; i++)
+                {
+                    Transform btnTr = container.Find(buttonNames[i]);
+                    if (btnTr != null)
+                    {
+                        Transform textTr = btnTr.Find("Text");
+                        if (textTr != null)
+                        {
+                            Text txt = textTr.GetComponent<Text>();
+                            if (txt != null)
+                            {
+                                txt.text = ARHerb.Localization.LocalizationManager.Get(langKeys[i]);
+                            }
+                        }
+                    }
+                }
+            }
+
             if (modeDropdown != null && modeDropdown.options != null && modeDropdown.options.Count >= 4)
             {
                 modeDropdown.options[0].text = ARHerb.Localization.LocalizationManager.Get("mode_plants");
@@ -390,6 +418,23 @@ namespace ARHerb.UI
             {
                 SetScanButtonState(true, ARHerb.Localization.LocalizationManager.Get("btn_scan"));
                 SetStatusText(ARHerb.Localization.LocalizationManager.Get("status_ready"), StatusType.Ready);
+            }
+
+            // If Result Panel is currently open, dynamically refresh AI enrichment description in the new language
+            if (resultPanel != null && resultPanel.activeSelf && !string.IsNullOrEmpty(currentCommonName))
+            {
+                EnsureResultOpenInMapsButtonSetup();
+                if (backendClient != null)
+                {
+                    string sciName = (scientificNameText != null) ? scientificNameText.text : "";
+                    string queryName = string.IsNullOrEmpty(sciName) ? currentCommonName : sciName;
+                    backendClient.EnrichPlant(queryName, null, defaultLanguage, 
+                        onSuccess: enrichRes => {
+                            DisplayResultUI(currentCommonName, sciName, 0.95f, enrichRes?.enrichment);
+                        },
+                        onFailure: err => Debug.LogWarning($"[UIManager] Enrichment language update error: {err}")
+                    );
+                }
             }
         }
 
@@ -920,13 +965,8 @@ namespace ARHerb.UI
             debugRect.sizeDelta = Vector2.zero;
 
             Text debugTxt = debugGo.GetComponent<Text>();
-            debugTxt.text = "HISTORY PANEL OPEN";
-            debugTxt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            debugTxt.fontSize = 40;
-            debugTxt.fontStyle = FontStyle.Bold;
-            debugTxt.alignment = TextAnchor.MiddleCenter;
-            debugTxt.color = Color.yellow;
-            debugTxt.raycastTarget = false;
+            debugTxt.text = "";
+            debugGo.SetActive(false);
 
             // 4. Title Text
             GameObject titleGo = new GameObject("TitleText", typeof(Text));
@@ -937,7 +977,7 @@ namespace ARHerb.UI
             titleRect.sizeDelta = Vector2.zero;
 
             Text titleTxt = titleGo.GetComponent<Text>();
-            titleTxt.text = "HISTORIA SKANOWANIA";
+            titleTxt.text = ARHerb.Localization.LocalizationManager.Get("history_title");
             titleTxt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             titleTxt.fontSize = 28;
             titleTxt.fontStyle = FontStyle.Bold;
@@ -1063,14 +1103,165 @@ namespace ARHerb.UI
 
         private void CreateRuntimeHistoryCard(Transform container, ARHerb.History.HistoryItem item)
         {
-            GameObject cardGo = new GameObject($"Item_{item.id}", typeof(Image), typeof(LayoutElement));
+            GameObject cardGo = new GameObject($"Item_{item.id}", typeof(Image), typeof(Button), typeof(LayoutElement));
             cardGo.transform.SetParent(container, false);
 
             Image cardImg = cardGo.GetComponent<Image>();
             cardImg.color = new Color(0.14f, 0.16f, 0.22f, 0.95f);
+            cardImg.raycastTarget = true;
 
             LayoutElement le = cardGo.GetComponent<LayoutElement>();
             le.preferredHeight = 90f;
+
+            // Card click listener to open main result panel for this specimen
+            Button cardBtn = cardGo.GetComponent<Button>();
+            cardBtn.onClick.AddListener(() =>
+            {
+                string reqId = System.Guid.NewGuid().ToString().Substring(0, 8);
+                string timestamp = System.DateTime.Now.ToString("HH:mm:ss.fff");
+
+                Debug.Log($"[REQ-{reqId}] [{timestamp}] STAGE 1: History item clicked - ID: '{item.id}', CommonName: '{item.commonName}', ScientificName: '{item.scientificName}'");
+                Debug.Log($"[REQ-{reqId}] [{timestamp}] STAGE 2: Current selected language: '{defaultLanguage}'");
+                Debug.Log($"[REQ-{reqId}] [{timestamp}] STAGE 3: Saved original history item text - CommonName: '{item.commonName}', Description: '{item.description}'");
+
+                // 1. Close history overlay canvas
+                if (runtimeHistoryOverlayCanvasGo != null)
+                {
+                    Destroy(runtimeHistoryOverlayCanvasGo);
+                }
+
+                // 2. Set GPS location data
+                currentScanHasLocation = item.hasLocation;
+                currentScanLat = item.latitude;
+                currentScanLng = item.longitude;
+                openedResultFromHistory = true;
+
+                // 3. Immediately display ResultPanel with loading placeholders in active language
+                string loadingPlaceholder = ARHerb.Localization.LocalizationManager.Get("status_loading_details");
+                EnrichmentData loadingEnrichment = new EnrichmentData
+                {
+                    commonName = item.commonName,
+                    description = loadingPlaceholder,
+                    funFact = loadingPlaceholder,
+                    edibleStatus = item.edibleStatus,
+                    edibleNote = loadingPlaceholder
+                };
+
+                DisplayResultUI(item.commonName, item.scientificName, item.score, loadingEnrichment, reqId);
+
+                // 4. Request translated/enriched content from backend in current active language with 15s timeout
+                if (backendClient != null)
+                {
+                    string queryName = !string.IsNullOrEmpty(item.scientificName) ? item.scientificName : item.commonName;
+                    Debug.Log($"[REQ-{reqId}] [{timestamp}] STAGE 4: EnrichPlant called for history item. Query: '{queryName}', Language: '{defaultLanguage}'");
+
+                    bool enrichmentCompleted = false;
+
+                    backendClient.EnrichPlant(queryName, null, defaultLanguage,
+                        onSuccess: enrichRes => {
+                            if (enrichmentCompleted) return;
+                            enrichmentCompleted = true;
+
+                            string resTimestamp = System.DateTime.Now.ToString("HH:mm:ss.fff");
+                            Debug.Log($"[REQ-{reqId}] [{resTimestamp}] STAGE 5: HTTP 200 Success received from backend");
+                            if (enrichRes != null && enrichRes.enrichment != null)
+                            {
+                                Debug.Log($"[REQ-{reqId}] [{resTimestamp}] STAGE 6: Parsed backend response - Description: '{enrichRes.enrichment.description}', FunFact: '{enrichRes.enrichment.funFact}'");
+
+                                string finalCommonName = !string.IsNullOrEmpty(enrichRes.enrichment.commonName) 
+                                    ? enrichRes.enrichment.commonName 
+                                    : item.commonName;
+
+                                DisplayResultUI(finalCommonName, item.scientificName, item.score, enrichRes.enrichment, reqId);
+                            }
+                        },
+                        onFailure: err => {
+                            if (enrichmentCompleted) return;
+                            enrichmentCompleted = true;
+
+                            string errTimestamp = System.DateTime.Now.ToString("HH:mm:ss.fff");
+                            Debug.LogWarning($"[REQ-{reqId}] [{errTimestamp}] STAGE 5: HTTP Failure: {err}");
+
+                            // Fallback to saved history item data on failure
+                            EnrichmentData fallbackEnrichment = new EnrichmentData
+                            {
+                                commonName = item.commonName,
+                                description = item.description,
+                                funFact = item.funFact,
+                                edibleStatus = item.edibleStatus,
+                                edibleNote = item.edibleNote
+                            };
+
+                            DisplayResultUI(item.commonName, item.scientificName, item.score, fallbackEnrichment, reqId);
+                            ShowWarningToast(ARHerb.Localization.LocalizationManager.Get("status_backend_error"));
+                        }
+                    );
+
+                    StartCoroutine(EnrichTimeoutFallback(15f, reqId, () => {
+                        if (!enrichmentCompleted)
+                        {
+                            enrichmentCompleted = true;
+                            Debug.LogWarning($"[REQ-{reqId}] STAGE 5: 15-second timeout reached. Falling back to saved history data.");
+                            EnrichmentData fallbackEnrichment = new EnrichmentData
+                            {
+                                commonName = item.commonName,
+                                description = item.description,
+                                funFact = item.funFact,
+                                edibleStatus = item.edibleStatus,
+                                edibleNote = item.edibleNote
+                            };
+
+                            DisplayResultUI(item.commonName, item.scientificName, item.score, fallbackEnrichment, reqId);
+                            ShowWarningToast(ARHerb.Localization.LocalizationManager.Get("status_backend_error"));
+                        }
+                    }));
+                }
+                else
+                {
+                    // Fallback immediately if backendClient is missing
+                    EnrichmentData fallbackEnrichment = new EnrichmentData
+                    {
+                        commonName = item.commonName,
+                        description = item.description,
+                        funFact = item.funFact,
+                        edibleStatus = item.edibleStatus,
+                        edibleNote = item.edibleNote
+                    };
+                    DisplayResultUI(item.commonName, item.scientificName, item.score, fallbackEnrichment, reqId);
+                }
+
+                // 5. Load and show thumbnail preview image if available
+                if (!string.IsNullOrEmpty(item.thumbnailPath) && System.IO.File.Exists(item.thumbnailPath))
+                {
+                    try
+                    {
+                        byte[] bytes = System.IO.File.ReadAllBytes(item.thumbnailPath);
+                        Texture2D tex = new Texture2D(2, 2);
+                        if (tex.LoadImage(bytes) && thumbnailPreviewUI != null)
+                        {
+                            if (thumbnailPreviewUI.texture != null && thumbnailPreviewUI.texture is Texture2D dynamicTex)
+                            {
+                                Destroy(dynamicTex);
+                            }
+                            thumbnailPreviewUI.texture = tex;
+                            thumbnailPreviewUI.gameObject.SetActive(true);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.LogError($"[UIManager] Error loading item thumbnail from history: {ex.Message}");
+                    }
+                }
+
+                // 6. Ensure result panel is active and brought to front
+                if (resultPanel != null)
+                {
+                    resultPanel.SetActive(true);
+                    resultPanel.transform.SetAsLastSibling();
+                }
+
+                SetStatusText($"Wczytano z historii: {item.commonName}", StatusType.Success);
+            });
 
             // Text info
             GameObject infoGo = new GameObject("InfoText", typeof(Text));
@@ -1081,15 +1272,20 @@ namespace ARHerb.UI
             infoRect.sizeDelta = Vector2.zero;
 
             Text infoTxt = infoGo.GetComponent<Text>();
+            string noGpsLabel = ARHerb.Localization.LocalizationManager.Get("no_gps");
             string gpsInfo = item.hasLocation 
                 ? $"📍 GPS: {item.latitude.ToString("F4", System.Globalization.CultureInfo.InvariantCulture)}, {item.longitude.ToString("F4", System.Globalization.CultureInfo.InvariantCulture)}"
-                : "📍 Brak GPS";
+                : $"📍 {noGpsLabel}";
 
-            infoTxt.text = $"<b>{item.commonName}</b>\n<i>{item.scientificName}</i>\n<color=#80C0FF>{item.mode.ToUpper()} • {gpsInfo}</color>";
+            string modeKey = string.IsNullOrEmpty(item.mode) ? "mode_auto" : $"mode_{item.mode.ToLower()}";
+            string translatedMode = ARHerb.Localization.LocalizationManager.Get(modeKey).ToUpper();
+
+            infoTxt.text = $"<b>{item.commonName}</b>\n<i>{item.scientificName}</i>\n<color=#80C0FF>{translatedMode} • {gpsInfo}</color>";
             infoTxt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             infoTxt.fontSize = 13;
             infoTxt.color = Color.white;
             infoTxt.alignment = TextAnchor.MiddleLeft;
+            infoTxt.raycastTarget = false;
 
             // Maps Button inside card
             GameObject mapsBtnGo = new GameObject("MapsButton", typeof(Image), typeof(Button));
@@ -1111,7 +1307,7 @@ namespace ARHerb.UI
             mTxtRect.sizeDelta = Vector2.zero;
 
             Text mTxt = mTxtGo.GetComponent<Text>();
-            mTxt.text = hasLoc ? ARHerb.Localization.LocalizationManager.Get("btn_open_maps") : "Brak GPS";
+            mTxt.text = hasLoc ? ARHerb.Localization.LocalizationManager.Get("btn_open_maps") : noGpsLabel;
             mTxt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             mTxt.fontSize = 11;
             mTxt.alignment = TextAnchor.MiddleCenter;
@@ -1135,6 +1331,12 @@ namespace ARHerb.UI
                     ARHerb.Location.GPSLocationManager.OpenInGoogleMaps(lat, lng);
                 });
             }
+        }
+
+        private System.Collections.IEnumerator EnrichTimeoutFallback(float seconds, string reqId, System.Action onTimeout)
+        {
+            yield return new WaitForSeconds(seconds);
+            onTimeout?.Invoke();
         }
 
         private void OnCloseHistoryButtonClicked()
@@ -1381,11 +1583,30 @@ namespace ARHerb.UI
             });
         }
 
-        private void DisplayResultUI(string commonName, string scientificName, float score, EnrichmentData enrichment)
+        private void DisplayResultUI(string commonName, string scientificName, float score, EnrichmentData enrichment, string reqId = "DIRECT")
         {
+            string timestamp = System.DateTime.Now.ToString("HH:mm:ss.fff");
+            Debug.Log($"[REQ-{reqId}] [{timestamp}] STAGE 7/8: DisplayResultUI invoked for CommonName: '{commonName}' (Lang: '{defaultLanguage}')");
+
             if (resultPanel != null)
             {
                 resultPanel.SetActive(true);
+                resultPanel.transform.SetAsLastSibling();
+
+                RectTransform resRt = resultPanel.GetComponent<RectTransform>();
+                if (resRt != null)
+                {
+                    resRt.anchorMin = Vector2.zero;
+                    resRt.anchorMax = Vector2.one;
+                    resRt.offsetMin = Vector2.zero;
+                    resRt.offsetMax = Vector2.zero;
+                }
+
+                Image resImg = resultPanel.GetComponent<Image>();
+                if (resImg != null)
+                {
+                    resImg.color = new Color(0.07f, 0.08f, 0.11f, 1.0f); // Solid 100% opaque dark background
+                }
             }
             SetScanningFrameVisible(false);
 
@@ -1396,9 +1617,20 @@ namespace ARHerb.UI
 
             currentCommonName = commonName;
 
-            if (commonNameText != null) commonNameText.text = commonName;
-            if (scientificNameText != null) scientificNameText.text = scientificName;
-            if (scoreText != null) scoreText.text = $"{ARHerb.Localization.LocalizationManager.Get("score_label")}: {score:P1}";
+            if (commonNameText != null)
+            {
+                commonNameText.text = commonName;
+                Debug.Log($"[REQ-{reqId}] [{timestamp}] STAGE 7/8: commonNameText (ID:{commonNameText.GetInstanceID()}) assigned: '{commonName}'");
+            }
+            if (scientificNameText != null)
+            {
+                scientificNameText.text = scientificName;
+                Debug.Log($"[REQ-{reqId}] [{timestamp}] STAGE 7/8: scientificNameText (ID:{scientificNameText.GetInstanceID()}) assigned: '{scientificName}'");
+            }
+            if (scoreText != null)
+            {
+                scoreText.text = $"{ARHerb.Localization.LocalizationManager.Get("score_label")}: {score:P1}";
+            }
 
             if (resultGpsLabel != null)
             {
@@ -1410,11 +1642,20 @@ namespace ARHerb.UI
             }
 
             EnsureResultOpenInMapsButtonSetup();
+            EnsureResultPanelSwipeDismissSetup();
 
             if (enrichment != null)
             {
-                if (descriptionText != null) descriptionText.text = enrichment.description;
-                if (funFactText != null) funFactText.text = enrichment.funFact;
+                if (descriptionText != null)
+                {
+                    descriptionText.text = enrichment.description;
+                    Debug.Log($"[REQ-{reqId}] [{timestamp}] STAGE 7/8: descriptionText (ID:{descriptionText.GetInstanceID()}) assigned: '{enrichment.description}'");
+                }
+                if (funFactText != null)
+                {
+                    funFactText.text = enrichment.funFact;
+                    Debug.Log($"[REQ-{reqId}] [{timestamp}] STAGE 7/8: funFactText (ID:{funFactText.GetInstanceID()}) assigned: '{enrichment.funFact}'");
+                }
                 if (edibilityText != null)
                 {
                     string statusStr = GetFriendlyEdibilityStatus(enrichment.edibleStatus);
@@ -1422,6 +1663,7 @@ namespace ARHerb.UI
                         ? $"{ARHerb.Localization.LocalizationManager.Get("edibility_label")}: {statusStr}" 
                         : $"{ARHerb.Localization.LocalizationManager.Get("edibility_label")}: {statusStr} - {enrichment.edibleNote}";
                     edibilityText.text = edibilityLabel;
+                    Debug.Log($"[REQ-{reqId}] [{timestamp}] STAGE 7/8: edibilityText (ID:{edibilityText.GetInstanceID()}) assigned: '{edibilityLabel}'");
                 }
             }
             else
@@ -1430,6 +1672,19 @@ namespace ARHerb.UI
                 if (descriptionText != null) descriptionText.text = noData;
                 if (funFactText != null) funFactText.text = noData;
                 if (edibilityText != null) edibilityText.text = $"{ARHerb.Localization.LocalizationManager.Get("edibility_label")}: {noData}";
+            }
+
+            // Localize any static section header texts in ResultPanel
+            foreach (Text t in resultPanel.GetComponentsInChildren<Text>(true))
+            {
+                if (t.name.Contains("DescriptionTitle") || t.name.Contains("DescriptionHeader"))
+                    t.text = ARHerb.Localization.LocalizationManager.Get("description_label");
+                else if (t.name.Contains("FunFactTitle") || t.name.Contains("FunFactHeader"))
+                    t.text = ARHerb.Localization.LocalizationManager.Get("fun_fact_label");
+                else if (t.name.Contains("EdibilityTitle") || t.name.Contains("EdibilityHeader"))
+                    t.text = ARHerb.Localization.LocalizationManager.Get("edibility_label");
+                else if (t.name.Contains("ScoreTitle") || t.name.Contains("ScoreHeader"))
+                    t.text = ARHerb.Localization.LocalizationManager.Get("score_label");
             }
         }
 
@@ -1463,6 +1718,45 @@ namespace ARHerb.UI
             }
         }
 
+        private void EnsureResultPanelSwipeDismissSetup()
+        {
+            if (resultPanel == null) return;
+
+            ResultPanelSwipeDismiss swipeComponent = resultPanel.GetComponent<ResultPanelSwipeDismiss>();
+            if (swipeComponent == null)
+            {
+                swipeComponent = resultPanel.AddComponent<ResultPanelSwipeDismiss>();
+            }
+
+            swipeComponent.OnDismissed = () => {
+                Debug.Log("[UIManager] ResultPanel swiped down to dismiss");
+                SetScanningFrameVisible(true);
+                SetStatusText(ARHerb.Localization.LocalizationManager.Get("status_ready"), StatusType.Ready);
+                openedResultFromHistory = false;
+            };
+
+            // Top Drag Pill indicator (—)
+            Transform existingPill = resultPanel.transform.Find("DragPillIndicator");
+            if (existingPill == null)
+            {
+                GameObject pillGo = new GameObject("DragPillIndicator", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+                pillGo.transform.SetParent(resultPanel.transform, false);
+
+                RectTransform pillRt = pillGo.GetComponent<RectTransform>();
+                pillRt.anchorMin = new Vector2(0.5f, 0.975f);
+                pillRt.anchorMax = new Vector2(0.5f, 0.975f);
+                pillRt.pivot = new Vector2(0.5f, 0.5f);
+                pillRt.sizeDelta = new Vector2(90f, 8f);
+                pillRt.anchoredPosition = Vector2.zero;
+
+                Image pillImg = pillGo.GetComponent<Image>();
+                pillImg.color = new Color(1f, 1f, 1f, 0.45f);
+                pillImg.raycastTarget = false;
+
+                pillGo.transform.SetAsLastSibling();
+            }
+        }
+
         private void EnsureResultOpenInMapsButtonSetup()
         {
             Debug.Log("[MapsButton] ShowResult called");
@@ -1493,7 +1787,7 @@ namespace ARHerb.UI
                 }
                 else
                 {
-                    resultGpsLabel.text = "Brak danych GPS dla tego skanu.";
+                    resultGpsLabel.text = ARHerb.Localization.LocalizationManager.Get("location_no_data");
                 }
             }
 
@@ -1550,7 +1844,7 @@ namespace ARHerb.UI
 
                 Text btnTxt = txtTr.GetComponent<Text>();
                 if (btnTxt == null) btnTxt = txtTr.gameObject.AddComponent<Text>();
-                btnTxt.text = currentScanHasLocation ? ARHerb.Localization.LocalizationManager.Get("btn_open_maps") : "Brak GPS";
+                btnTxt.text = currentScanHasLocation ? ARHerb.Localization.LocalizationManager.Get("btn_open_maps") : ARHerb.Localization.LocalizationManager.Get("no_gps");
                 btnTxt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
                 btnTxt.fontSize = 12;
                 btnTxt.alignment = TextAnchor.MiddleCenter;
@@ -1592,15 +1886,8 @@ namespace ARHerb.UI
 
             if (resultDebugText != null)
             {
-                if (resultOpenInMapsButton != null && resultOpenInMapsButton.gameObject.activeInHierarchy)
-                {
-                    resultDebugText.text = "MAP BUTTON EXISTS";
-                }
-                else
-                {
-                    resultDebugText.text = "MAP BUTTON MISSING";
-                }
-                resultDebugText.gameObject.SetActive(true);
+                resultDebugText.text = "";
+                resultDebugText.gameObject.SetActive(false);
             }
         }
 
@@ -1636,10 +1923,74 @@ namespace ARHerb.UI
                         break;
                     case StatusType.Error:
                         statusMessageText.color = new Color(0.9f, 0.3f, 0.3f); // Coral red
+                        ShowWarningToast(message);
                         break;
                 }
                 
                 Debug.Log($"[UIManager] Status ({type}): {message}");
+            }
+        }
+
+        private void ShowWarningToast(string message)
+        {
+            Canvas canvas = GetComponentInParent<Canvas>();
+            if (canvas == null) canvas = FindObjectOfType<Canvas>();
+            if (canvas == null) return;
+
+            Transform existingToast = canvas.transform.Find("WarningToastBanner");
+            GameObject toastGo;
+            if (existingToast != null)
+            {
+                toastGo = existingToast.gameObject;
+            }
+            else
+            {
+                toastGo = new GameObject("WarningToastBanner", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+                toastGo.transform.SetParent(canvas.transform, false);
+
+                RectTransform rt = toastGo.GetComponent<RectTransform>();
+                rt.anchorMin = new Vector2(0.08f, 0.78f);
+                rt.anchorMax = new Vector2(0.92f, 0.85f);
+                rt.offsetMin = Vector2.zero;
+                rt.offsetMax = Vector2.zero;
+
+                Image img = toastGo.GetComponent<Image>();
+                img.color = new Color(0.85f, 0.2f, 0.2f, 0.95f);
+
+                GameObject txtGo = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer), typeof(Text));
+                txtGo.transform.SetParent(toastGo.transform, false);
+
+                RectTransform txtRt = txtGo.GetComponent<RectTransform>();
+                txtRt.anchorMin = Vector2.zero;
+                txtRt.anchorMax = Vector2.one;
+                txtRt.offsetMin = new Vector2(10, 5);
+                txtRt.offsetMax = new Vector2(-10, -5);
+
+                Text txt = txtGo.GetComponent<Text>();
+                txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+                txt.fontSize = 18;
+                txt.fontStyle = FontStyle.Bold;
+                txt.alignment = TextAnchor.MiddleCenter;
+                txt.color = Color.white;
+            }
+
+            Text toastText = toastGo.GetComponentInChildren<Text>();
+            if (toastText != null)
+            {
+                toastText.text = "⚠️ " + message;
+            }
+
+            toastGo.SetActive(true);
+            StopCoroutine("DismissWarningToast");
+            StartCoroutine("DismissWarningToast", toastGo);
+        }
+
+        private System.Collections.IEnumerator DismissWarningToast(GameObject toastGo)
+        {
+            yield return new WaitForSeconds(4.0f);
+            if (toastGo != null)
+            {
+                toastGo.SetActive(false);
             }
         }
 
@@ -1715,66 +2066,6 @@ namespace ARHerb.UI
                 historyButton.onClick.AddListener(OnHistoryButtonClicked);
                 historyButton.gameObject.SetActive(true);
             }
-        }
-
-        private void EnsureSettingsPanelSetup()
-        {
-            Canvas canvas = GetComponentInParent<Canvas>();
-            if (canvas == null) canvas = FindObjectOfType<Canvas>();
-            if (canvas == null) return;
-
-            Transform safeAreaTr = canvas.transform.Find("SafeArea");
-            Transform parentTr = safeAreaTr != null ? safeAreaTr : canvas.transform;
-
-            // Find SettingsButton
-            Transform settingsBtnTr = parentTr.Find("TopHeaderPanel/SettingsButton");
-            if (settingsBtnTr == null) settingsBtnTr = parentTr.Find("SettingsButton");
-            if (settingsBtnTr == null) settingsBtnTr = canvas.transform.Find("SettingsButton");
-
-            // Find SettingsPanel
-            Transform settingsPanelTr = parentTr.Find("SettingsPanel");
-            if (settingsPanelTr == null) settingsPanelTr = canvas.transform.Find("SettingsPanel");
-            if (settingsPanelTr == null) settingsPanelTr = parentTr.Find("TopHeaderPanel/SettingsPanel");
-
-            // Connect InputField if null
-            if (backendUrlInput == null && settingsPanelTr != null)
-            {
-                Transform inputTr = settingsPanelTr.Find("BackendUrlInput");
-                if (inputTr != null)
-                {
-                    backendUrlInput = inputTr.GetComponent<InputField>();
-                }
-            }
-
-            if (backendUrlInput != null)
-            {
-                string savedUrl = PlayerPrefs.GetString("SavedBackendUrl", "");
-                if (string.IsNullOrEmpty(savedUrl) && backendClient != null)
-                {
-                    savedUrl = backendClient.GetBackendUrl();
-                }
-                if (string.IsNullOrEmpty(savedUrl)) savedUrl = "http://localhost:3001";
-                backendUrlInput.text = savedUrl;
-                backendUrlInput.onEndEdit.RemoveAllListeners();
-                backendUrlInput.onEndEdit.AddListener(OnBackendUrlChanged);
-            }
-
-            // Connect SettingsButton onClick to toggle SettingsPanel
-            if (settingsBtnTr != null && settingsPanelTr != null)
-            {
-                Button settingsBtn = settingsBtnTr.GetComponent<Button>();
-                GameObject panelGo = settingsPanelTr.gameObject;
-
-                if (settingsBtn != null)
-                {
-                    settingsBtn.onClick.RemoveAllListeners();
-                    settingsBtn.onClick.AddListener(() => {
-                        bool newState = !panelGo.activeSelf;
-                        panelGo.SetActive(newState);
-                        Debug.Log($"[UIManager] Settings panel toggled active: {newState}");
-                    });
-                }
-            }
 
             // 2. Guarantee GalleryButton
             if (galleryButton == null)
@@ -1829,6 +2120,69 @@ namespace ARHerb.UI
             EnsureHistoryPanelSetup(parentTr);
         }
 
+        private void EnsureSettingsPanelSetup()
+        {
+            GameObject btnGo = FindGameObjectInScene("SettingsButton");
+            GameObject panelGo = FindGameObjectInScene("SettingsPanel");
+
+            Debug.Log($"[UIManager] SettingsButton found = {(btnGo != null)}, SettingsPanel found = {(panelGo != null)}");
+
+            if (btnGo == null || panelGo == null) return;
+
+            Button settingsBtn = btnGo.GetComponent<Button>();
+            if (settingsBtn == null) settingsBtn = btnGo.AddComponent<Button>();
+
+            if (backendUrlInput == null)
+            {
+                backendUrlInput = panelGo.GetComponentInChildren<InputField>(true);
+            }
+
+            if (backendUrlInput != null)
+            {
+                string savedUrl = PlayerPrefs.GetString("SavedBackendUrl", "");
+                if (string.IsNullOrEmpty(savedUrl) && backendClient != null)
+                {
+                    savedUrl = backendClient.GetBackendUrl();
+                }
+                if (string.IsNullOrEmpty(savedUrl)) savedUrl = "http://localhost:3001";
+                backendUrlInput.text = savedUrl;
+                backendUrlInput.onEndEdit.RemoveAllListeners();
+                backendUrlInput.onEndEdit.AddListener(OnBackendUrlChanged);
+            }
+
+            // Ensure panel has valid RectTransform anchors and styling
+            RectTransform panelRt = panelGo.GetComponent<RectTransform>();
+            if (panelRt != null)
+            {
+                panelRt.anchorMin = new Vector2(0.05f, 0.74f);
+                panelRt.anchorMax = new Vector2(0.95f, 0.84f);
+                panelRt.offsetMin = Vector2.zero;
+                panelRt.offsetMax = Vector2.zero;
+            }
+
+            Image panelImg = panelGo.GetComponent<Image>();
+            if (panelImg != null)
+            {
+                panelImg.color = new Color(0.1f, 0.13f, 0.18f, 0.98f);
+            }
+
+            Canvas extraCanvas = panelGo.GetComponent<Canvas>();
+            if (extraCanvas != null) Destroy(extraCanvas);
+
+            settingsBtn.onClick.RemoveAllListeners();
+            settingsBtn.onClick.AddListener(() => {
+                bool newState = !panelGo.activeSelf;
+                panelGo.SetActive(newState);
+
+                if (newState)
+                {
+                    panelGo.transform.SetAsLastSibling();
+                }
+
+                Debug.Log($"[UIManager] Settings panel toggled active: {newState}");
+            });
+        }
+
         private void EnsureHistoryPanelSetup(Transform parentTr)
         {
             if (historyPanel == null)
@@ -1875,14 +2229,10 @@ namespace ARHerb.UI
 
         private void EnsureLanguageDropdownVisible()
         {
-            // 1. Make language overlay canvas visible
-            if (languageOverlayCanvas != null)
+            // 1. Disable empty overlay canvas if present so it never blocks touch/click raycasts
+            if (languageOverlayCanvas != null && languageOverlayCanvas.transform.childCount == 0)
             {
-                languageOverlayCanvas.gameObject.SetActive(true);
-                languageOverlayCanvas.sortingOrder = 1000;
-                languageOverlayCanvas.overrideSorting = true;
-                languageOverlayCanvas.gameObject.SetActive(true);
-                Debug.Log("[Language] visible on Android = true");
+                languageOverlayCanvas.gameObject.SetActive(false);
             }
 
             // 2. Ensure dropdown is visible and interactable
@@ -1890,6 +2240,62 @@ namespace ARHerb.UI
             {
                 languageDropdown.gameObject.SetActive(true);
                 languageDropdown.interactable = true;
+
+                // Ensure options are clear (PL, EN, GR)
+                languageDropdown.options = new System.Collections.Generic.List<Dropdown.OptionData>
+                {
+                    new Dropdown.OptionData("PL"),
+                    new Dropdown.OptionData("EN"),
+                    new Dropdown.OptionData("GR")
+                };
+                languageDropdown.RefreshShownValue();
+
+                // Ensure Template has Canvas for top-level sorting and wide layout
+                if (languageDropdown.template != null)
+                {
+                    RectTransform templateRt = languageDropdown.template.GetComponent<RectTransform>();
+                    if (templateRt != null)
+                    {
+                        templateRt.sizeDelta = new Vector2(180f, 220f); // Wider spacious dropdown list
+                    }
+
+                    Image templateImg = languageDropdown.template.GetComponent<Image>();
+                    if (templateImg != null)
+                    {
+                        templateImg.color = new Color(0.95f, 0.97f, 0.95f, 0.98f); // Clean light background
+                    }
+
+                    Canvas templateCanvas = languageDropdown.template.GetComponent<Canvas>();
+                    if (templateCanvas == null)
+                    {
+                        templateCanvas = languageDropdown.template.gameObject.AddComponent<Canvas>();
+                    }
+                    templateCanvas.overrideSorting = true;
+                    templateCanvas.sortingOrder = 30000;
+
+                    if (languageDropdown.template.GetComponent<GraphicRaycaster>() == null)
+                    {
+                        languageDropdown.template.gameObject.AddComponent<GraphicRaycaster>();
+                    }
+
+                    // Ensure each item has sufficient height (55px) and bold dark green text
+                    foreach (Toggle itemToggle in languageDropdown.template.GetComponentsInChildren<Toggle>(true))
+                    {
+                        RectTransform itemRt = itemToggle.GetComponent<RectTransform>();
+                        if (itemRt != null)
+                        {
+                            itemRt.sizeDelta = new Vector2(0f, 55f);
+                        }
+                    }
+
+                    foreach (Text t in languageDropdown.template.GetComponentsInChildren<Text>(true))
+                    {
+                        t.color = new Color(0.08f, 0.48f, 0.18f); // Dark green matching button color
+                        t.fontSize = 22;
+                        t.fontStyle = FontStyle.Bold;
+                        t.alignment = TextAnchor.MiddleCenter;
+                    }
+                }
 
                 Image img = languageDropdown.GetComponent<Image>();
                 if (img != null)
@@ -1900,13 +2306,43 @@ namespace ARHerb.UI
                     img.raycastTarget = true;
                 }
 
-                foreach (Text t in languageDropdown.GetComponentsInChildren<Text>(true))
+                // Add EventTrigger to handle toggle-closing dropdown when button is clicked while list is open
+                UnityEngine.EventSystems.EventTrigger trigger = languageDropdown.gameObject.GetComponent<UnityEngine.EventSystems.EventTrigger>();
+                if (trigger == null) trigger = languageDropdown.gameObject.AddComponent<UnityEngine.EventSystems.EventTrigger>();
+                trigger.triggers.Clear();
+
+                UnityEngine.EventSystems.EventTrigger.Entry pointerDownEntry = new UnityEngine.EventSystems.EventTrigger.Entry
                 {
-                    Color tc = t.color;
-                    tc.a = 1f;
-                    t.color = tc;
-                    t.raycastTarget = false;
-                }
+                    eventID = UnityEngine.EventSystems.EventTriggerType.PointerDown
+                };
+                pointerDownEntry.callback.AddListener((data) => {
+                    GameObject openList = GameObject.Find("Dropdown List");
+                    if (openList == null && languageDropdown.transform.Find("Dropdown List") != null)
+                    {
+                        openList = languageDropdown.transform.Find("Dropdown List").gameObject;
+                    }
+
+                    if (openList != null && openList.activeSelf)
+                    {
+                        // Dropdown list is currently open -> close it and mark timestamp
+                        lastLanguageDropdownCloseTime = Time.unscaledTime;
+                        languageDropdown.Hide();
+                    }
+                });
+                trigger.triggers.Add(pointerDownEntry);
+
+                UnityEngine.EventSystems.EventTrigger.Entry pointerClickEntry = new UnityEngine.EventSystems.EventTrigger.Entry
+                {
+                    eventID = UnityEngine.EventSystems.EventTriggerType.PointerClick
+                };
+                pointerClickEntry.callback.AddListener((data) => {
+                    if (Time.unscaledTime - lastLanguageDropdownCloseTime < 0.4f)
+                    {
+                        // Suppress instant re-opening
+                        languageDropdown.Hide();
+                    }
+                });
+                trigger.triggers.Add(pointerClickEntry);
             }
             else
             {
@@ -2031,7 +2467,7 @@ namespace ARHerb.UI
             EnsureScanningFrameSetup();
             if (scanningFrame != null)
             {
-                scanningFrame.SetActive(visible);
+                scanningFrame.SetActive(true); // Scanning frame stays constantly visible as requested
             }
         }
 
@@ -2064,12 +2500,13 @@ namespace ARHerb.UI
             Button camDropdownBtn = FindButtonByName("CameraDropdown");
             if (camDropdownBtn != null) buttonIconMap[camDropdownBtn] = "chose_camera";
 
-            // Also try to find a LanguageButton / SettingsButton by name in the hierarchy
+            // Also try to find a LanguageButton / LanguageDropdown / SettingsButton by name in the hierarchy
             Button langBtn = FindButtonByName("LanguageButton");
+            if (langBtn == null) langBtn = FindButtonByName("LanguageDropdown");
             if (langBtn != null) buttonIconMap[langBtn] = "jezyk";
 
             Button settingsBtn = FindButtonByName("SettingsButton");
-            if (settingsBtn != null) buttonIconMap[settingsBtn] = "jezyk";
+            if (settingsBtn != null) buttonIconMap[settingsBtn] = "settings2";
 
             foreach (var kvp in buttonIconMap)
             {
@@ -2088,25 +2525,34 @@ namespace ARHerb.UI
             }
         }
 
-        private Button FindButtonByName(string name)
+        private GameObject FindGameObjectInScene(string name)
         {
-            Canvas canvas = GetComponentInParent<Canvas>();
-            if (canvas == null) canvas = FindObjectOfType<Canvas>();
-            if (canvas == null) return null;
-            Transform t = canvas.transform.Find(name);
-            if (t == null)
+            GameObject go = GameObject.Find(name);
+            if (go != null) return go;
+
+            foreach (Canvas c in FindObjectsOfType<Canvas>(true))
             {
-                // Deep search
-                foreach (Transform child in canvas.GetComponentsInChildren<Transform>(true))
+                foreach (Transform t in c.GetComponentsInChildren<Transform>(true))
                 {
-                    if (child.name == name)
-                    {
-                        t = child;
-                        break;
-                    }
+                    if (t.name == name) return t.gameObject;
                 }
             }
-            return t?.GetComponent<Button>();
+
+            foreach (GameObject rootGo in UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects())
+            {
+                foreach (Transform t in rootGo.GetComponentsInChildren<Transform>(true))
+                {
+                    if (t.name == name) return t.gameObject;
+                }
+            }
+
+            return null;
+        }
+
+        private Button FindButtonByName(string name)
+        {
+            GameObject go = FindGameObjectInScene(name);
+            return go != null ? go.GetComponent<Button>() : null;
         }
 
         private Sprite LoadIconSprite(string iconName)
@@ -2410,10 +2856,12 @@ namespace ARHerb.UI
                 }
 
                 // Camera Select Button (Center - opens modal picker)
+                Transform oldDropdown = cameraBarGo.transform.Find("CameraDropdown");
+                if (oldDropdown != null) oldDropdown.gameObject.SetActive(false);
+
                 if (cameraSelectButton == null)
                 {
-                    Transform foundSelect = cameraBarGo.transform.Find("CameraDropdown");
-                    if (foundSelect == null) foundSelect = cameraBarGo.transform.Find("CameraSelectButton");
+                    Transform foundSelect = cameraBarGo.transform.Find("CameraSelectButton");
                     if (foundSelect != null) cameraSelectButton = foundSelect.GetComponent<Button>();
                 }
                 if (cameraSelectButton == null)
@@ -2498,6 +2946,13 @@ namespace ARHerb.UI
             {
                 switchCameraButton.onClick.RemoveAllListeners();
                 switchCameraButton.onClick.AddListener(OnSwitchCameraButtonClicked);
+                foreach (Transform child in switchCameraButton.transform)
+                {
+                    if (child.name == "Text" || child.name == "Label")
+                    {
+                        child.gameObject.SetActive(false);
+                    }
+                }
             }
             if (cameraSelectButton != null)
             {
@@ -2595,7 +3050,7 @@ namespace ARHerb.UI
             titleRect.sizeDelta = Vector2.zero;
 
             Text titleTxt = titleGo.GetComponent<Text>();
-            titleTxt.text = "📷 Wybierz Aparat";
+            titleTxt.text = "📷 " + ARHerb.Localization.LocalizationManager.Get("camera_select_title");
             titleTxt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             titleTxt.fontSize = 28;
             titleTxt.fontStyle = FontStyle.Bold;

@@ -19,6 +19,15 @@ namespace ARHerb.Network
         [Tooltip("Backend Server Address.\n- In Unity Editor: http://localhost:3001\n- On Mobile: Use your Pinggy, ngrok, or hosted HTTPS backend URL (e.g. https://yourtunnel.pinggy.link).")]
         [SerializeField] private string backendUrl = "http://localhost:3001";
 
+        private void Awake()
+        {
+            string savedUrl = PlayerPrefs.GetString("SavedBackendUrl", "");
+            if (!string.IsNullOrEmpty(savedUrl))
+            {
+                SetBackendUrl(savedUrl);
+            }
+        }
+
         /// <summary>
         /// Sends an image payload to the backend's /api/identify endpoint.
         /// </summary>
@@ -58,6 +67,7 @@ namespace ARHerb.Network
 
             using (UnityWebRequest request = new UnityWebRequest(requestUrl, "POST"))
             {
+                request.timeout = 15;
                 byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonPayload);
                 request.uploadHandler = new UploadHandlerRaw(bodyRaw);
                 request.downloadHandler = new DownloadHandlerBuffer();
@@ -121,10 +131,12 @@ namespace ARHerb.Network
 
             string jsonPayload = JsonConvert.SerializeObject(payload);
 
-            Debug.Log($"[BackendClient] Sending POST to {requestUrl} (ScientificName: {scientificName})...");
+            Debug.Log($"[DEBUG DATAFLOW] Selected Language: {lang}");
+            Debug.Log($"[DEBUG DATAFLOW] Request Body sent to backend ({requestUrl}):\n{jsonPayload}");
 
             using (UnityWebRequest request = new UnityWebRequest(requestUrl, "POST"))
             {
+                request.timeout = 15;
                 byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonPayload);
                 request.uploadHandler = new UploadHandlerRaw(bodyRaw);
                 request.downloadHandler = new DownloadHandlerBuffer();
@@ -135,7 +147,7 @@ namespace ARHerb.Network
                 if (request.result == UnityWebRequest.Result.Success)
                 {
                     string jsonResponse = request.downloadHandler.text;
-                    Debug.Log($"[BackendClient] Enrich response:\n{jsonResponse}");
+                    Debug.Log($"[DEBUG DATAFLOW] Raw Backend Response:\n{jsonResponse}");
 
                     try
                     {

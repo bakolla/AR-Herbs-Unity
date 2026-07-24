@@ -20,7 +20,8 @@ public class AttachButtonIconsEditor
         { "SwitchCameraButton", "kamera"       },
         { "HistoryButton",      "time"         },
         { "LanguageButton",     "jezyk"        },
-        { "SettingsButton",     "jezyk"        },
+        { "LanguageDropdown",   "jezyk"        },
+        { "SettingsButton",     "settings2"    },
         { "CameraDropdown",     "chose_camera" },
         { "CameraSelectButton", "chose_camera" },
     };
