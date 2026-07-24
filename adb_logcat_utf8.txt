@@ -1,0 +1,625 @@
+﻿--------- beginning of system
+--------- beginning of main
+07-24 12:04:56.810 19117 19178 I Unity   : [REQ-6af76bb3] [12:04:56.807] STAGE 7/8: commonNameText (ID:11322) assigned: 'Raspberry'
+07-24 12:04:56.810 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:04:56.810 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:04:56.810 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass74_0:<CreateRuntimeHistoryCard>b__0()
+07-24 12:04:56.810 19117 19178 I Unity   : UnityEngine.Events.UnityEvent:Invoke()
+07-24 12:04:56.810 19117 19178 I Unity   : UnityEngine.EventSystems.ExecuteEvents:Execute(GameObject, BaseEventData, EventFunction`1)
+07-24 12:04:56.810 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchPress(PointerEventData, Boolean, Boolean)
+07-24 12:04:56.810 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchEvents()
+07-24 12:04:56.810 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:Process()
+07-24 12:04:56.810 19117 19178 I Unity   : 
+07-24 12:04:56.811 19117 19178 I Unity   : [REQ-6af76bb3] [12:04:56.807] STAGE 7/8: scientificNameText (ID:11374) assigned: 'Rubus idaeus'
+07-24 12:04:56.811 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:04:56.811 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:04:56.811 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass74_0:<CreateRuntimeHistoryCard>b__0()
+07-24 12:04:56.811 19117 19178 I Unity   : UnityEngine.Events.UnityEvent:Invoke()
+07-24 12:04:56.811 19117 19178 I Unity   : UnityEngine.EventSystems.ExecuteEvents:Execute(GameObject, BaseEventData, EventFunction`1)
+07-24 12:04:56.811 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchPress(PointerEventData, Boolean, Boolean)
+07-24 12:04:56.811 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchEvents()
+07-24 12:04:56.811 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:Process()
+07-24 12:04:56.811 19117 19178 I Unity   : 
+07-24 12:04:56.812 19117 19178 I Unity   : [MapsButton] ShowResult called
+07-24 12:04:56.812 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:04:56.812 19117 19178 I Unity   : ARHerb.UI.UIManager:EnsureResultOpenInMapsButtonSetup()
+07-24 12:04:56.812 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:04:56.812 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass74_0:<CreateRuntimeHistoryCard>b__0()
+07-24 12:04:56.812 19117 19178 I Unity   : UnityEngine.Events.UnityEvent:Invoke()
+07-24 12:04:56.812 19117 19178 I Unity   : UnityEngine.EventSystems.ExecuteEvents:Execute(GameObject, BaseEventData, EventFunction`1)
+07-24 12:04:56.812 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchPress(PointerEventData, Boolean, Boolean)
+07-24 12:04:56.812 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchEvents()
+07-24 12:04:56.812 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:Process()
+07-24 12:04:56.812 19117 19178 I Unity   : 
+07-24 12:04:56.812 19117 19178 I Unity   : [MapsButton] UIManager reference assigned = True
+07-24 12:04:56.812 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:04:56.812 19117 19178 I Unity   : ARHerb.UI.UIManager:EnsureResultOpenInMapsButtonSetup()
+07-24 12:04:56.812 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:04:56.812 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass74_0:<CreateRuntimeHistoryCard>b__0()
+07-24 12:04:56.812 19117 19178 I Unity   : UnityEngine.Events.UnityEvent:Invoke()
+07-24 12:04:56.812 19117 19178 I Unity   : UnityEngine.EventSystems.ExecuteEvents:Execute(GameObject, BaseEventData, EventFunction`1)
+07-24 12:04:56.812 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchPress(PointerEventData, Boolean, Boolean)
+07-24 12:04:56.812 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchEvents()
+07-24 12:04:56.812 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:Process()
+07-24 12:04:56.812 19117 19178 I Unity   : 
+07-24 12:04:56.813 19117 19178 I Unity   : [MapsButton] button activeSelf = True
+07-24 12:04:56.813 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:04:56.813 19117 19178 I Unity   : ARHerb.UI.UIManager:EnsureResultOpenInMapsButtonSetup()
+07-24 12:04:56.813 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:04:56.813 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass74_0:<CreateRuntimeHistoryCard>b__0()
+07-24 12:04:56.813 19117 19178 I Unity   : UnityEngine.Events.UnityEvent:Invoke()
+07-24 12:04:56.813 19117 19178 I Unity   : UnityEngine.EventSystems.ExecuteEvents:Execute(GameObject, BaseEventData, EventFunction`1)
+07-24 12:04:56.813 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchPress(PointerEventData, Boolean, Boolean)
+07-24 12:04:56.813 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchEvents()
+07-24 12:04:56.813 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:Process()
+07-24 12:04:56.813 19117 19178 I Unity   : 
+07-24 12:04:56.813 19117 19178 I Unity   : [MapsButton] activeInHierarchy = True
+07-24 12:04:56.813 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:04:56.813 19117 19178 I Unity   : ARHerb.UI.UIManager:EnsureResultOpenInMapsButtonSetup()
+07-24 12:04:56.813 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:04:56.813 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass74_0:<CreateRuntimeHistoryCard>b__0()
+07-24 12:04:56.813 19117 19178 I Unity   : UnityEngine.Events.UnityEvent:Invoke()
+07-24 12:04:56.813 19117 19178 I Unity   : UnityEngine.EventSystems.ExecuteEvents:Execute(GameObject, BaseEventData, EventFunction`1)
+07-24 12:04:56.813 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchPress(PointerEventData, Boolean, Boolean)
+07-24 12:04:56.813 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchEvents()
+07-24 12:04:56.813 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:Process()
+07-24 12:04:56.813 19117 19178 I Unity   : 
+07-24 12:04:56.814 19117 19178 I Unity   : [MapsButton] rect = (0.55, 0.02) to (0.95, 0.14)
+07-24 12:04:56.814 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:04:56.814 19117 19178 I Unity   : ARHerb.UI.UIManager:EnsureResultOpenInMapsButtonSetup()
+07-24 12:04:56.814 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:04:56.814 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass74_0:<CreateRuntimeHistoryCard>b__0()
+07-24 12:04:56.814 19117 19178 I Unity   : UnityEngine.Events.UnityEvent:Invoke()
+07-24 12:04:56.814 19117 19178 I Unity   : UnityEngine.EventSystems.ExecuteEvents:Execute(GameObject, BaseEventData, EventFunction`1)
+07-24 12:04:56.814 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchPress(PointerEventData, Boolean, Boolean)
+07-24 12:04:56.814 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchEvents()
+07-24 12:04:56.814 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:Process()
+07-24 12:04:56.814 19117 19178 I Unity   : 
+07-24 12:04:56.814 19117 19178 I Unity   : [MapsButton] sibling index = 13
+07-24 12:04:56.814 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:04:56.814 19117 19178 I Unity   : ARHerb.UI.UIManager:EnsureResultOpenInMapsButtonSetup()
+07-24 12:04:56.814 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:04:56.814 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass74_0:<CreateRuntimeHistoryCard>b__0()
+07-24 12:04:56.814 19117 19178 I Unity   : UnityEngine.Events.UnityEvent:Invoke()
+07-24 12:04:56.814 19117 19178 I Unity   : UnityEngine.EventSystems.ExecuteEvents:Execute(GameObject, BaseEventData, EventFunction`1)
+07-24 12:04:56.814 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchPress(PointerEventData, Boolean, Boolean)
+07-24 12:04:56.814 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchEvents()
+07-24 12:04:56.814 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:Process()
+07-24 12:04:56.814 19117 19178 I Unity   : 
+07-24 12:04:56.814 19117 19178 I Unity   : [MapsButton] listener assigned
+07-24 12:04:56.814 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:04:56.814 19117 19178 I Unity   : ARHerb.UI.UIManager:EnsureResultOpenInMapsButtonSetup()
+07-24 12:04:56.814 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:04:56.814 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass74_0:<CreateRuntimeHistoryCard>b__0()
+07-24 12:04:56.814 19117 19178 I Unity   : UnityEngine.Events.UnityEvent:Invoke()
+07-24 12:04:56.814 19117 19178 I Unity   : UnityEngine.EventSystems.ExecuteEvents:Execute(GameObject, BaseEventData, EventFunction`1)
+07-24 12:04:56.814 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchPress(PointerEventData, Boolean, Boolean)
+07-24 12:04:56.814 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchEvents()
+07-24 12:04:56.814 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:Process()
+07-24 12:04:56.814 19117 19178 I Unity   : 
+07-24 12:04:56.815 19117 19178 I Unity   : [REQ-6af76bb3] [12:04:56.807] STAGE 7/8: descriptionText (ID:11118) assigned: '╬Ž¤î¤ü¤ä¤ë¤â╬Ě ╬╗╬Á¤Ç¤ä╬┐╬╝╬Á¤ü╬Á╬╣¤Ä╬Ż...'
+07-24 12:04:56.815 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:04:56.815 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:04:56.815 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass74_0:<CreateRuntimeHistoryCard>b__0()
+07-24 12:04:56.815 19117 19178 I Unity   : UnityEngine.Events.UnityEvent:Invoke()
+07-24 12:04:56.815 19117 19178 I Unity   : UnityEngine.EventSystems.ExecuteEvents:Execute(GameObject, BaseEventData, EventFunction`1)
+07-24 12:04:56.815 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchPress(PointerEventData, Boolean, Boolean)
+07-24 12:04:56.815 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchEvents()
+07-24 12:04:56.815 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:Process()
+07-24 12:04:56.815 19117 19178 I Unity   : 
+07-24 12:04:56.816 19117 19178 I Unity   : [REQ-6af76bb3] [12:04:56.807] STAGE 7/8: funFactText (ID:11342) assigned: '╬Ž¤î¤ü¤ä¤ë¤â╬Ě ╬╗╬Á¤Ç¤ä╬┐╬╝╬Á¤ü╬Á╬╣¤Ä╬Ż...'
+07-24 12:04:56.816 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:04:56.816 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:04:56.816 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass74_0:<CreateRuntimeHistoryCard>b__0()
+07-24 12:04:56.816 19117 19178 I Unity   : UnityEngine.Events.UnityEvent:Invoke()
+07-24 12:04:56.816 19117 19178 I Unity   : UnityEngine.EventSystems.ExecuteEvents:Execute(GameObject, BaseEventData, EventFunction`1)
+07-24 12:04:56.816 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchPress(PointerEventData, Boolean, Boolean)
+07-24 12:04:56.816 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchEvents()
+07-24 12:04:56.816 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:Process()
+07-24 12:04:56.816 19117 19178 I Unity   : 
+07-24 12:04:56.816 19117 19178 I Unity   : [REQ-6af76bb3] [12:04:56.807] STAGE 7/8: edibilityText (ID:11332) assigned: '╬ĺ¤ü¤ë¤â╬╣╬╝¤î¤ä╬Ě¤ä╬▒ / ╬Ĺ¤â¤ć╬Č╬╗╬Á╬╣╬▒: ╬ĺ¤ü¤Ä¤â╬╣╬╝╬┐ / ╬Ĺ¤â¤ć╬▒╬╗╬ş¤é - ╬Ž¤î¤ü¤ä¤ë¤â╬Ě ╬╗╬Á¤Ç¤ä╬┐╬╝╬Á¤ü╬Á╬╣¤Ä╬Ż...'
+07-24 12:04:56.816 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:04:56.816 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:04:56.816 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass74_0:<CreateRuntimeHistoryCard>b__0()
+07-24 12:04:56.816 19117 19178 I Unity   : UnityEngine.Events.UnityEvent:Invoke()
+07-24 12:04:56.816 19117 19178 I Unity   : UnityEngine.EventSystems.ExecuteEvents:Execute(GameObject, BaseEventData, EventFunction`1)
+07-24 12:04:56.816 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchPress(PointerEventData, Boolean, Boolean)
+07-24 12:04:56.816 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchEvents()
+07-24 12:04:56.816 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:Process()
+07-24 12:04:56.816 19117 19178 I Unity   : 
+07-24 12:04:56.817 19117 19178 I Unity   : [REQ-6af76bb3] [12:04:56.801] STAGE 4: EnrichPlant called for history item. Query: 'Rubus idaeus', Language: 'el'
+07-24 12:04:56.817 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:04:56.817 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass74_0:<CreateRuntimeHistoryCard>b__0()
+07-24 12:04:56.817 19117 19178 I Unity   : UnityEngine.Events.UnityEvent:Invoke()
+07-24 12:04:56.817 19117 19178 I Unity   : UnityEngine.EventSystems.ExecuteEvents:Execute(GameObject, BaseEventData, EventFunction`1)
+07-24 12:04:56.817 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchPress(PointerEventData, Boolean, Boolean)
+07-24 12:04:56.817 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchEvents()
+07-24 12:04:56.817 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:Process()
+07-24 12:04:56.817 19117 19178 I Unity   : 
+07-24 12:04:56.818 19117 19178 I Unity   : [DEBUG DATAFLOW] Selected Language: el
+07-24 12:04:56.818 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:04:56.818 19117 19178 I Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:04:56.818 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:04:56.818 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass74_0:<CreateRuntimeHistoryCard>b__0()
+07-24 12:04:56.818 19117 19178 I Unity   : UnityEngine.Events.UnityEvent:Invoke()
+07-24 12:04:56.818 19117 19178 I Unity   : UnityEngine.EventSystems.ExecuteEvents:Execute(GameObject, BaseEventData, EventFunction`1)
+07-24 12:04:56.818 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchPress(PointerEventData, Boolean, Boolean)
+07-24 12:04:56.818 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchEvents()
+07-24 12:04:56.818 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:Process()
+07-24 12:04:56.818 19117 19178 I Unity   : 
+07-24 12:04:56.818 19117 19178 I Unity   : [DEBUG DATAFLOW] Request Body sent to backend (http://127.0.0.1:3001/api/enrich):
+07-24 12:04:56.818 19117 19178 I Unity   : {"scientificName":"Rubus idaeus","commonNames":[],"lang":"el"}
+07-24 12:04:56.818 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:04:56.818 19117 19178 I Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:04:56.818 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:04:56.818 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass74_0:<CreateRuntimeHistoryCard>b__0()
+07-24 12:04:56.818 19117 19178 I Unity   : UnityEngine.Events.UnityEvent:Invoke()
+07-24 12:04:56.818 19117 19178 I Unity   : UnityEngine.EventSystems.ExecuteEvents:Execute(GameObject, BaseEventData, EventFunction`1)
+07-24 12:04:56.818 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchPress(PointerEventData, Boolean, Boolean)
+07-24 12:04:56.818 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchEvents()
+07-24 12:04:56.818 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:Process()
+07-24 12:04:56.818 19117 19178 I Unity   : 
+07-24 12:04:56.837 19117 19178 I Unity   : [UIManager] Status (Success): Wczytano z historii: Raspberry
+07-24 12:04:56.837 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:04:56.837 19117 19178 I Unity   : ARHerb.UI.UIManager:SetStatusText(String, StatusType)
+07-24 12:04:56.837 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass74_0:<CreateRuntimeHistoryCard>b__0()
+07-24 12:04:56.837 19117 19178 I Unity   : UnityEngine.Events.UnityEvent:Invoke()
+07-24 12:04:56.837 19117 19178 I Unity   : UnityEngine.EventSystems.ExecuteEvents:Execute(GameObject, BaseEventData, EventFunction`1)
+07-24 12:04:56.837 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchPress(PointerEventData, Boolean, Boolean)
+07-24 12:04:56.837 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchEvents()
+07-24 12:04:56.837 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:Process()
+07-24 12:04:56.837 19117 19178 I Unity   : 
+07-24 12:05:01.984 19117 19178 I Unity   : [DEBUG DATAFLOW] Raw Backend Response:
+07-24 12:05:01.984 19117 19178 I Unity   : {"enrichment":{"commonName":"╬ú╬╝╬ş╬┐¤ů¤ü╬┐","edibleStatus":"edible","edibleNote":"╬č╬╣ ╬║╬▒¤ü¤Ç╬┐╬» ¤ä╬┐¤ů ¤â╬╝╬ş╬┐¤ů¤ü╬┐¤ů ╬Á╬»╬Ż╬▒╬╣ ╬Á╬ż╬▒╬╣¤ü╬Á¤ä╬╣╬║╬Č ╬▓¤ü¤Ä¤â╬╣╬╝╬┐╬╣, ╬│╬╗¤ů╬║╬┐╬» ╬║╬▒╬╣ ╬▒¤ü¤ë╬╝╬▒¤ä╬╣╬║╬┐╬».","funFact":"╬Ą╬┐ ¤â╬╝╬ş╬┐¤ů¤ü╬┐ ╬Á╬»╬Ż╬▒╬╣ ╬╝╬ş╬╗╬┐¤é ¤ä╬Ě¤é ╬┐╬╣╬║╬┐╬│╬ş╬Ż╬Á╬╣╬▒¤é ¤ä¤ë╬Ż ¤ä¤ü╬╣╬▒╬Ż¤ä╬▒¤ć¤ů╬╗╬╗╬╣¤Ä╬Ż (Rosaceae) ╬║╬▒╬╣ ¤ů¤Ç╬Č¤ü¤ç╬┐¤ů╬Ż ¤Ç╬┐╬╗╬╗╬ş¤é ¤Ç╬┐╬╣╬║╬╣╬╗╬»╬Á¤é ¤ä╬┐¤ů, ¤â¤ů╬╝¤Ç╬Á¤ü╬╣╬╗╬▒╬╝╬▓╬▒╬Ż╬┐╬╝╬ş╬Ż¤ë╬Ż ╬▒¤ů¤ä¤Ä╬Ż ╬╝╬Á ╬║╬»¤ä¤ü╬╣╬Ż╬┐¤ů¤é ╬« ╬╝╬▒¤Ź¤ü╬┐¤ů¤é ╬║╬▒¤ü¤Ç╬┐¤Ź¤é. ╬ú╬Á ╬▒╬Ż¤ä╬»╬Ş╬Á¤â╬Ě ╬╝╬Á ¤ä╬▒ ╬▓╬▒¤ä¤î╬╝╬┐¤ů¤ü╬▒, ╬┐╬╣ ╬║╬▒¤ü¤Ç╬┐╬» ¤ä╬┐¤ů ¤â╬╝╬ş╬┐¤ů¤ü╬┐¤ů ╬▒¤Ç╬┐¤ç¤ë¤ü╬»╬Â╬┐╬Ż¤ä╬▒╬╣ ╬Á¤Ź╬║╬┐╬╗╬▒ ╬▒¤Ç¤î ¤ä╬┐╬Ż ¤Ç¤ů¤ü╬«╬Ż╬▒ ¤ä╬┐¤ů¤é ¤î¤ä╬▒╬Ż ╬Á╬»╬Ż╬▒╬╣ ¤Ä¤ü╬╣╬╝╬┐╬╣.","description":"╬Ľ╬»╬Ż╬▒╬╣ ╬ş╬Ż╬▒¤é ¤ć¤ů╬╗╬╗╬┐╬▓¤î╬╗╬┐¤é ╬Ş╬Č╬╝╬Ż╬┐¤é ¤Ç╬┐¤ů ¤ć¤ä╬Č╬Ż╬Á╬╣ ¤ä╬▒ 1-2 ╬╝╬ş¤ä¤ü╬▒ ¤Ź¤ł╬┐¤é, ╬╝╬Á ╬▒╬│╬║╬Č╬Ş╬╣╬▒ ¤â¤ä╬┐¤ů¤é ╬▓╬╗╬▒¤â¤ä╬┐¤Ź¤é ¤ä╬┐¤ů. ╬á╬▒¤ü╬Č╬│╬Á╬╣ ¤ç╬▒¤ü╬▒╬║¤ä╬Ě¤ü╬╣¤â¤ä╬╣╬║╬┐¤Ź¤é ╬║¤î╬║╬║╬╣╬Ż╬┐¤ů¤é, ¤â¤Ź╬Ż╬Ş╬Á¤ä╬┐¤ů
+07-24 12:05:01.985 19117 19178 I Unity   : [REQ-6af76bb3] [12:05:01.984] STAGE 5: HTTP 200 Success received from backend
+07-24 12:05:01.985 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:01.985 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass74_1:<CreateRuntimeHistoryCard>b__1(EnrichResponse)
+07-24 12:05:01.985 19117 19178 I Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:05:01.985 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:01.985 19117 19178 I Unity   : 
+07-24 12:05:01.986 19117 19178 I Unity   : [REQ-6af76bb3] [12:05:01.984] STAGE 6: Parsed backend response - Description: '╬Ľ╬»╬Ż╬▒╬╣ ╬ş╬Ż╬▒¤é ¤ć¤ů╬╗╬╗╬┐╬▓¤î╬╗╬┐¤é ╬Ş╬Č╬╝╬Ż╬┐¤é ¤Ç╬┐¤ů ¤ć¤ä╬Č╬Ż╬Á╬╣ ¤ä╬▒ 1-2 ╬╝╬ş¤ä¤ü╬▒ ¤Ź¤ł╬┐¤é, ╬╝╬Á ╬▒╬│╬║╬Č╬Ş╬╣╬▒ ¤â¤ä╬┐¤ů¤é ╬▓╬╗╬▒¤â¤ä╬┐¤Ź¤é ¤ä╬┐¤ů. ╬á╬▒¤ü╬Č╬│╬Á╬╣ ¤ç╬▒¤ü╬▒╬║¤ä╬Ě¤ü╬╣¤â¤ä╬╣╬║╬┐¤Ź¤é ╬║¤î╬║╬║╬╣╬Ż╬┐¤ů¤é, ¤â¤Ź╬Ż╬Ş╬Á¤ä╬┐¤ů¤é ╬║╬▒¤ü¤Ç╬┐¤Ź¤é ¤Ç╬┐¤ů ╬▒¤Ç╬┐¤ä╬Á╬╗╬┐¤Ź╬Ż¤ä╬▒╬╣ ╬▒¤Ç¤î ╬╝╬╣╬║¤ü╬ş¤é ╬┤¤ü¤Ź¤Ç╬Á¤é.', FunFact: '╬Ą╬┐ ¤â╬╝╬ş╬┐¤ů¤ü╬┐ ╬Á╬»╬Ż╬▒╬╣ ╬╝╬ş╬╗╬┐¤é ¤ä╬Ě¤é ╬┐╬╣╬║╬┐╬│╬ş╬Ż╬Á╬╣╬▒¤é ¤ä¤ë╬Ż ¤ä¤ü╬╣╬▒╬Ż¤ä╬▒¤ć¤ů╬╗╬╗╬╣¤Ä╬Ż (Rosaceae) ╬║╬▒╬╣ ¤ů¤Ç╬Č¤ü¤ç╬┐¤ů╬Ż ¤Ç╬┐╬╗╬╗╬ş¤é ¤Ç╬┐╬╣╬║╬╣╬╗╬»╬Á¤é ¤ä╬┐¤ů, ¤â¤ů╬╝¤Ç╬Á¤ü╬╣╬╗╬▒╬╝╬▓╬▒╬Ż╬┐╬╝╬ş╬Ż¤ë╬Ż ╬▒¤ů¤ä¤Ä╬Ż ╬╝╬Á ╬║╬»¤ä¤ü╬╣╬Ż╬┐¤ů¤é ╬« ╬╝╬▒¤Ź¤ü╬┐¤ů¤é ╬║╬▒¤ü¤Ç╬┐¤Ź¤é. ╬ú╬Á ╬▒╬Ż¤ä╬»╬Ş╬Á¤â╬Ě ╬╝╬Á ¤ä╬▒ ╬▓╬▒¤ä¤î╬╝╬┐¤ů¤ü╬▒, ╬┐╬╣ ╬║╬▒¤ü¤Ç╬┐╬» ¤ä╬┐¤ů ¤â╬╝╬ş╬┐¤ů¤ü╬┐¤ů ╬▒¤Ç╬┐¤ç¤ë¤ü╬»╬Â╬┐╬Ż¤ä╬▒╬╣ ╬Á¤Ź╬║╬┐╬╗╬▒ ╬▒¤Ç¤î ¤ä╬┐╬Ż ¤Ç¤ů¤ü╬«╬Ż╬▒ ¤ä╬┐¤ů¤é ¤î¤ä╬▒╬Ż ╬Á╬»╬Ż╬▒╬╣ ¤Ä¤ü╬╣╬╝╬┐╬╣.'
+07-24 12:05:01.986 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:01.986 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass74_1
+07-24 12:05:01.986 19117 19178 I Unity   : [REQ-6af76bb3] [12:05:01.986] STAGE 7/8: DisplayResultUI invoked for CommonName: '╬ú╬╝╬ş╬┐¤ů¤ü╬┐' (Lang: 'el')
+07-24 12:05:01.986 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:01.986 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:05:01.986 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass74_1:<CreateRuntimeHistoryCard>b__1(EnrichResponse)
+07-24 12:05:01.986 19117 19178 I Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:05:01.986 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:01.986 19117 19178 I Unity   : 
+07-24 12:05:01.987 19117 19178 I Unity   : [REQ-6af76bb3] [12:05:01.986] STAGE 7/8: commonNameText (ID:11322) assigned: '╬ú╬╝╬ş╬┐¤ů¤ü╬┐'
+07-24 12:05:01.987 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:01.987 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:05:01.987 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass74_1:<CreateRuntimeHistoryCard>b__1(EnrichResponse)
+07-24 12:05:01.987 19117 19178 I Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:05:01.987 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:01.987 19117 19178 I Unity   : 
+07-24 12:05:01.988 19117 19178 I Unity   : [REQ-6af76bb3] [12:05:01.986] STAGE 7/8: scientificNameText (ID:11374) assigned: 'Rubus idaeus'
+07-24 12:05:01.988 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:01.988 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:05:01.988 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass74_1:<CreateRuntimeHistoryCard>b__1(EnrichResponse)
+07-24 12:05:01.988 19117 19178 I Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:05:01.988 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:01.988 19117 19178 I Unity   : 
+07-24 12:05:01.988 19117 19178 I Unity   : [MapsButton] ShowResult called
+07-24 12:05:01.988 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:01.988 19117 19178 I Unity   : ARHerb.UI.UIManager:EnsureResultOpenInMapsButtonSetup()
+07-24 12:05:01.988 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:05:01.988 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass74_1:<CreateRuntimeHistoryCard>b__1(EnrichResponse)
+07-24 12:05:01.988 19117 19178 I Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:05:01.988 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:01.988 19117 19178 I Unity   : 
+07-24 12:05:01.989 19117 19178 I Unity   : [MapsButton] UIManager reference assigned = True
+07-24 12:05:01.989 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:01.989 19117 19178 I Unity   : ARHerb.UI.UIManager:EnsureResultOpenInMapsButtonSetup()
+07-24 12:05:01.989 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:05:01.989 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass74_1:<CreateRuntimeHistoryCard>b__1(EnrichResponse)
+07-24 12:05:01.989 19117 19178 I Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:05:01.989 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:01.989 19117 19178 I Unity   : 
+07-24 12:05:01.990 19117 19178 I Unity   : [MapsButton] button activeSelf = True
+07-24 12:05:01.990 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:01.990 19117 19178 I Unity   : ARHerb.UI.UIManager:EnsureResultOpenInMapsButtonSetup()
+07-24 12:05:01.990 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:05:01.990 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass74_1:<CreateRuntimeHistoryCard>b__1(EnrichResponse)
+07-24 12:05:01.990 19117 19178 I Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:05:01.990 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:01.990 19117 19178 I Unity   : 
+07-24 12:05:01.990 19117 19178 I Unity   : [MapsButton] activeInHierarchy = True
+07-24 12:05:01.990 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:01.990 19117 19178 I Unity   : ARHerb.UI.UIManager:EnsureResultOpenInMapsButtonSetup()
+07-24 12:05:01.990 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:05:01.990 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass74_1:<CreateRuntimeHistoryCard>b__1(EnrichResponse)
+07-24 12:05:01.990 19117 19178 I Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:05:01.990 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:01.990 19117 19178 I Unity   : 
+07-24 12:05:01.991 19117 19178 I Unity   : [MapsButton] rect = (0.55, 0.02) to (0.95, 0.14)
+07-24 12:05:01.991 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:01.991 19117 19178 I Unity   : ARHerb.UI.UIManager:EnsureResultOpenInMapsButtonSetup()
+07-24 12:05:01.991 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:05:01.991 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass74_1:<CreateRuntimeHistoryCard>b__1(EnrichResponse)
+07-24 12:05:01.991 19117 19178 I Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:05:01.991 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:01.991 19117 19178 I Unity   : 
+07-24 12:05:01.992 19117 19178 I Unity   : [MapsButton] sibling index = 13
+07-24 12:05:01.992 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:01.992 19117 19178 I Unity   : ARHerb.UI.UIManager:EnsureResultOpenInMapsButtonSetup()
+07-24 12:05:01.992 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:05:01.992 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass74_1:<CreateRuntimeHistoryCard>b__1(EnrichResponse)
+07-24 12:05:01.992 19117 19178 I Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:05:01.992 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:01.992 19117 19178 I Unity   : 
+07-24 12:05:01.992 19117 19178 I Unity   : [MapsButton] listener assigned
+07-24 12:05:01.992 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:01.992 19117 19178 I Unity   : ARHerb.UI.UIManager:EnsureResultOpenInMapsButtonSetup()
+07-24 12:05:01.992 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:05:01.992 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass74_1:<CreateRuntimeHistoryCard>b__1(EnrichResponse)
+07-24 12:05:01.992 19117 19178 I Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:05:01.992 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:01.992 19117 19178 I Unity   : 
+07-24 12:05:01.993 19117 19178 I Unity   : [REQ-6af76bb3] [12:05:01.986] STAGE 7/8: descriptionText (ID:11118) assigned: '╬Ľ╬»╬Ż╬▒╬╣ ╬ş╬Ż╬▒¤é ¤ć¤ů╬╗╬╗╬┐╬▓¤î╬╗╬┐¤é ╬Ş╬Č╬╝╬Ż╬┐¤é ¤Ç╬┐¤ů ¤ć¤ä╬Č╬Ż╬Á╬╣ ¤ä╬▒ 1-2 ╬╝╬ş¤ä¤ü╬▒ ¤Ź¤ł╬┐¤é, ╬╝╬Á ╬▒╬│╬║╬Č╬Ş╬╣╬▒ ¤â¤ä╬┐¤ů¤é ╬▓╬╗╬▒¤â¤ä╬┐¤Ź¤é ¤ä╬┐¤ů. ╬á╬▒¤ü╬Č╬│╬Á╬╣ ¤ç╬▒¤ü╬▒╬║¤ä╬Ě¤ü╬╣¤â¤ä╬╣╬║╬┐¤Ź¤é ╬║¤î╬║╬║╬╣╬Ż╬┐¤ů¤é, ¤â¤Ź╬Ż╬Ş╬Á¤ä╬┐¤ů¤é ╬║╬▒¤ü¤Ç╬┐¤Ź¤é ¤Ç╬┐¤ů ╬▒¤Ç╬┐¤ä╬Á╬╗╬┐¤Ź╬Ż¤ä╬▒╬╣ ╬▒¤Ç¤î ╬╝╬╣╬║¤ü╬ş¤é ╬┤¤ü¤Ź¤Ç╬Á¤é.'
+07-24 12:05:01.993 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:01.993 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:05:01.993 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass74_1:<CreateRuntimeHistoryCard>b__1(EnrichResponse)
+07-24 12:05:01.993 19117 19178 I Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:05:01.993 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:01.993 19117 19178 I Unity   : 
+07-24 12:05:01.994 19117 19178 I Unity   : [REQ-6af76bb3] [12:05:01.986] STAGE 7/8: funFactText (ID:11342) assigned: '╬Ą╬┐ ¤â╬╝╬ş╬┐¤ů¤ü╬┐ ╬Á╬»╬Ż╬▒╬╣ ╬╝╬ş╬╗╬┐¤é ¤ä╬Ě¤é ╬┐╬╣╬║╬┐╬│╬ş╬Ż╬Á╬╣╬▒¤é ¤ä¤ë╬Ż ¤ä¤ü╬╣╬▒╬Ż¤ä╬▒¤ć¤ů╬╗╬╗╬╣¤Ä╬Ż (Rosaceae) ╬║╬▒╬╣ ¤ů¤Ç╬Č¤ü¤ç╬┐¤ů╬Ż ¤Ç╬┐╬╗╬╗╬ş¤é ¤Ç╬┐╬╣╬║╬╣╬╗╬»╬Á¤é ¤ä╬┐¤ů, ¤â¤ů╬╝¤Ç╬Á¤ü╬╣╬╗╬▒╬╝╬▓╬▒╬Ż╬┐╬╝╬ş╬Ż¤ë╬Ż ╬▒¤ů¤ä¤Ä╬Ż ╬╝╬Á ╬║╬»¤ä¤ü╬╣╬Ż╬┐¤ů¤é ╬« ╬╝╬▒¤Ź¤ü╬┐¤ů¤é ╬║╬▒¤ü¤Ç╬┐¤Ź¤é. ╬ú╬Á ╬▒╬Ż¤ä╬»╬Ş╬Á¤â╬Ě ╬╝╬Á ¤ä╬▒ ╬▓╬▒¤ä¤î╬╝╬┐¤ů¤ü╬▒, ╬┐╬╣ ╬║╬▒¤ü¤Ç╬┐╬» ¤ä╬┐¤ů ¤â╬╝╬ş╬┐¤ů¤ü╬┐¤ů ╬▒¤Ç╬┐¤ç¤ë¤ü╬»╬Â╬┐╬Ż¤ä╬▒╬╣ ╬Á¤Ź╬║╬┐╬╗╬▒ ╬▒¤Ç¤î ¤ä╬┐╬Ż ¤Ç¤ů¤ü╬«╬Ż╬▒ ¤ä╬┐¤ů¤é ¤î¤ä╬▒╬Ż ╬Á╬»╬Ż╬▒╬╣ ¤Ä¤ü╬╣╬╝╬┐╬╣.'
+07-24 12:05:01.994 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:01.994 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:05:01.994 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass74_1:<CreateRuntimeHistoryCard>b__1(EnrichResponse)
+07-24 12:05:01.994 19117 19178 I Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:05:01.994 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:01.994 19117 19178 I Unity   : 
+07-24 12:05:01.995 19117 19178 I Unity   : [REQ-6af76bb3] [12:05:01.986] STAGE 7/8: edibilityText (ID:11332) assigned: '╬ĺ¤ü¤ë¤â╬╣╬╝¤î¤ä╬Ě¤ä╬▒ / ╬Ĺ¤â¤ć╬Č╬╗╬Á╬╣╬▒: ╬ĺ¤ü¤Ä¤â╬╣╬╝╬┐ / ╬Ĺ¤â¤ć╬▒╬╗╬ş¤é - ╬č╬╣ ╬║╬▒¤ü¤Ç╬┐╬» ¤ä╬┐¤ů ¤â╬╝╬ş╬┐¤ů¤ü╬┐¤ů ╬Á╬»╬Ż╬▒╬╣ ╬Á╬ż╬▒╬╣¤ü╬Á¤ä╬╣╬║╬Č ╬▓¤ü¤Ä¤â╬╣╬╝╬┐╬╣, ╬│╬╗¤ů╬║╬┐╬» ╬║╬▒╬╣ ╬▒¤ü¤ë╬╝╬▒¤ä╬╣╬║╬┐╬».'
+07-24 12:05:01.995 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:01.995 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:05:01.995 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass74_1:<CreateRuntimeHistoryCard>b__1(EnrichResponse)
+07-24 12:05:01.995 19117 19178 I Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:05:01.995 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:01.995 19117 19178 I Unity   : 
+07-24 12:05:21.553 19117 19178 I Unity   : Handle cmd APP_CMD_TOUCH_EVENT(20)
+07-24 12:05:21.621 19117 19178 I Unity   : Handle cmd APP_CMD_TOUCH_EVENT(20)
+07-24 12:05:21.621 19117 19178 I Unity   : Handle cmd APP_CMD_TOUCH_EVENT(20)
+07-24 12:05:21.654 19117 19178 I Unity   : Handle cmd APP_CMD_TOUCH_EVENT(20)
+07-24 12:05:21.654 19117 19178 I Unity   : Handle cmd APP_CMD_TOUCH_EVENT(20)
+07-24 12:05:21.688 19117 19178 I Unity   : Handle cmd APP_CMD_TOUCH_EVENT(20)
+07-24 12:05:21.688 19117 19178 I Unity   : Handle cmd APP_CMD_TOUCH_EVENT(20)
+07-24 12:05:21.721 19117 19178 I Unity   : Handle cmd APP_CMD_TOUCH_EVENT(20)
+07-24 12:05:21.721 19117 19178 I Unity   : Handle cmd APP_CMD_TOUCH_EVENT(20)
+07-24 12:05:21.754 19117 19178 I Unity   : Handle cmd APP_CMD_TOUCH_EVENT(20)
+07-24 12:05:21.754 19117 19178 I Unity   : Handle cmd APP_CMD_TOUCH_EVENT(20)
+07-24 12:05:21.786 19117 19178 I Unity   : [UIManager] ResultPanel swiped down to dismiss
+07-24 12:05:21.786 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:21.786 19117 19178 I Unity   : ARHerb.UI.UIManager:<EnsureResultPanelSwipeDismissSetup>b__83_0()
+07-24 12:05:21.786 19117 19178 I Unity   : UnityEngine.EventSystems.ExecuteEvents:Execute(GameObject, BaseEventData, EventFunction`1)
+07-24 12:05:21.786 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchPress(PointerEventData, Boolean, Boolean)
+07-24 12:05:21.786 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchEvents()
+07-24 12:05:21.786 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:Process()
+07-24 12:05:21.786 19117 19178 I Unity   : 
+07-24 12:05:21.786 19117 19178 I Unity   : [UIManager] Status (Ready): ╬ł¤ä╬┐╬╣╬╝╬┐ ╬│╬╣╬▒ ¤â╬Č¤ü¤ë¤â╬Ě
+07-24 12:05:21.786 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:21.786 19117 19178 I Unity   : ARHerb.UI.UIManager:SetStatusText(String, StatusType)
+07-24 12:05:21.786 19117 19178 I Unity   : ARHerb.UI.UIManager:<EnsureResultPanelSwipeDismissSetup>b__83_0()
+07-24 12:05:21.786 19117 19178 I Unity   : UnityEngine.EventSystems.ExecuteEvents:Execute(GameObject, BaseEventData, EventFunction`1)
+07-24 12:05:21.786 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchPress(PointerEventData, Boolean, Boolean)
+07-24 12:05:21.786 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchEvents()
+07-24 12:05:21.786 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:Process()
+07-24 12:05:21.786 19117 19178 I Unity   : 
+07-24 12:05:23.753 19117 19178 I Unity   : Handle cmd APP_CMD_TOUCH_EVENT(20)
+07-24 12:05:23.887 19117 19178 I Unity   : Handle cmd APP_CMD_TOUCH_EVENT(20)
+07-24 12:05:23.918 19117 19178 I Unity   : [UIManager] Status (Loading): ╬Ť╬«¤ł╬Ě ╬Á╬╣╬║¤î╬Ż╬▒¤é...
+07-24 12:05:23.918 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:23.918 19117 19178 I Unity   : ARHerb.UI.UIManager:SetStatusText(String, StatusType)
+07-24 12:05:23.918 19117 19178 I Unity   : ARHerb.UI.UIManager:OnScanButtonClicked()
+07-24 12:05:23.918 19117 19178 I Unity   : UnityEngine.Events.UnityEvent:Invoke()
+07-24 12:05:23.918 19117 19178 I Unity   : UnityEngine.EventSystems.ExecuteEvents:Execute(GameObject, BaseEventData, EventFunction`1)
+07-24 12:05:23.918 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchPress(PointerEventData, Boolean, Boolean)
+07-24 12:05:23.918 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchEvents()
+07-24 12:05:23.918 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:Process()
+07-24 12:05:23.918 19117 19178 I Unity   : 
+07-24 12:05:23.919 19117 19178 I Unity   : [MobileWebcam] Capturing undistorted 1:1 square crop = (x=280, y=0, side=720, zoom=1,00x)
+07-24 12:05:23.919 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:23.919 19117 19178 I Unity   : ARHerb.Camera.MobileWebcamCaptureProvider:CaptureFrame(Action`1)
+07-24 12:05:23.919 19117 19178 I Unity   : UnityEngine.Events.UnityEvent:Invoke()
+07-24 12:05:23.919 19117 19178 I Unity   : UnityEngine.EventSystems.ExecuteEvents:Execute(GameObject, BaseEventData, EventFunction`1)
+07-24 12:05:23.919 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchPress(PointerEventData, Boolean, Boolean)
+07-24 12:05:23.919 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchEvents()
+07-24 12:05:23.919 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:Process()
+07-24 12:05:23.919 19117 19178 I Unity   : 
+07-24 12:05:23.995 19117 19178 I Unity   : [MobileWebcam] Frame captured successfully (124455 bytes, resolution 720x720).
+07-24 12:05:23.995 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:23.995 19117 19178 I Unity   : ARHerb.Camera.MobileWebcamCaptureProvider:CaptureFrame(Action`1)
+07-24 12:05:23.995 19117 19178 I Unity   : UnityEngine.Events.UnityEvent:Invoke()
+07-24 12:05:23.995 19117 19178 I Unity   : UnityEngine.EventSystems.ExecuteEvents:Execute(GameObject, BaseEventData, EventFunction`1)
+07-24 12:05:23.995 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchPress(PointerEventData, Boolean, Boolean)
+07-24 12:05:23.995 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchEvents()
+07-24 12:05:23.995 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:Process()
+07-24 12:05:23.995 19117 19178 I Unity   : 
+07-24 12:05:24.014 19117 19178 I Unity   : [UIManager] Status (Loading): ╬Ĺ¤Ç╬┐¤â¤ä╬┐╬╗╬« ¤â¤ä╬┐ backend...
+07-24 12:05:24.014 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:24.014 19117 19178 I Unity   : ARHerb.UI.UIManager:SetStatusText(String, StatusType)
+07-24 12:05:24.014 19117 19178 I Unity   : ARHerb.UI.UIManager:<OnScanButtonClicked>b__63_0(Byte[])
+07-24 12:05:24.014 19117 19178 I Unity   : ARHerb.Camera.MobileWebcamCaptureProvider:CaptureFrame(Action`1)
+07-24 12:05:24.014 19117 19178 I Unity   : UnityEngine.Events.UnityEvent:Invoke()
+07-24 12:05:24.014 19117 19178 I Unity   : UnityEngine.EventSystems.ExecuteEvents:Execute(GameObject, BaseEventData, EventFunction`1)
+07-24 12:05:24.014 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchPress(PointerEventData, Boolean, Boolean)
+07-24 12:05:24.014 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchEvents()
+07-24 12:05:24.014 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:Process()
+07-24 12:05:24.014 19117 19178 I Unity   : 
+07-24 12:05:24.024 19117 19178 I Unity   : [BackendClient] Sending POST to http://127.0.0.1:3001/api/identify (Mode: plants, Lang: el, Size: 124455 bytes)...
+07-24 12:05:24.024 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:24.024 19117 19178 I Unity   : ARHerb.Network.<SendIdentifyRequest>d__3:MoveNext()
+07-24 12:05:24.024 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.024 19117 19178 I Unity   : ARHerb.Camera.MobileWebcamCaptureProvider:CaptureFrame(Action`1)
+07-24 12:05:24.024 19117 19178 I Unity   : UnityEngine.Events.UnityEvent:Invoke()
+07-24 12:05:24.024 19117 19178 I Unity   : UnityEngine.EventSystems.ExecuteEvents:Execute(GameObject, BaseEventData, EventFunction`1)
+07-24 12:05:24.024 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchPress(PointerEventData, Boolean, Boolean)
+07-24 12:05:24.024 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:ProcessTouchEvents()
+07-24 12:05:24.024 19117 19178 I Unity   : UnityEngine.EventSystems.StandaloneInputModule:Process()
+07-24 12:05:24.024 19117 19178 I Unity   : 
+07-24 12:05:24.851 19117 19178 I Unity   : [BackendClient] Identify response:
+07-24 12:05:24.851 19117 19178 I Unity   : {"query":{"project":"all","images":["6cee22bc701b28d3dcb057a4fc9c5aea"],"organs":["leaf"],"includeRelatedImages":true,"noReject":false,"type":null},"predictedOrgans":[{"image":"6cee22bc701b28d3dcb057a4fc9c5aea","filename":"capture.jpg","organ":"fruit","score":0.82725}],"language":"en","preferedReferential":"k-world-flora","bestMatch":"Rubus idaeus L.","results":[{"score":0.53493,"species":{"scientificNameWithoutAuthor":"Rubus idaeus","scientificNameAuthorship":"L.","genus":{"scientificNameWithoutAuthor":"Rubus","scientificNameAuthorship":"","scientificName":"Rubus"},"family":{"scientificNameWithoutAuthor":"Rosaceae","scientificNameAuthorship":"","scientificName":"Rosaceae"},"commonNames":["Raspberry","European red raspberry","Red raspberry"],"scientificName":"Rubus idaeus L."},"images":[{"organ":"fruit","author":"Arienza javier","license":"cc-by-sa","date":{"timestamp":1626014658261,"string":"July 11, 2021"},"url":{"o":"https://bs.plantnet.org/image/o/b38ab78af875b799e03415
+07-24 12:05:24.853 19117 19178 I Unity   : [UIManager] Status (Loading): ╬Ĺ╬Ż╬Č╬╗¤ů¤â╬Ě ╬╝╬Á AI...
+07-24 12:05:24.853 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:24.853 19117 19178 I Unity   : ARHerb.UI.UIManager:SetStatusText(String, StatusType)
+07-24 12:05:24.853 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass63_0:<OnScanButtonClicked>b__1(ScanResult)
+07-24 12:05:24.853 19117 19178 I Unity   : ARHerb.Network.<SendIdentifyRequest>d__3:MoveNext()
+07-24 12:05:24.853 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.853 19117 19178 I Unity   : 
+07-24 12:05:24.853 19117 19178 I Unity   : [REQ-DIRECT] [12:05:24.853] STAGE 7/8: DisplayResultUI invoked for CommonName: 'Raspberry' (Lang: 'el')
+07-24 12:05:24.853 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:24.853 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:05:24.853 19117 19178 I Unity   : ARHerb.UI.UIManager:ProcessIdentifyResult(ScanResult, String)
+07-24 12:05:24.853 19117 19178 I Unity   : ARHerb.Network.<SendIdentifyRequest>d__3:MoveNext()
+07-24 12:05:24.853 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.853 19117 19178 I Unity   : 
+07-24 12:05:24.855 19117 19178 I Unity   : [REQ-DIRECT] [12:05:24.853] STAGE 7/8: commonNameText (ID:11322) assigned: 'Raspberry'
+07-24 12:05:24.855 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:24.855 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:05:24.855 19117 19178 I Unity   : ARHerb.UI.UIManager:ProcessIdentifyResult(ScanResult, String)
+07-24 12:05:24.855 19117 19178 I Unity   : ARHerb.Network.<SendIdentifyRequest>d__3:MoveNext()
+07-24 12:05:24.855 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.855 19117 19178 I Unity   : 
+07-24 12:05:24.855 19117 19178 I Unity   : [REQ-DIRECT] [12:05:24.853] STAGE 7/8: scientificNameText (ID:11374) assigned: 'Rubus idaeus'
+07-24 12:05:24.855 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:24.855 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:05:24.855 19117 19178 I Unity   : ARHerb.UI.UIManager:ProcessIdentifyResult(ScanResult, String)
+07-24 12:05:24.855 19117 19178 I Unity   : ARHerb.Network.<SendIdentifyRequest>d__3:MoveNext()
+07-24 12:05:24.855 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.855 19117 19178 I Unity   : 
+07-24 12:05:24.856 19117 19178 I Unity   : [MapsButton] ShowResult called
+07-24 12:05:24.856 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:24.856 19117 19178 I Unity   : ARHerb.UI.UIManager:EnsureResultOpenInMapsButtonSetup()
+07-24 12:05:24.856 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:05:24.856 19117 19178 I Unity   : ARHerb.UI.UIManager:ProcessIdentifyResult(ScanResult, String)
+07-24 12:05:24.856 19117 19178 I Unity   : ARHerb.Network.<SendIdentifyRequest>d__3:MoveNext()
+07-24 12:05:24.856 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.856 19117 19178 I Unity   : 
+07-24 12:05:24.856 19117 19178 I Unity   : [MapsButton] UIManager reference assigned = True
+07-24 12:05:24.856 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:24.856 19117 19178 I Unity   : ARHerb.UI.UIManager:EnsureResultOpenInMapsButtonSetup()
+07-24 12:05:24.856 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:05:24.856 19117 19178 I Unity   : ARHerb.UI.UIManager:ProcessIdentifyResult(ScanResult, String)
+07-24 12:05:24.856 19117 19178 I Unity   : ARHerb.Network.<SendIdentifyRequest>d__3:MoveNext()
+07-24 12:05:24.856 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.856 19117 19178 I Unity   : 
+07-24 12:05:24.857 19117 19178 I Unity   : [MapsButton] button activeSelf = True
+07-24 12:05:24.857 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:24.857 19117 19178 I Unity   : ARHerb.UI.UIManager:EnsureResultOpenInMapsButtonSetup()
+07-24 12:05:24.857 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:05:24.857 19117 19178 I Unity   : ARHerb.UI.UIManager:ProcessIdentifyResult(ScanResult, String)
+07-24 12:05:24.857 19117 19178 I Unity   : ARHerb.Network.<SendIdentifyRequest>d__3:MoveNext()
+07-24 12:05:24.857 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.857 19117 19178 I Unity   : 
+07-24 12:05:24.857 19117 19178 I Unity   : [MapsButton] activeInHierarchy = True
+07-24 12:05:24.857 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:24.857 19117 19178 I Unity   : ARHerb.UI.UIManager:EnsureResultOpenInMapsButtonSetup()
+07-24 12:05:24.857 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:05:24.857 19117 19178 I Unity   : ARHerb.UI.UIManager:ProcessIdentifyResult(ScanResult, String)
+07-24 12:05:24.857 19117 19178 I Unity   : ARHerb.Network.<SendIdentifyRequest>d__3:MoveNext()
+07-24 12:05:24.857 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.857 19117 19178 I Unity   : 
+07-24 12:05:24.858 19117 19178 I Unity   : [MapsButton] rect = (0.55, 0.02) to (0.95, 0.14)
+07-24 12:05:24.858 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:24.858 19117 19178 I Unity   : ARHerb.UI.UIManager:EnsureResultOpenInMapsButtonSetup()
+07-24 12:05:24.858 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:05:24.858 19117 19178 I Unity   : ARHerb.UI.UIManager:ProcessIdentifyResult(ScanResult, String)
+07-24 12:05:24.858 19117 19178 I Unity   : ARHerb.Network.<SendIdentifyRequest>d__3:MoveNext()
+07-24 12:05:24.858 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.858 19117 19178 I Unity   : 
+07-24 12:05:24.858 19117 19178 I Unity   : [MapsButton] sibling index = 13
+07-24 12:05:24.858 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:24.858 19117 19178 I Unity   : ARHerb.UI.UIManager:EnsureResultOpenInMapsButtonSetup()
+07-24 12:05:24.858 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:05:24.858 19117 19178 I Unity   : ARHerb.UI.UIManager:ProcessIdentifyResult(ScanResult, String)
+07-24 12:05:24.858 19117 19178 I Unity   : ARHerb.Network.<SendIdentifyRequest>d__3:MoveNext()
+07-24 12:05:24.858 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.858 19117 19178 I Unity   : 
+07-24 12:05:24.858 19117 19178 I Unity   : [MapsButton] listener assigned
+07-24 12:05:24.858 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:24.858 19117 19178 I Unity   : ARHerb.UI.UIManager:EnsureResultOpenInMapsButtonSetup()
+07-24 12:05:24.858 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:05:24.858 19117 19178 I Unity   : ARHerb.UI.UIManager:ProcessIdentifyResult(ScanResult, String)
+07-24 12:05:24.858 19117 19178 I Unity   : ARHerb.Network.<SendIdentifyRequest>d__3:MoveNext()
+07-24 12:05:24.858 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.858 19117 19178 I Unity   : 
+07-24 12:05:24.859 19117 19178 I Unity   : [UIManager] Status (Loading): ╬Ž¤î¤ü¤ä¤ë¤â╬Ě ╬╗╬Á¤Ç¤ä╬┐╬╝╬Á¤ü╬Á╬╣¤Ä╬Ż...
+07-24 12:05:24.859 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:24.859 19117 19178 I Unity   : ARHerb.UI.UIManager:SetStatusText(String, StatusType)
+07-24 12:05:24.859 19117 19178 I Unity   : ARHerb.UI.UIManager:ProcessIdentifyResult(ScanResult, String)
+07-24 12:05:24.859 19117 19178 I Unity   : ARHerb.Network.<SendIdentifyRequest>d__3:MoveNext()
+07-24 12:05:24.859 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.859 19117 19178 I Unity   : 
+07-24 12:05:24.860 19117 19178 I Unity   : [DEBUG DATAFLOW] Selected Language: el
+07-24 12:05:24.860 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:24.860 19117 19178 I Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:05:24.860 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.860 19117 19178 I Unity   : ARHerb.Network.<SendIdentifyRequest>d__3:MoveNext()
+07-24 12:05:24.860 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.860 19117 19178 I Unity   : 
+07-24 12:05:24.860 19117 19178 I Unity   : [DEBUG DATAFLOW] Request Body sent to backend (http://127.0.0.1:3001/api/enrich):
+07-24 12:05:24.860 19117 19178 I Unity   : {"scientificName":"Rubus idaeus","commonNames":["Raspberry","European red raspberry","Red raspberry"],"lang":"el"}
+07-24 12:05:24.860 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:24.860 19117 19178 I Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:05:24.860 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.860 19117 19178 I Unity   : ARHerb.Network.<SendIdentifyRequest>d__3:MoveNext()
+07-24 12:05:24.860 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.860 19117 19178 I Unity   : 
+07-24 12:05:24.887 19117 19178 I Unity   : [DEBUG DATAFLOW] Raw Backend Response:
+07-24 12:05:24.887 19117 19178 I Unity   : {"enrichment":{"commonName":"╬ú╬╝╬ş╬┐¤ů¤ü╬┐","edibleStatus":"edible","edibleNote":"╬č╬╣ ╬║╬▒¤ü¤Ç╬┐╬» ¤ä╬┐¤ů ¤â╬╝╬ş╬┐¤ů¤ü╬┐¤ů ╬Á╬»╬Ż╬▒╬╣ ╬Á╬ż╬▒╬╣¤ü╬Á¤ä╬╣╬║╬Č ╬▓¤ü¤Ä¤â╬╣╬╝╬┐╬╣, ╬│╬╗¤ů╬║╬┐╬» ╬║╬▒╬╣ ╬▒¤ü¤ë╬╝╬▒¤ä╬╣╬║╬┐╬».","funFact":"╬Ą╬┐ ¤â╬╝╬ş╬┐¤ů¤ü╬┐ ╬Á╬»╬Ż╬▒╬╣ ╬╝╬ş╬╗╬┐¤é ¤ä╬Ě¤é ╬┐╬╣╬║╬┐╬│╬ş╬Ż╬Á╬╣╬▒¤é ¤ä¤ë╬Ż ¤ä¤ü╬╣╬▒╬Ż¤ä╬▒¤ć¤ů╬╗╬╗╬╣¤Ä╬Ż (Rosaceae) ╬║╬▒╬╣ ¤ů¤Ç╬Č¤ü¤ç╬┐¤ů╬Ż ¤Ç╬┐╬╗╬╗╬ş¤é ¤Ç╬┐╬╣╬║╬╣╬╗╬»╬Á¤é ¤ä╬┐¤ů, ¤â¤ů╬╝¤Ç╬Á¤ü╬╣╬╗╬▒╬╝╬▓╬▒╬Ż╬┐╬╝╬ş╬Ż¤ë╬Ż ╬▒¤ů¤ä¤Ä╬Ż ╬╝╬Á ╬║╬»¤ä¤ü╬╣╬Ż╬┐¤ů¤é ╬« ╬╝╬▒¤Ź¤ü╬┐¤ů¤é ╬║╬▒¤ü¤Ç╬┐¤Ź¤é. ╬ú╬Á ╬▒╬Ż¤ä╬»╬Ş╬Á¤â╬Ě ╬╝╬Á ¤ä╬▒ ╬▓╬▒¤ä¤î╬╝╬┐¤ů¤ü╬▒, ╬┐╬╣ ╬║╬▒¤ü¤Ç╬┐╬» ¤ä╬┐¤ů ¤â╬╝╬ş╬┐¤ů¤ü╬┐¤ů ╬▒¤Ç╬┐¤ç¤ë¤ü╬»╬Â╬┐╬Ż¤ä╬▒╬╣ ╬Á¤Ź╬║╬┐╬╗╬▒ ╬▒¤Ç¤î ¤ä╬┐╬Ż ¤Ç¤ů¤ü╬«╬Ż╬▒ ¤ä╬┐¤ů¤é ¤î¤ä╬▒╬Ż ╬Á╬»╬Ż╬▒╬╣ ¤Ä¤ü╬╣╬╝╬┐╬╣.","description":"╬Ľ╬»╬Ż╬▒╬╣ ╬ş╬Ż╬▒¤é ¤ć¤ů╬╗╬╗╬┐╬▓¤î╬╗╬┐¤é ╬Ş╬Č╬╝╬Ż╬┐¤é ¤Ç╬┐¤ů ¤ć¤ä╬Č╬Ż╬Á╬╣ ¤ä╬▒ 1-2 ╬╝╬ş¤ä¤ü╬▒ ¤Ź¤ł╬┐¤é, ╬╝╬Á ╬▒╬│╬║╬Č╬Ş╬╣╬▒ ¤â¤ä╬┐¤ů¤é ╬▓╬╗╬▒¤â¤ä╬┐¤Ź¤é ¤ä╬┐¤ů. ╬á╬▒¤ü╬Č╬│╬Á╬╣ ¤ç╬▒¤ü╬▒╬║¤ä╬Ě¤ü╬╣¤â¤ä╬╣╬║╬┐¤Ź¤é ╬║¤î╬║╬║╬╣╬Ż╬┐¤ů¤é, ¤â¤Ź╬Ż╬Ş╬Á¤ä╬┐¤ů
+07-24 12:05:24.888 19117 19178 I Unity   : [REQ-DIRECT] [12:05:24.888] STAGE 7/8: DisplayResultUI invoked for CommonName: 'Raspberry' (Lang: 'el')
+07-24 12:05:24.888 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:24.888 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:05:24.888 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass67_0:<ProcessIdentifyResult>b__0(EnrichResponse)
+07-24 12:05:24.888 19117 19178 I Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:05:24.888 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.888 19117 19178 I Unity   : 
+07-24 12:05:24.889 19117 19178 I Unity   : [REQ-DIRECT] [12:05:24.888] STAGE 7/8: commonNameText (ID:11322) assigned: '╬ú╬╝╬ş╬┐¤ů¤ü╬┐'
+07-24 12:05:24.889 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:24.889 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:05:24.889 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass67_0:<ProcessIdentifyResult>b__0(EnrichResponse)
+07-24 12:05:24.889 19117 19178 I Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:05:24.889 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.889 19117 19178 I Unity   : 
+07-24 12:05:24.889 19117 19178 I Unity   : [REQ-DIRECT] [12:05:24.888] STAGE 7/8: scientificNameText (ID:11374) assigned: 'Rubus idaeus'
+07-24 12:05:24.889 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:24.889 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:05:24.889 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass67_0:<ProcessIdentifyResult>b__0(EnrichResponse)
+07-24 12:05:24.889 19117 19178 I Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:05:24.889 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.889 19117 19178 I Unity   : 
+07-24 12:05:24.890 19117 19178 I Unity   : [MapsButton] ShowResult called
+07-24 12:05:24.890 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:24.890 19117 19178 I Unity   : ARHerb.UI.UIManager:EnsureResultOpenInMapsButtonSetup()
+07-24 12:05:24.890 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:05:24.890 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass67_0:<ProcessIdentifyResult>b__0(EnrichResponse)
+07-24 12:05:24.890 19117 19178 I Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:05:24.890 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.890 19117 19178 I Unity   : 
+07-24 12:05:24.890 19117 19178 I Unity   : [MapsButton] UIManager reference assigned = True
+07-24 12:05:24.890 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:24.890 19117 19178 I Unity   : ARHerb.UI.UIManager:EnsureResultOpenInMapsButtonSetup()
+07-24 12:05:24.890 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:05:24.890 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass67_0:<ProcessIdentifyResult>b__0(EnrichResponse)
+07-24 12:05:24.890 19117 19178 I Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:05:24.890 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.890 19117 19178 I Unity   : 
+07-24 12:05:24.891 19117 19178 I Unity   : [MapsButton] button activeSelf = True
+07-24 12:05:24.891 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:24.891 19117 19178 I Unity   : ARHerb.UI.UIManager:EnsureResultOpenInMapsButtonSetup()
+07-24 12:05:24.891 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:05:24.891 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass67_0:<ProcessIdentifyResult>b__0(EnrichResponse)
+07-24 12:05:24.891 19117 19178 I Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:05:24.891 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.891 19117 19178 I Unity   : 
+07-24 12:05:24.891 19117 19178 I Unity   : [MapsButton] activeInHierarchy = True
+07-24 12:05:24.891 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:24.891 19117 19178 I Unity   : ARHerb.UI.UIManager:EnsureResultOpenInMapsButtonSetup()
+07-24 12:05:24.891 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:05:24.891 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass67_0:<ProcessIdentifyResult>b__0(EnrichResponse)
+07-24 12:05:24.891 19117 19178 I Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:05:24.891 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.891 19117 19178 I Unity   : 
+07-24 12:05:24.892 19117 19178 I Unity   : [MapsButton] rect = (0.55, 0.02) to (0.95, 0.14)
+07-24 12:05:24.892 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:24.892 19117 19178 I Unity   : ARHerb.UI.UIManager:EnsureResultOpenInMapsButtonSetup()
+07-24 12:05:24.892 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:05:24.892 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass67_0:<ProcessIdentifyResult>b__0(EnrichResponse)
+07-24 12:05:24.892 19117 19178 I Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:05:24.892 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.892 19117 19178 I Unity   : 
+07-24 12:05:24.892 19117 19178 I Unity   : [MapsButton] sibling index = 13
+07-24 12:05:24.892 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:24.892 19117 19178 I Unity   : ARHerb.UI.UIManager:EnsureResultOpenInMapsButtonSetup()
+07-24 12:05:24.892 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:05:24.892 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass67_0:<ProcessIdentifyResult>b__0(EnrichResponse)
+07-24 12:05:24.892 19117 19178 I Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:05:24.892 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.892 19117 19178 I Unity   : 
+07-24 12:05:24.893 19117 19178 I Unity   : [MapsButton] listener assigned
+07-24 12:05:24.893 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:24.893 19117 19178 I Unity   : ARHerb.UI.UIManager:EnsureResultOpenInMapsButtonSetup()
+07-24 12:05:24.893 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:05:24.893 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass67_0:<ProcessIdentifyResult>b__0(EnrichResponse)
+07-24 12:05:24.893 19117 19178 I Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:05:24.893 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.893 19117 19178 I Unity   : 
+07-24 12:05:24.893 19117 19178 I Unity   : [REQ-DIRECT] [12:05:24.888] STAGE 7/8: descriptionText (ID:11118) assigned: '╬Ľ╬»╬Ż╬▒╬╣ ╬ş╬Ż╬▒¤é ¤ć¤ů╬╗╬╗╬┐╬▓¤î╬╗╬┐¤é ╬Ş╬Č╬╝╬Ż╬┐¤é ¤Ç╬┐¤ů ¤ć¤ä╬Č╬Ż╬Á╬╣ ¤ä╬▒ 1-2 ╬╝╬ş¤ä¤ü╬▒ ¤Ź¤ł╬┐¤é, ╬╝╬Á ╬▒╬│╬║╬Č╬Ş╬╣╬▒ ¤â¤ä╬┐¤ů¤é ╬▓╬╗╬▒¤â¤ä╬┐¤Ź¤é ¤ä╬┐¤ů. ╬á╬▒¤ü╬Č╬│╬Á╬╣ ¤ç╬▒¤ü╬▒╬║¤ä╬Ě¤ü╬╣¤â¤ä╬╣╬║╬┐¤Ź¤é ╬║¤î╬║╬║╬╣╬Ż╬┐¤ů¤é, ¤â¤Ź╬Ż╬Ş╬Á¤ä╬┐¤ů¤é ╬║╬▒¤ü¤Ç╬┐¤Ź¤é ¤Ç╬┐¤ů ╬▒¤Ç╬┐¤ä╬Á╬╗╬┐¤Ź╬Ż¤ä╬▒╬╣ ╬▒¤Ç¤î ╬╝╬╣╬║¤ü╬ş¤é ╬┤¤ü¤Ź¤Ç╬Á¤é.'
+07-24 12:05:24.893 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:24.893 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:05:24.893 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass67_0:<ProcessIdentifyResult>b__0(EnrichResponse)
+07-24 12:05:24.893 19117 19178 I Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:05:24.893 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.893 19117 19178 I Unity   : 
+07-24 12:05:24.894 19117 19178 I Unity   : [REQ-DIRECT] [12:05:24.888] STAGE 7/8: funFactText (ID:11342) assigned: '╬Ą╬┐ ¤â╬╝╬ş╬┐¤ů¤ü╬┐ ╬Á╬»╬Ż╬▒╬╣ ╬╝╬ş╬╗╬┐¤é ¤ä╬Ě¤é ╬┐╬╣╬║╬┐╬│╬ş╬Ż╬Á╬╣╬▒¤é ¤ä¤ë╬Ż ¤ä¤ü╬╣╬▒╬Ż¤ä╬▒¤ć¤ů╬╗╬╗╬╣¤Ä╬Ż (Rosaceae) ╬║╬▒╬╣ ¤ů¤Ç╬Č¤ü¤ç╬┐¤ů╬Ż ¤Ç╬┐╬╗╬╗╬ş¤é ¤Ç╬┐╬╣╬║╬╣╬╗╬»╬Á¤é ¤ä╬┐¤ů, ¤â¤ů╬╝¤Ç╬Á¤ü╬╣╬╗╬▒╬╝╬▓╬▒╬Ż╬┐╬╝╬ş╬Ż¤ë╬Ż ╬▒¤ů¤ä¤Ä╬Ż ╬╝╬Á ╬║╬»¤ä¤ü╬╣╬Ż╬┐¤ů¤é ╬« ╬╝╬▒¤Ź¤ü╬┐¤ů¤é ╬║╬▒¤ü¤Ç╬┐¤Ź¤é. ╬ú╬Á ╬▒╬Ż¤ä╬»╬Ş╬Á¤â╬Ě ╬╝╬Á ¤ä╬▒ ╬▓╬▒¤ä¤î╬╝╬┐¤ů¤ü╬▒, ╬┐╬╣ ╬║╬▒¤ü¤Ç╬┐╬» ¤ä╬┐¤ů ¤â╬╝╬ş╬┐¤ů¤ü╬┐¤ů ╬▒¤Ç╬┐¤ç¤ë¤ü╬»╬Â╬┐╬Ż¤ä╬▒╬╣ ╬Á¤Ź╬║╬┐╬╗╬▒ ╬▒¤Ç¤î ¤ä╬┐╬Ż ¤Ç¤ů¤ü╬«╬Ż╬▒ ¤ä╬┐¤ů¤é ¤î¤ä╬▒╬Ż ╬Á╬»╬Ż╬▒╬╣ ¤Ä¤ü╬╣╬╝╬┐╬╣.'
+07-24 12:05:24.894 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:24.894 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:05:24.894 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass67_0:<ProcessIdentifyResult>b__0(EnrichResponse)
+07-24 12:05:24.894 19117 19178 I Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:05:24.894 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.894 19117 19178 I Unity   : 
+07-24 12:05:24.895 19117 19178 I Unity   : [REQ-DIRECT] [12:05:24.888] STAGE 7/8: edibilityText (ID:11332) assigned: '╬ĺ¤ü¤ë¤â╬╣╬╝¤î¤ä╬Ě¤ä╬▒ / ╬Ĺ¤â¤ć╬Č╬╗╬Á╬╣╬▒: ╬ĺ¤ü¤Ä¤â╬╣╬╝╬┐ / ╬Ĺ¤â¤ć╬▒╬╗╬ş¤é - ╬č╬╣ ╬║╬▒¤ü¤Ç╬┐╬» ¤ä╬┐¤ů ¤â╬╝╬ş╬┐¤ů¤ü╬┐¤ů ╬Á╬»╬Ż╬▒╬╣ ╬Á╬ż╬▒╬╣¤ü╬Á¤ä╬╣╬║╬Č ╬▓¤ü¤Ä¤â╬╣╬╝╬┐╬╣, ╬│╬╗¤ů╬║╬┐╬» ╬║╬▒╬╣ ╬▒¤ü¤ë╬╝╬▒¤ä╬╣╬║╬┐╬».'
+07-24 12:05:24.895 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:24.895 19117 19178 I Unity   : ARHerb.UI.UIManager:DisplayResultUI(String, String, Single, EnrichmentData, String)
+07-24 12:05:24.895 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass67_0:<ProcessIdentifyResult>b__0(EnrichResponse)
+07-24 12:05:24.895 19117 19178 I Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:05:24.895 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.895 19117 19178 I Unity   : 
+07-24 12:05:24.896 19117 19178 I Unity   : [GPS] Native location flow started
+07-24 12:05:24.896 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:24.896 19117 19178 I Unity   : ARHerb.Location.<FetchLocationCoroutine>d__5:MoveNext()
+07-24 12:05:24.896 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.896 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass67_0:<ProcessIdentifyResult>b__0(EnrichResponse)
+07-24 12:05:24.896 19117 19178 I Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:05:24.896 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.896 19117 19178 I Unity   : 
+07-24 12:05:24.897 19117 19178 I Unity   : [GPS] Permission granted = True
+07-24 12:05:24.897 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:24.897 19117 19178 I Unity   : ARHerb.Location.<FetchLocationCoroutine>d__5:MoveNext()
+07-24 12:05:24.897 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.897 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass67_0:<ProcessIdentifyResult>b__0(EnrichResponse)
+07-24 12:05:24.897 19117 19178 I Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:05:24.897 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.897 19117 19178 I Unity   : 
+07-24 12:05:24.898 19117 19178 I Unity   : [GPS] Location enabled by user = False
+07-24 12:05:24.898 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:24.898 19117 19178 I Unity   : ARHerb.Location.<FetchLocationCoroutine>d__5:MoveNext()
+07-24 12:05:24.898 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.898 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass67_0:<ProcessIdentifyResult>b__0(EnrichResponse)
+07-24 12:05:24.898 19117 19178 I Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:05:24.898 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.898 19117 19178 I Unity   : 
+07-24 12:05:24.899 19117 19178 W Unity   : [GPS] Location disabled by user. Saving scan without GPS.
+07-24 12:05:24.899 19117 19178 W Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:24.899 19117 19178 W Unity   : ARHerb.Location.<FetchLocationCoroutine>d__5:MoveNext()
+07-24 12:05:24.899 19117 19178 W Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.899 19117 19178 W Unity   : ARHerb.UI.<>c__DisplayClass67_0:<ProcessIdentifyResult>b__0(EnrichResponse)
+07-24 12:05:24.899 19117 19178 W Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:05:24.899 19117 19178 W Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.899 19117 19178 W Unity   : 
+07-24 12:05:24.899 19117 19178 I Unity   : [GPS] No GPS, hasLocation=false
+07-24 12:05:24.899 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:24.899 19117 19178 I Unity   : ARHerb.Location.<FetchLocationCoroutine>d__5:MoveNext()
+07-24 12:05:24.899 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.899 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass67_0:<ProcessIdentifyResult>b__0(EnrichResponse)
+07-24 12:05:24.899 19117 19178 I Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:05:24.899 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.899 19117 19178 I Unity   : 
+07-24 12:05:24.905 19117 19178 I Unity   : [ScanHistoryManager] Saved scan: Raspberry (Rubus idaeus), total items: 23
+07-24 12:05:24.905 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:24.905 19117 19178 I Unity   : ARHerb.History.ScanHistoryManager:SaveScan(String, String, String, Single, String, String, String, String, Byte[], Boolean, Single, Single)
+07-24 12:05:24.905 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass68_0:<SaveScanWithGPS>b__0(Boolean, Single, Single)
+07-24 12:05:24.905 19117 19178 I Unity   : ARHerb.Location.<FetchLocationCoroutine>d__5:MoveNext()
+07-24 12:05:24.905 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.905 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass67_0:<ProcessIdentifyResult>b__0(EnrichResponse)
+07-24 12:05:24.905 19117 19178 I Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:05:24.905 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.905 19117 19178 I Unity   : 
+07-24 12:05:24.906 19117 19178 I Unity   : [UIManager] Status (Success): ­čôĚ ╬Ľ¤Ç╬╣¤â¤ä¤ü╬┐¤ć╬« ¤â¤ä╬Ě ¤â╬Č¤ü¤ë¤â╬Ě
+07-24 12:05:24.906 19117 19178 I Unity   : UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+07-24 12:05:24.906 19117 19178 I Unity   : ARHerb.UI.UIManager:SetStatusText(String, StatusType)
+07-24 12:05:24.906 19117 19178 I Unity   : ARHerb.UI.<>c__DisplayClass67_0:<ProcessIdentifyResult>b__0(EnrichResponse)
+07-24 12:05:24.906 19117 19178 I Unity   : ARHerb.Network.<SendEnrichRequest>d__5:MoveNext()
+07-24 12:05:24.906 19117 19178 I Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+07-24 12:05:24.906 19117 19178 I Unity   : 
